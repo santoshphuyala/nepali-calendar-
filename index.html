@@ -1,1 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nepali Calendar - 2082 BS</title>
+    <!-- SheetJS CDN for Excel Export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .header {
+            background-color: #d32f2f;
+            color: white;
+            text-align: center;
+            padding: 10px;
+            font-size: 1.2em;
+            position: relative;
+        }
+        .nav-buttons {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            gap: 10px;
+        }
+        .nav-buttons.left {
+            left: 10px;
+        }
+        .nav-buttons.right {
+            right: 10px;
+        }
+        .nav-buttons button {
+            background-color: white;
+            color: #d32f2f;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .nav-buttons button:disabled {
+            background-color: #ddd;
+            cursor: not-allowed;
+        }
+        .calendar-container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 10px;
+        }
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+        }
+        .calendar-day {
+            background-color: white;
+            border: 1px solid #ddd;
+            padding: 10px;
+            cursor: pointer;
+            position: relative;
+            min-height: 80px;
+        }
+        .calendar-day:hover {
+            background-color: #f0f0f0;
+        }
+        .maghe-sankranti {
+            background-color: #4caf50;
+            color: white;
+        }
+        .sonam-lhosar {
+            background-color: #ff9800;
+            color: white;
+        }
+        .bs-date {
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+        .greg-date {
+            font-size: 0.9em;
+            color: #555;
+        }
+        /* Add Note Form at Bottom */
+        .note-form-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background-color: #fff;
+            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+            padding: 15px;
+            display: none;
+            z-index: 1000;
+        }
+        .note-form-container.active {
+            display: block;
+        }
+        .note-form-container h3 {
+            margin: 0 0 10px;
+            font-size: 1.2em;
+        }
+        .note-form-container input,
+        .note-form-container textarea {
+            width: 100%;
+            margin-bottom: 10px;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .note-form-container button {
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .note-form-container button:hover {
+            background-color: #b71c1c;
+        }
+        /* Notes Modal */
+        .notes-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 2000;
+        }
+        .notes-modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 600px;
+            border-radius: 8px;
+            position: relative;
+        }
+        .notes-modal-content h2 {
+            margin: 0 0 15px;
+        }
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 1.5em;
+            cursor: pointer;
+        }
+        .notes-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+        }
+        .note-item {
+            border-bottom: 1px solid #ddd;
+            padding: 10px 0;
+        }
+        .note-item:last-child {
+            border-bottom: none;
+        }
+        .export-btn {
+            background-color: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .export-btn:hover {
+            background-color: #388e3c;
+        }
+        /* Access Notes Button */
+        .access-notes-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #d32f2f;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .access-notes-btn:hover {
+            background-color: #b71c1c;
+        }
+    </style>
+</head>
+<body>
+    <div class="header" id="header">
+        Nepali Calendar - <span id="currentMonth">Magh 2082 BS (January/February 2026)</span>
+        <div class="nav-buttons left">
+            <button id="prevMonth" onclick="changeMonth(-1)">Previous</button>
+        </div>
+        <div class="nav-buttons right">
+            <button id="nextMonth" onclick="changeMonth(1)">Next</button>
+        </div>
+    </div>
 
+    <button class="access-notes-btn" onclick="showNotes()">View Notes</button>
+
+    <div class="calendar-container">
+        <div class="calendar-grid" id="calendarGrid">
+            <!-- Calendar will be dynamically generated -->
+        </div>
+    </div>
+
+    <!-- Add Note Form at Bottom -->
+    <div class="note-form-container" id="noteForm">
+        <h3>Add Note for <span id="selectedDate">Date</span></h3>
+        <input type="text" id="noteTitle" placeholder="Note Title">
+        <input type="time" id="noteTime">
+        <textarea id="noteDescription" placeholder="Description" rows="3"></textarea>
+        <button onclick="saveNote()">Save Note</button>
+    </div>
+
+    <!-- Notes Modal -->
+    <div class="notes-modal" id="notesModal">
+        <div class="notes-modal-content">
+            <span class="close-modal" onclick="closeNotesModal()">&times;</span>
+            <h2>Saved Notes</h2>
+            <div class="notes-list" id="notesList"></div>
+            <button class="export-btn" onclick="exportNotesToExcel()">Export to Excel</button>
+        </div>
+    </div>
+
+    <script>
+        // Calendar data for 2082 BS (simplified for demo, adjust as needed)
+        const months2082 = [
+            { name: "Baishakh", days: 31, gregStart: "2025-04-14" },
+            { name: "Jestha", days: 32, gregStart: "2025-05-15" },
+            { name: "Ashadh", days: 31, gregStart: "2025-06-16" },
+            { name: "Shrawan", days: 32, gregStart: "2025-07-17" },
+            { name: "Bhadra", days: 31, gregStart: "2025-08-18" },
+            { name: "Ashoj", days: 31, gregStart: "2025-09-18" },
+            { name: "Kartik", days: 29, gregStart: "2025-10-19" },
+            { name: "Mangsir", days: 30, gregStart: "2025-11-17" },
+            { name: "Poush", days: 29, gregStart: "2025-12-17" },
+            { name: "Magh", days: 30, gregStart: "2026-01-15" },
+            { name: "Falgun", days: 29, gregStart: "2026-02-14" },
+            { name: "Chaitra", days: 30, gregStart: "2026-03-15" }
+        ];
+
+        let currentMonthIndex = 9; // Start with Magh (index 9)
+
+        // Load notes from localStorage
+        let notes = JSON.parse(localStorage.getItem('calendarNotes')) || [];
+
+        // Function to render the calendar
+        function renderCalendar() {
+            const month = months2082[currentMonthIndex];
+            const gregStartDate = new Date(month.gregStart);
+            const firstDayOfMonth = gregStartDate.getDay(); // 0 (Sun) to 6 (Sat)
+            const daysInMonth = month.days;
+
+            // Update header
+            document.getElementById('currentMonth').textContent = `${month.name} 2082 BS (${gregStartDate.toLocaleString('default', { month: 'long' })} ${gregStartDate.getFullYear()})`;
+
+            // Enable/disable navigation buttons
+            document.getElementById('prevMonth').disabled = currentMonthIndex === 0;
+            document.getElementById('nextMonth').disabled = currentMonthIndex === months2082.length - 1;
+
+            // Generate calendar grid
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = `
+                <div class="calendar-day" style="background-color: #f0f0f0;">आइतवार<br>Sun</div>
+                <div class="calendar-day" style="background-color: #f0f0f0;">सोमवार<br>Mon</div>
+                <div class="calendar-day" style="background-color: #f0f0f0;">मङ्गलवार<br>Tue</div>
+                <div class="calendar-day" style="background-color: #f0f0f0;">बुधवार<br>Wed</div>
+                <div class="calendar-day" style="background-color: #f0f0f0;">बिहीवार<br>Thu</div>
+                <div class="calendar-day" style="background-color: #f0f0f0;">शुक्रवार<br>Fri</div>
+                <div class="calendar-day" style="background-color: #f0f0f0;">शनिवार<br>Sat</div>
+            `;
+
+            // Add empty days before the first day of the month
+            for (let i = 0; i < firstDayOfMonth; i++) {
+                calendarGrid.innerHTML += `<div class="calendar-day"></div>`;
+            }
+
+            // Add days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const gregDate = new Date(gregStartDate);
+                gregDate.setDate(gregDate.getDate() + (day - 1));
+                const gregDateStr = gregDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+                const bsDateStr = `${month.name} ${day}`;
+                let className = '';
+                let festival = '';
+
+                // Festival placeholders for Magh
+                if (month.name === 'Magh') {
+                    if (day === 1) {
+                        className = 'maghe-sankranti';
+                        festival = 'Maghe Sankranti';
+                    } else if (day === 5) {
+                        className = 'sonam-lhosar';
+                        festival = 'Sonam Lhosar';
+                    }
+                }
+
+                calendarGrid.innerHTML += `
+                    <div class="calendar-day ${className}" data-date="${bsDateStr}">
+                        <div class="bs-date">${month.name} ${day}</div>
+                        <div class="greg-date">${gregDateStr}</div>
+                        ${festival ? `<div>${festival}</div>` : ''}
+                    </div>
+                `;
+            }
+
+            // Re-attach long-press event listeners
+            attachLongPressListeners();
+        }
+
+        // Function to change months
+        function changeMonth(direction) {
+            currentMonthIndex += direction;
+            renderCalendar();
+        }
+
+        // Long-press detection
+        function attachLongPressListeners() {
+            const calendarDays = document.querySelectorAll('.calendar-day');
+            let pressTimer;
+
+            calendarDays.forEach(day => {
+                if (!day.dataset.date) return;
+
+                // Mouse events for desktop
+                day.addEventListener('mousedown', () => {
+                    pressTimer = setTimeout(() => {
+                        showNoteForm(day.dataset.date);
+                    }, 500);
+                });
+
+                day.addEventListener('mouseup', () => {
+                    clearTimeout(pressTimer);
+                });
+
+                day.addEventListener('mouseleave', () => {
+                    clearTimeout(pressTimer);
+                });
+
+                // Touch events for mobile
+                day.addEventListener('touchstart', () => {
+                    pressTimer = setTimeout(() => {
+                        showNoteForm(day.dataset.date);
+                    }, 500);
+                });
+
+                day.addEventListener('touchend', () => {
+                    clearTimeout(pressTimer);
+                });
+
+                day.addEventListener('touchcancel', () => {
+                    clearTimeout(pressTimer);
+                });
+            });
+        }
+
+        function showNoteForm(date) {
+            document.getElementById('selectedDate').textContent = date;
+            document.getElementById('noteForm').classList.add('active');
+        }
+
+        function saveNote() {
+            const title = document.getElementById('noteTitle').value;
+            const time = document.getElementById('noteTime').value;
+            const description = document.getElementById('noteDescription').value;
+            const date = document.getElementById('selectedDate').textContent;
+
+            if (title || description) {
+                notes.push({ date, title, time, description });
+                localStorage.setItem('calendarNotes', JSON.stringify(notes));
+                alert(`Note saved for ${date}!`);
+            }
+
+            // Reset and hide form
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteTime').value = '';
+            document.getElementById('noteDescription').value = '';
+            document.getElementById('noteForm').classList.remove('active');
+        }
+
+        function showNotes() {
+            const notesList = document.getElementById('notesList');
+            notesList.innerHTML = '';
+
+            if (notes.length === 0) {
+                notesList.innerHTML = '<p>No notes saved yet.</p>';
+            } else {
+                notes.forEach(note => {
+                    notesList.innerHTML += `
+                        <div class="note-item">
+                            <strong>${note.date}</strong><br>
+                            Title: ${note.title || 'N/A'}<br>
+                            Time: ${note.time || 'N/A'}<br>
+                            Description: ${note.description || 'N/A'}
+                        </div>
+                    `;
+                });
+            }
+
+            document.getElementById('notesModal').style.display = 'block';
+        }
+
+        function closeNotesModal() {
+            document.getElementById('notesModal').style.display = 'none';
+        }
+
+        function exportNotesToExcel() {
+            const data = notes.map(note => ({
+                Date: note.date,
+                Title: note.title || 'N/A',
+                Time: note.time || 'N/A',
+                Description: note.description || 'N/A'
+            }));
+
+            const worksheet = XLSX.utils.json_to_sheet(data);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, 'Notes');
+            XLSX.writeFile(workbook, 'calendar_notes.xlsx');
+        }
+
+        // Initial render
+        renderCalendar();
+    </script>
+</body>
+</html>
