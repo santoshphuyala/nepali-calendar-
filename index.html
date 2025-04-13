@@ -8,18 +8,46 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #f4f4f4;
+            background-color: #f9f9f9;
+            color: #333;
         }
         .header {
-            background-color: #d32f2f;
+            background-color: #c62828;
             color: white;
             text-align: center;
-            padding: 10px;
-            font-size: 1.2em;
-            position: relative;
+            padding: 15px;
+            font-size: 1.3em;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .month-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            background-color: #fff;
+            padding: 10px 0;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+        .month-tab {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border-radius: 20px;
+            background-color: #f0f0f0;
+            transition: background-color 0.3s;
+        }
+        .month-tab.active {
+            background-color: #c62828;
+            color: white;
+        }
+        .month-tab:hover {
+            background-color: #e0e0e0;
+        }
+        .month-tab.active:hover {
+            background-color: #b71c1c;
         }
         .nav-buttons {
             position: absolute;
@@ -29,18 +57,19 @@
             gap: 10px;
         }
         .nav-buttons.left {
-            left: 10px;
+            left: 15px;
         }
         .nav-buttons.right {
-            right: 10px;
+            right: 15px;
         }
         .nav-buttons button {
             background-color: white;
-            color: #d32f2f;
+            color: #c62828;
             border: none;
-            padding: 5px 10px;
+            padding: 5px 15px;
             border-radius: 4px;
             cursor: pointer;
+            font-weight: bold;
         }
         .nav-buttons button:disabled {
             background-color: #ddd;
@@ -49,24 +78,29 @@
         .calendar-container {
             max-width: 1200px;
             margin: 20px auto;
-            padding: 10px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
+            gap: 8px;
             text-align: center;
         }
         .calendar-day {
-            background-color: white;
-            border: 1px solid #ddd;
-            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            padding: 12px;
             cursor: pointer;
             position: relative;
-            min-height: 80px;
+            min-height: 100px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
         }
         .calendar-day:hover {
-            background-color: #f0f0f0;
+            background-color: #f5f5f5;
         }
         .maghe-sankranti {
             background-color: #4caf50;
@@ -81,10 +115,40 @@
             font-size: 1.1em;
         }
         .greg-date {
-            font-size: 0.9em;
-            color: #555;
+            font-size: 0.85em;
+            color: #666;
+            margin-top: 2px;
         }
-        /* Add Note Form at Bottom */
+        .festival {
+            font-size: 0.8em;
+            margin-top: 5px;
+        }
+        .note-indicator {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 8px;
+            height: 8px;
+            background-color: #c62828;
+            border-radius: 50%;
+        }
+        .note-tooltip {
+            display: none;
+            position: absolute;
+            background-color: #333;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            z-index: 100;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+        }
+        .calendar-day:hover .note-tooltip {
+            display: block;
+        }
         .note-form-container {
             position: fixed;
             bottom: 0;
@@ -102,6 +166,7 @@
         .note-form-container h3 {
             margin: 0 0 10px;
             font-size: 1.2em;
+            color: #c62828;
         }
         .note-form-container input,
         .note-form-container textarea {
@@ -110,9 +175,10 @@
             padding: 8px;
             border: 1px solid #ddd;
             border-radius: 4px;
+            box-sizing: border-box;
         }
         .note-form-container button {
-            background-color: #d32f2f;
+            background-color: #c62828;
             color: white;
             border: none;
             padding: 10px 20px;
@@ -122,7 +188,6 @@
         .note-form-container button:hover {
             background-color: #b71c1c;
         }
-        /* Notes Modal */
         .notes-modal {
             display: none;
             position: fixed;
@@ -130,20 +195,21 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.5);
+            background-color: rgba(0, 0, 0, 0.6);
             z-index: 2000;
         }
         .notes-modal-content {
             background-color: white;
             margin: 10% auto;
             padding: 20px;
-            width: 80%;
+            width: 90%;
             max-width: 600px;
             border-radius: 8px;
             position: relative;
         }
         .notes-modal-content h2 {
             margin: 0 0 15px;
+            color: #c62828;
         }
         .close-modal {
             position: absolute;
@@ -151,6 +217,7 @@
             right: 15px;
             font-size: 1.5em;
             cursor: pointer;
+            color: #666;
         }
         .notes-list {
             max-height: 300px;
@@ -158,34 +225,61 @@
             margin-bottom: 15px;
         }
         .note-item {
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid #eee;
             padding: 10px 0;
+            position: relative;
         }
         .note-item:last-child {
             border-bottom: none;
         }
-        .export-btn {
-            background-color: #4caf50;
-            color: white;
+        .delete-note {
+            position: absolute;
+            top: 10px;
+            right: 0;
+            color: #c62828;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        .delete-note:hover {
+            color: #b71c1c;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: space-between;
+        }
+        .export-btn, .clear-btn {
             border: none;
             padding: 10px 20px;
             border-radius: 4px;
             cursor: pointer;
+            font-weight: bold;
+        }
+        .export-btn {
+            background-color: #4caf50;
+            color: white;
         }
         .export-btn:hover {
             background-color: #388e3c;
         }
-        /* Access Notes Button */
+        .clear-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        .clear-btn:hover {
+            background-color: #d32f2f;
+        }
         .access-notes-btn {
             position: fixed;
             top: 20px;
             right: 20px;
-            background-color: #d32f2f;
+            background-color: #c62828;
             color: white;
             border: none;
             padding: 10px 20px;
             border-radius: 4px;
             cursor: pointer;
+            z-index: 1000;
         }
         .access-notes-btn:hover {
             background-color: #b71c1c;
@@ -194,7 +288,7 @@
 </head>
 <body>
     <div class="header" id="header">
-        Nepali Calendar - <span id="currentMonth">Magh 2082 BS (January/February 2026)</span>
+        Nepali Calendar - <span id="currentMonth">2082 BS</span>
         <div class="nav-buttons left">
             <button id="prevMonth" onclick="changeMonth(-1)">Previous</button>
         </div>
@@ -203,12 +297,12 @@
         </div>
     </div>
 
+    <div class="month-tabs" id="monthTabs"></div>
+
     <button class="access-notes-btn" onclick="showNotes()">View Notes</button>
 
     <div class="calendar-container">
-        <div class="calendar-grid" id="calendarGrid">
-            <!-- Calendar will be dynamically generated -->
-        </div>
+        <div class="calendar-grid" id="calendarGrid"></div>
     </div>
 
     <!-- Add Note Form at Bottom -->
@@ -223,10 +317,13 @@
     <!-- Notes Modal -->
     <div class="notes-modal" id="notesModal">
         <div class="notes-modal-content">
-            <span class="close-modal" onclick="closeNotesModal()">&times;</span>
+            <span class="close-modal" onclick="closeNotesModal()">×</span>
             <h2>Saved Notes</h2>
             <div class="notes-list" id="notesList"></div>
-            <button class="export-btn" onclick="exportNotesToExcel()">Export to Excel</button>
+            <div class="action-buttons">
+                <button class="export-btn" onclick="exportNotesToExcel()">Export to Excel</button>
+                <button class="clear-btn" onclick="clearAllNotes()">Clear All Notes</button>
+            </div>
         </div>
     </div>
 
@@ -248,15 +345,30 @@
         ];
 
         let currentMonthIndex = 9; // Start with Magh (index 9)
-
-        // Load notes from localStorage
         let notes = JSON.parse(localStorage.getItem('calendarNotes')) || [];
+
+        // Render month tabs
+        function renderMonthTabs() {
+            const monthTabs = document.getElementById('monthTabs');
+            monthTabs.innerHTML = '';
+            months2082.forEach((month, index) => {
+                const tab = document.createElement('div');
+                tab.className = `month-tab ${index === currentMonthIndex ? 'active' : ''}`;
+                tab.textContent = month.name;
+                tab.onclick = () => {
+                    currentMonthIndex = index;
+                    renderCalendar();
+                    renderMonthTabs();
+                };
+                monthTabs.appendChild(tab);
+            });
+        }
 
         // Function to render the calendar
         function renderCalendar() {
             const month = months2082[currentMonthIndex];
             const gregStartDate = new Date(month.gregStart);
-            const firstDayOfMonth = gregStartDate.getDay(); // 0 (Sun) to 6 (Sat)
+            const firstDayOfMonth = gregStartDate.getDay();
             const daysInMonth = month.days;
 
             // Update header
@@ -269,13 +381,13 @@
             // Generate calendar grid
             const calendarGrid = document.getElementById('calendarGrid');
             calendarGrid.innerHTML = `
-                <div class="calendar-day" style="background-color: #f0f0f0;">आइतवार<br>Sun</div>
-                <div class="calendar-day" style="background-color: #f0f0f0;">सोमवार<br>Mon</div>
-                <div class="calendar-day" style="background-color: #f0f0f0;">मङ्गलवार<br>Tue</div>
-                <div class="calendar-day" style="background-color: #f0f0f0;">बुधवार<br>Wed</div>
-                <div class="calendar-day" style="background-color: #f0f0f0;">बिहीवार<br>Thu</div>
-                <div class="calendar-day" style="background-color: #f0f0f0;">शुक्रवार<br>Fri</div>
-                <div class="calendar-day" style="background-color: #f0f0f0;">शनिवार<br>Sat</div>
+                <div class="calendar-day" style="background-color: #f0f0f0; font-weight: bold;">आइतवार<br>Sun</div>
+                <div class="calendar-day" style="background-color: #f0f0f0; font-weight: bold;">सोमवार<br>Mon</div>
+                <div class="calendar-day" style="background-color: #f0f0f0; font-weight: bold;">मङ्गलवार<br>Tue</div>
+                <div class="calendar-day" style="background-color: #f0f0f0; font-weight: bold;">बुधवार<br>Wed</div>
+                <div class="calendar-day" style="background-color: #f0f0f0; font-weight: bold;">बिहीवार<br>Thu</div>
+                <div class="calendar-day" style="background-color: #f0f0f0; font-weight: bold;">शुक्रवार<br>Fri</div>
+                <div class="calendar-day" style="background-color: #f0f0f0; font-weight: bold;">शनिवार<br>Sat</div>
             `;
 
             // Add empty days before the first day of the month
@@ -303,11 +415,18 @@
                     }
                 }
 
+                // Check for notes on this date
+                const dayNotes = notes.filter(note => note.date === bsDateStr);
+                const noteIndicator = dayNotes.length > 0 ? '<div class="note-indicator"></div>' : '';
+                const noteTooltip = dayNotes.length > 0 ? `<div class="note-tooltip">${dayNotes.length} Note${dayNotes.length > 1 ? 's' : ''}</div>` : '';
+
                 calendarGrid.innerHTML += `
                     <div class="calendar-day ${className}" data-date="${bsDateStr}">
                         <div class="bs-date">${month.name} ${day}</div>
                         <div class="greg-date">${gregDateStr}</div>
-                        ${festival ? `<div>${festival}</div>` : ''}
+                        ${festival ? `<div class="festival">${festival}</div>` : ''}
+                        ${noteIndicator}
+                        ${noteTooltip}
                     </div>
                 `;
             }
@@ -320,6 +439,7 @@
         function changeMonth(direction) {
             currentMonthIndex += direction;
             renderCalendar();
+            renderMonthTabs();
         }
 
         // Long-press detection
@@ -377,6 +497,7 @@
                 notes.push({ date, title, time, description });
                 localStorage.setItem('calendarNotes', JSON.stringify(notes));
                 alert(`Note saved for ${date}!`);
+                renderCalendar(); // Re-render to show note indicator
             }
 
             // Reset and hide form
@@ -393,19 +514,38 @@
             if (notes.length === 0) {
                 notesList.innerHTML = '<p>No notes saved yet.</p>';
             } else {
-                notes.forEach(note => {
+                notes.forEach((note, index) => {
                     notesList.innerHTML += `
                         <div class="note-item">
                             <strong>${note.date}</strong><br>
                             Title: ${note.title || 'N/A'}<br>
                             Time: ${note.time || 'N/A'}<br>
                             Description: ${note.description || 'N/A'}
+                            <span class="delete-note" onclick="deleteNote(${index})">Delete</span>
                         </div>
                     `;
                 });
             }
 
             document.getElementById('notesModal').style.display = 'block';
+        }
+
+        function deleteNote(index) {
+            if (confirm('Are you sure you want to delete this note?')) {
+                notes.splice(index, 1);
+                localStorage.setItem('calendarNotes', JSON.stringify(notes));
+                showNotes(); // Refresh modal
+                renderCalendar(); // Refresh calendar to update indicators
+            }
+        }
+
+        function clearAllNotes() {
+            if (confirm('Are you sure you want to clear all notes?')) {
+                notes = [];
+                localStorage.setItem('calendarNotes', JSON.stringify(notes));
+                showNotes(); // Refresh modal
+                renderCalendar(); // Refresh calendar to update indicators
+            }
         }
 
         function closeNotesModal() {
@@ -423,11 +563,4 @@
             const worksheet = XLSX.utils.json_to_sheet(data);
             const workbook = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(workbook, worksheet, 'Notes');
-            XLSX.writeFile(workbook, 'calendar_notes.xlsx');
-        }
-
-        // Initial render
-        renderCalendar();
-    </script>
-</body>
-</html>
+            XLSX.wr
