@@ -6,7 +6,7 @@
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
-        script-src 'self' 'nonce-OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2' 'strict-dynamic' 'unsafe-eval' https://santoshphuyala.github.io https://ff.kis.v2.scr.kaspersky-labs.com wss://ff.kis.v2.scr.kaspersky-labs.com;
+        script-src 'self' 'nonce-OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2' 'strict-dynamic' 'unsafe-eval' https://cdnjs.cloudflare.com https://ff.kis.v2.scr.kaspersky-labs.com wss://ff.kis.v2.scr.kaspersky-labs.com;
         img-src 'self' blob: data: https://assets.grok.com https://imgs.search.brave.com;
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
         font-src 'self' https://fonts.gstatic.com;
@@ -37,6 +37,7 @@
         .calendar-day{background:#fff;border:1px solid #e0e0e0;padding:0.75rem;cursor:pointer;min-height:100px;border-radius:8px;transition:.3s;position:relative}
         .mini-calendar .calendar-day{padding:0.2rem;min-height:30px;font-size:0.5rem}
         .calendar-day:hover{background:#f5f5f5;transform:translateY(-2px)}
+        .calendar-day.today{background:#e3f2fd;border:2px solid var(--secondary)} /* Highlight for today */
         .saturday{background:#b0bec5;color:#fff}.dashain{background:#d81b60;color:#fff}.tihar{background:#7b1fa2;color:#fff}
         .national{background:#4caf50;color:#fff}.ethnic{background:#ff9800;color:#fff}.women{background:#f06292;color:#fff}
         .education{background:#0288d1;color:#fff}.jatra{background:#ab47bc;color:#fff}.observed{background:#689f38;color:#fff}
@@ -88,9 +89,12 @@
         .access-notes-btn{position:fixed;top:1.5rem;right:1.5rem;background:var(--secondary);color:#fff;border:none;padding:0.75rem 1.5rem;border-radius:8px;cursor:pointer;z-index:1000;transition:.3s;font-size:0.9rem}
         .access-notes-btn:hover{background:#0277bd}
         .access-notes-btn.nepali{font-family:'Noto Sans Devanagari',sans-serif}
-        .language-toggle{position:fixed;top:1.5rem;left:1.5rem;z-index:1000}
+        .language-toggle{position:fixed;top:5rem;right:1.5rem;z-index:1000} /* Moved below View Notes */
         .language-toggle button{background:var(--secondary);color:#fff;border:none;padding:0.75rem 1rem;border-radius:8px;cursor:pointer;font-weight:600;transition:.3s;font-size:0.9rem}
         .language-toggle button:hover{background:#0277bd}
+        .year-filter{text-align:center;margin:1rem 0} /* Style for year dropdown */
+        .year-filter select{padding:0.75rem;border-radius:8px;border:1px solid #ddd;font-family:'Poppins',sans-serif;font-size:0.9rem;background:#e3f2fd}
+        .year-filter select:focus{outline:none;border-color:var(--secondary)}
         .footer{text-align:center;padding:1rem;background:var(--card-bg);color:var(--text-light);font-size:0.8rem;margin-top:2rem;box-shadow:0 -2px 8px rgba(0,0,0,0.1)}
         @media (max-width:768px){
             .header{font-size:1.2rem}
@@ -99,13 +103,11 @@
             .nav-buttons{flex-direction:column}
             .calendar-container{grid-template-columns:1fr;grid-template-rows:auto auto auto;gap:1rem}
             .mini-calendar,.main-calendar{max-width:100%}
+            .language-toggle{top:6rem} /* Adjust for mobile */
         }
     </style>
 </head>
 <body>
-    <div class="language-toggle">
-        <button id="languageToggle" data-en="Toggle Language (EN/NE)" data-ne="भाषा टगल गर्नुहोस् (EN/NE)">Toggle Language (EN/NE)</button>
-    </div>
     <div class="header">
         <span class="header-title" data-en="Nepali Calendar" data-ne="नेपाली पात्रो">Nepali Calendar</span> - <span id="currentMonth">2082 BS</span>
         <div class="nav-buttons left">
@@ -115,8 +117,18 @@
             <button id="nextMonth" data-en="Next" data-ne="पछिल्लो">Next</button>
         </div>
     </div>
+    <div class="year-filter">
+        <select id="yearFilter">
+            <option value="2081">2081 BS</option>
+            <option value="2082" selected>2082 BS</option>
+            <option value="2083">2083 BS</option>
+        </select>
+    </div>
     <div class="month-tabs" id="monthTabs"></div>
     <button class="access-notes-btn" id="accessNotes" data-en="View Notes" data-ne="नोटहरू हेर्नुहोस्">View Notes</button>
+    <div class="language-toggle">
+        <button id="languageToggle" data-en="Toggle Language (EN/NE)" data-ne="भाषा टगल गर्नुहोस् (EN/NE)">Toggle Language (EN/NE)</button>
+    </div>
     <div class="calendar-container">
         <div class="mini-calendar" id="miniCalendarLeft">
             <h3 id="miniLeftTitle"></h3>
@@ -163,24 +175,9 @@
         </div>
     </div>
     <div class="footer">Calendar Concept and Design by Santosh Phuyal</div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.20.2/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2">
-        // Assume SheetJS and jsPDF are hosted locally at /scripts/
-        // Download from https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.20.2/xlsx.full.min.js
-        // and https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js
-        const scripts = [
-            '/scripts/xlsx.full.min.js',
-            '/scripts/jspdf.umd.min.js'
-            // Alternatively, use external sources if not hosted locally:
-            // 'https://santoshphuyala.github.io/scripts/xlsx.full.min.js',
-            // 'https://santoshphuyala.github.io/scripts/jspdf.umd.min.js'
-        ];
-        scripts.forEach(src => {
-            const script = document.createElement('script');
-            script.src = src;
-            script.async = false;
-            document.head.appendChild(script);
-        });
-
         // Calendar data
         const calendarData = {
             2081: [{name:"Baishakh",days:31,gregStart:"2024-04-13"},{name:"Jestha",days:32,gregStart:"2024-05-14"},{name:"Ashadh",days:31,gregStart:"2024-06-15"},{name:"Shrawan",days:32,gregStart:"2024-07-16"},{name:"Bhadra",days:31,gregStart:"2024-08-17"},{name:"Asoj",days:31,gregStart:"2024-09-17"},{name:"Kartik",days:30,gregStart:"2024-10-18"},{name:"Mangsir",days:29,gregStart:"2024-11-17"},{name:"Poush",days:30,gregStart:"2024-12-16"},{name:"Magh",days:29,gregStart:"2025-01-15"},{name:"Falgun",days:30,gregStart:"2025-02-13"},{name:"Chaitra",days:30,gregStart:"2025-03-15"}],
@@ -196,6 +193,25 @@
         // State
         let currentYear = 2082, currentMonth = 0, language = 'en';
         let notes = JSON.parse(localStorage.getItem('notes')) || [];
+        const todayGregorian = new Date('2025-04-17'); // Current date: April 17, 2025
+        let todayBS = '2082-01-05'; // Corresponding BS date
+
+        // Find today's BS date
+        function findTodayBSDate() {
+            for (const year in calendarData) {
+                calendarData[year].forEach((month, monthIndex) => {
+                    const gregStart = new Date(month.gregStart);
+                    for (let day = 1; day <= month.days; day++) {
+                        const currentGreg = new Date(gregStart.getTime() + (day - 1) * 86400000);
+                        if (currentGreg.toISOString().split('T')[0] === todayGregorian.toISOString().split('T')[0]) {
+                            currentYear = parseInt(year);
+                            currentMonth = monthIndex;
+                            todayBS = `${year}-${(monthIndex + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                        }
+                    }
+                });
+            }
+        }
 
         // Language translations
         const translations = {
@@ -224,6 +240,8 @@
 
         // Initialize
         function init() {
+            findTodayBSDate(); // Set currentYear and currentMonth to today
+            renderYearFilter();
             renderMonthTabs();
             renderCalendar();
             renderMiniCalendars();
@@ -248,6 +266,30 @@
             document.getElementById('exportMonth').addEventListener('click', () => exportCalendarToExcel('month'));
             document.getElementById('exportYear').addEventListener('click', () => exportCalendarToExcel('year'));
             document.getElementById('clearNotes').addEventListener('click', clearAllNotes);
+            document.getElementById('yearFilter').addEventListener('change', changeYear);
+        }
+
+        // Render year filter
+        function renderYearFilter() {
+            const filter = document.getElementById('yearFilter');
+            filter.innerHTML = '';
+            Object.keys(calendarData).forEach(year => {
+                const opt = document.createElement('option');
+                opt.value = year;
+                opt.textContent = `${year} BS`;
+                if (year == currentYear) opt.selected = true;
+                filter.appendChild(opt);
+            });
+        }
+
+        // Change year
+        function changeYear() {
+            currentYear = parseInt(document.getElementById('yearFilter').value);
+            currentMonth = 0; // Reset to first month of selected year
+            renderMonthTabs();
+            renderCalendar();
+            renderMiniCalendars();
+            updateMonthFilter();
         }
 
         // Render month tabs
@@ -297,11 +339,13 @@
             for (let day = 1; day <= monthData.days; day++) {
                 const dayDiv = document.createElement('div');
                 dayDiv.className = 'calendar-day';
+                const dateKey = `${currentYear}-${(currentMonth+1).toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
+                const gregDate = new Date(gregStart.getTime() + (day-1)*86400000).toISOString().split('T')[0];
+                if (dateKey === todayBS) dayDiv.classList.add('today'); // Highlight today
                 dayDiv.innerHTML = `
                     <div class="bs-date">${day}</div>
-                    <div class="greg-date">${new Date(gregStart.getTime() + (day-1)*86400000).toISOString().split('T')[0]}</div>
+                    <div class="greg-date">${gregDate}</div>
                 `;
-                const dateKey = `${currentYear}-${(currentMonth+1).toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
                 if (festivals[dateKey]) {
                     dayDiv.classList.add(festivals[dateKey].class);
                     const festival = document.createElement('div');
@@ -375,11 +419,13 @@
             for (let day = 1; day <= monthData.days; day++) {
                 const dayDiv = document.createElement('div');
                 dayDiv.className = 'calendar-day';
+                const dateKey = `${year}-${(month+1).toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
+                const gregDate = new Date(gregStart.getTime() + (day-1)*86400000).toISOString().split('T')[0];
+                if (dateKey === todayBS) dayDiv.classList.add('today'); // Highlight today
                 dayDiv.innerHTML = `
                     <div class="bs-date">${day}</div>
-                    <div class="greg-date">${new Date(gregStart.getTime() + (day-1)*86400000).toISOString().split('T')[0]}</div>
+                    <div class="greg-date">${gregDate}</div>
                 `;
-                const dateKey = `${year}-${(month+1).toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
                 if (festivals[dateKey]) {
                     dayDiv.classList.add(festivals[dateKey].class);
                     const tooltip = document.createElement('div');
@@ -416,6 +462,7 @@
             currentMonth += dir;
             if (currentMonth < 0) { currentYear--; currentMonth = calendarData[currentYear].length - 1; }
             else if (currentMonth >= calendarData[currentYear].length) { currentYear++; currentMonth = 0; }
+            document.getElementById('yearFilter').value = currentYear;
             renderMonthTabs();
             renderCalendar();
             renderMiniCalendars();
@@ -428,6 +475,7 @@
             renderMonthTabs();
             renderCalendar();
             renderMiniCalendars();
+            updateMonthFilter();
         }
 
         // Update language
@@ -550,7 +598,10 @@
 
         // Export notes to Excel
         function exportNotesToExcel() {
-            if (!window.XLSX) return alert('Excel export not available');
+            if (!window.XLSX) {
+                alert(language === 'en' ? 'Excel export library not loaded. Please try again later.' : 'एक्सेल निर्यात लाइब्रेरी लोड भएन। कृपया पछि पुन: प्रयास गर्नुहोस्।');
+                return;
+            }
             const ws = XLSX.utils.json_to_sheet(notes, { header: ['date','title','time','description'] });
             const wb = XLSX.utils.book_new();
             XLSX.utils.book_append_sheet(wb, ws, 'Notes');
@@ -559,7 +610,10 @@
 
         // Export calendar to Excel
         function exportCalendarToExcel(scope) {
-            if (!window.XLSX) return alert('Excel export not available');
+            if (!window.XLSX) {
+                alert(language === 'en' ? 'Excel export library not loaded. Please try again later.' : 'एक्सेल निर्यात लाइब्रेरी लोड भएन। कृपया पछि पुन: प्रयास गर्नुहोस्।');
+                return;
+            }
             const data = [];
             const months = scope === 'month' ? [calendarData[currentYear][currentMonth]] : calendarData[currentYear];
             months.forEach((month, mIdx) => {
@@ -579,28 +633,48 @@
         // Import calendar data
         function importCalendarData() {
             const file = document.getElementById('calendarImport').files[0];
-            if (!file || !window.XLSX) return alert('Excel import not available');
+            if (!file) {
+                alert(language === 'en' ? 'No file selected.' : 'कुनै फाइल चयन गरिएको छैन।');
+                return;
+            }
+            if (!window.XLSX) {
+                alert(language === 'en' ? 'Excel import library not loaded. Please try again later.' : 'एक्सेल आयात लाइब्रेरी लोड भएन। कृपया पछि पुन: प्रयास गर्नुहोस्।');
+                return;
+            }
             const reader = new FileReader();
             reader.onload = e => {
-                const data = new Uint8Array(e.target.result);
-                const wb = XLSX.read(data, { type: 'array', raw: true });
-                const ws = wb.Sheets[wb.SheetNames[0]];
-                const json = XLSX.utils.sheet_to_json(ws);
-                notes = json.filter(row => row.date && row.title);
-                localStorage.setItem('notes', JSON.stringify(notes));
-                filterNotes();
-                renderCalendar();
-                renderMiniCalendars();
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const wb = XLSX.read(data, { type: 'array', raw: true });
+                    const ws = wb.Sheets[wb.SheetNames[0]];
+                    const json = XLSX.utils.sheet_to_json(ws);
+                    notes = json.filter(row => row.date && row.title);
+                    localStorage.setItem('notes', JSON.stringify(notes));
+                    filterNotes();
+                    renderCalendar();
+                    renderMiniCalendars();
+                    alert(language === 'en' ? 'Notes imported successfully.' : 'नोटहरू सफलतापूर्वक आयात गरियो।');
+                } catch (err) {
+                    alert(language === 'en' ? 'Error importing file. Please ensure it is a valid Excel file.' : 'फाइल आयात गर्दा त्रुटि। कृपया यो मान्य एक्सेल फाइल हो भनेर सुनिश्चित गर्नुहोस्।');
+                }
+            };
+            reader.onerror = () => {
+                alert(language === 'en' ? 'Error reading file.' : 'फाइल पढ्दा त्रुटि।');
             };
             reader.readAsArrayBuffer(file);
         }
 
         // Print current month to PDF
         function printCurrentMonthPDF() {
-            if (!window.jsPDF) return alert('PDF export not available');
+            if (!window.jsPDF) {
+                alert(language === 'en' ? 'PDF export library not loaded. Please try again later.' : 'पीडीएफ निर्यात लाइब्रेरी लोड भएन। कृपया पछि पुन: प्रयास गर्नुहोस्।');
+                return;
+            }
             const { jsPDF } = window.jsPDF;
             const doc = new jsPDF();
             const monthData = calendarData[currentYear][currentMonth];
+            doc.setFont('helvetica');
+            doc.setFontSize(12);
             doc.text(`${monthData.name} ${currentYear} BS`, 10, 10);
             let y = 20;
             for (let day = 1; day <= monthData.days; day++) {
@@ -616,9 +690,14 @@
 
         // Print full year to PDF
         function printFullYearPDF() {
-            if (!window.jsPDF) return alert('PDF export not available');
+            if (!window.jsPDF) {
+                alert(language === 'en' ? 'PDF export library not loaded. Please try again later.' : 'पीडीएफ निर्यात लाइब्रेरी लोड भएन। कृपया पछि पुन: प्रयास गर्नुहोस्।');
+                return;
+            }
             const { jsPDF } = window.jsPDF;
             const doc = new jsPDF();
+            doc.setFont('helvetica');
+            doc.setFontSize(12);
             doc.text(`Nepali Calendar ${currentYear} BS`, 10, 10);
             let y = 20;
             calendarData[currentYear].forEach(month => {
