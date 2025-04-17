@@ -6,7 +6,7 @@
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
-        script-src 'self' 'nonce-OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2' 'strict-dynamic' 'unsafe-eval';
+        script-src 'self' 'nonce-OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2' 'strict-dynamic' 'unsafe-eval' https://santoshphuyala.github.io https://ff.kis.v2.scr.kaspersky-labs.com wss://ff.kis.v2.scr.kaspersky-labs.com;
         img-src 'self' blob: data: https://assets.grok.com https://imgs.search.brave.com;
         style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
         font-src 'self' https://fonts.gstatic.com;
@@ -170,6 +170,9 @@
         const scripts = [
             '/scripts/xlsx.full.min.js',
             '/scripts/jspdf.umd.min.js'
+            // Alternatively, use external sources if not hosted locally:
+            // 'https://santoshphuyala.github.io/scripts/xlsx.full.min.js',
+            // 'https://santoshphuyala.github.io/scripts/jspdf.umd.min.js'
         ];
         scripts.forEach(src => {
             const script = document.createElement('script');
@@ -231,7 +234,7 @@
 
         // Bind events
         function bindEvents() {
-            document.getElementDrawer('languageToggle').addEventListener('click', toggleLanguage);
+            document.getElementById('languageToggle').addEventListener('click', toggleLanguage);
             document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
             document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
             document.getElementById('accessNotes').addEventListener('click', showNotes);
@@ -285,7 +288,11 @@
             });
 
             const firstDay = gregStart.getDay();
-            for (let i = 0; i < firstDay; i++) grid.appendChild(document.createElement('div').className = 'calendar-day');
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                grid.appendChild(emptyDay);
+            }
 
             for (let day = 1; day <= monthData.days; day++) {
                 const dayDiv = document.createElement('div');
@@ -359,7 +366,11 @@
             });
 
             const firstDay = gregStart.getDay();
-            for (let i = 0; i < firstDay; i++) grid.appendChild(document.createElement('div').className = 'calendar-day');
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                grid.appendChild(emptyDay);
+            }
 
             for (let day = 1; day <= monthData.days; day++) {
                 const dayDiv = document.createElement('div');
@@ -561,8 +572,8 @@
             });
             const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, scope === 'month' ? month.name : 'Year');
-            XLSX.writeFile(wb, `${scope === 'month' ? month.name : currentYear}_Calendar.xlsx`);
+            XLSX.utils.book_append_sheet(wb, ws, scope === 'month' ? months[0].name : 'Year');
+            XLSX.writeFile(wb, `${scope === 'month' ? months[0].name : currentYear}_Calendar.xlsx`);
         }
 
         // Import calendar data
