@@ -377,7 +377,7 @@
     </div>
 
     <script>
-        // Calendar data for 2081 BS to 2083 BS (accurate dates based on Nepali Patro)
+        // Calendar data for 2081 BS to 2083 BS
         const calendarData = {
             2081: [
                 { name: "Baishakh", days: 31, gregStart: "2024-04-13" },
@@ -393,3 +393,307 @@
                 { name: "Falgun", days: 30, gregStart: "2025-02-13" },
                 { name: "Chaitra", days: 30, gregStart: "2025-03-15" }
             ],
+            2082: [
+                { name: "Baishakh", days: 31, gregStart: "2025-04-14" },
+                { name: "Jestha", days: 31, gregStart: "2025-05-15" },
+                { name: "Ashadh", days: 32, gregStart: "2025-06-15" },
+                { name: "Shrawan", days: 31, gregStart: "2025-07-17" },
+                { name: "Bhadra", days: 32, gregStart: "2025-08-17" },
+                { name: "Ashoj", days: 30, gregStart: "2025-09-18" },
+                { name: "Kartik", days: 30, gregStart: "2025-10-18" },
+                { name: "Mangsir", days: 30, gregStart: "2025-11-17" },
+                { name: "Poush", days: 29, gregStart: "2025-12-17" },
+                { name: "Magh", days: 30, gregStart: "2026-01-15" },
+                { name: "Falgun", days: 30, gregStart: "2026-02-14" },
+                { name: "Chaitra", days: 31, gregStart: "2026-03-16" }
+            ],
+            2083: [
+                { name: "Baishakh", days: 31, gregStart: "2026-04-14" },
+                { name: "Jestha", days: 32, gregStart: "2026-05-15" },
+                { name: "Ashadh", days: 31, gregStart: "2026-06-16" },
+                { name: "Shrawan", days: 32, gregStart: "2026-07-17" },
+                { name: "Bhadra", days: 31, gregStart: "2026-08-18" },
+                { name: "Ashoj", days: 31, gregStart: "2026-09-18" },
+                { name: "Kartik", days: 30, gregStart: "2026-10-19" },
+                { name: "Mangsir", days: 29, gregStart: "2026-11-18" },
+                { name: "Poush", days: 30, gregStart: "2026-12-17" },
+                { name: "Magh", days: 30, gregStart: "2027-01-16" },
+                { name: "Falgun", days: 30, gregStart: "2027-02-15" },
+                { name: "Chaitra", days: 30, gregStart: "2027-03-17" }
+            ]
+        };
+
+        // Festival data (example for demonstration)
+        const festivals = {
+            "2081-10-01": { name: "Maghe Sankranti", class: "maghe-sankranti" },
+            "2081-11-15": { name: "Sonam Lhosar", class: "sonam-lhosar" }
+        };
+
+        // State
+        let currentYear = 2082;
+        let currentMonth = 0; // Index of the month (0 = Baishakh)
+        let language = 'en'; // Default language
+        let notes = JSON.parse(localStorage.getItem('notes')) || [];
+
+        // Initialize the calendar
+        function initCalendar() {
+            renderMonthTabs();
+            renderCalendar();
+            updateMonthFilter();
+            updateLanguage();
+        }
+
+        // Render month tabs
+        function renderMonthTabs() {
+            const monthTabs = document.getElementById('monthTabs');
+            monthTabs.innerHTML = '';
+            calendarData[currentYear].forEach((month, index) => {
+                const tab = document.createElement('div');
+                tab.className = `month-tab ${index === currentMonth ? 'active' : ''}`;
+                tab.textContent = language === 'en' ? month.name : month.name; // Add Nepali names if available
+                tab.onclick = () => {
+                    currentMonth = index;
+                    renderMonthTabs();
+                    renderCalendar();
+                };
+                monthTabs.appendChild(tab);
+            });
+        }
+
+        // Render calendar grid
+        function renderCalendar() {
+            const calendarGrid = document.getElementById('calendarGrid');
+            const currentMonthData = calendarData[currentYear][currentMonth];
+            const daysInMonth = currentMonthData.days;
+            const gregStart = new Date(currentMonthData.gregStart);
+
+            // Update header
+            document.getElementById('currentMonth').textContent = `${currentMonthData.name} ${currentYear} BS`;
+
+            // Clear previous grid
+            calendarGrid.innerHTML = '';
+
+            // Add weekday headers
+            const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            weekdays.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.className = 'calendar-day';
+                dayHeader.style.backgroundColor = '#0288d1';
+                dayHeader.style.color = 'white';
+                dayHeader.textContent = day;
+                calendarGrid.appendChild(dayHeader);
+            });
+
+            // Calculate the first day of the month
+            const firstDay = gregStart.getDay();
+
+            // Add empty cells before the first day
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                calendarGrid.appendChild(emptyDay);
+            }
+
+            // Add days of the month
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+
+                // BS date
+                const bsDate = document.createElement('div');
+                bsDate.className = 'bs-date';
+                bsDate.textContent = day;
+                dayDiv.appendChild(bsDate);
+
+                // Gregorian date
+                const gregDate = new Date(gregStart);
+                gregDate.setDate(gregStart.getDate() + (day - 1));
+                const gregDateDiv = document.createElement('div');
+                gregDateDiv.className = 'greg-date';
+                gregDateDiv.textContent = gregDate.toISOString().split('T')[0];
+                dayDiv.appendChild(gregDateDiv);
+
+                // Festivals
+                const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                if (festivals[dateKey]) {
+                    dayDiv.classList.add(festivals[dateKey].class);
+                    const festivalDiv = document.createElement('div');
+                    festivalDiv.className = 'festival';
+                    festivalDiv.textContent = festivals[dateKey].name;
+                    dayDiv.appendChild(festivalDiv);
+                }
+
+                // Notes
+                const dayNotes = notes.filter(note => note.date === dateKey);
+                if (dayNotes.length > 0) {
+                    const noteIndicator = document.createElement('div');
+                    noteIndicator.className = 'note-indicator';
+                    dayDiv.appendChild(noteIndicator);
+                    const noteTooltip = document.createElement('div');
+                    noteTooltip.className = 'note-tooltip';
+                    noteTooltip.textContent = dayNotes.map(note => note.title).join(', ');
+                    dayDiv.appendChild(noteTooltip);
+                }
+
+                // Click to add note
+                dayDiv.onclick = () => openNoteForm(dateKey, day, currentMonthData.name);
+
+                calendarGrid.appendChild(dayDiv);
+            }
+
+            // Update navigation buttons
+            document.getElementById('prevMonth').disabled = currentYear === 2081 && currentMonth === 0;
+            document.getElementById('nextMonth').disabled = currentYear === 2083 && currentMonth === calendarData[2083].length - 1;
+        }
+
+        // Change month
+        function changeMonth(direction) {
+            currentMonth += direction;
+            if (currentMonth < 0) {
+                currentYear--;
+                currentMonth = calendarData[currentYear].length - 1;
+            } else if (currentMonth >= calendarData[currentYear].length) {
+                currentYear++;
+                currentMonth = 0;
+            }
+            renderMonthTabs();
+            renderCalendar();
+        }
+
+        // Toggle language
+        function toggleLanguage() {
+            language = language === 'en' ? 'ne' : 'en';
+            updateLanguage();
+            renderMonthTabs();
+            renderCalendar();
+        }
+
+        // Update language for elements
+        function updateLanguage() {
+            document.querySelectorAll('[data-en]').forEach(elem => {
+                elem.textContent = elem.dataset[language];
+            });
+        }
+
+        // Open note form
+        function openNoteForm(dateKey, day, monthName) {
+            const noteForm = document.getElementById('noteForm');
+            document.getElementById('selectedDate').textContent = `${monthName} ${day}, ${currentYear} BS`;
+            noteForm.dataset.date = dateKey;
+            noteForm.classList.add('active');
+        }
+
+        // Save note
+        function saveNote() {
+            const noteForm = document.getElementById('noteForm');
+            const date = noteForm.dataset.date;
+            const title = document.getElementById('noteTitle').value;
+            const time = document.getElementById('noteTime').value;
+            const description = document.getElementById('noteDescription').value;
+
+            if (title) {
+                notes.push({ date, title, time, description });
+                localStorage.setItem('notes', JSON.stringify(notes));
+                noteForm.classList.remove('active');
+                document.getElementById('noteTitle').value = '';
+                document.getElementById('noteTime').value = '';
+                document.getElementById('noteDescription').value = '';
+                renderCalendar();
+            }
+        }
+
+        // Show notes modal
+        function showNotes() {
+            document.getElementById('notesModal').style.display = 'block';
+            filterNotes();
+        }
+
+        // Close notes modal
+        function closeNotesModal() {
+            document.getElementById('notesModal').style.display = 'none';
+        }
+
+        // Update month filter
+        function updateMonthFilter() {
+            const monthFilter = document.getElementById('monthFilter');
+            monthFilter.innerHTML = '<option value="all" data-en="All Months" data-ne="सबै महिनाहरू">All Months</option>';
+            Object.keys(calendarData).forEach(year => {
+                calendarData[year].forEach((month, index) => {
+                    const option = document.createElement('option');
+                    option.value = `${year}-${index}`;
+                    option.textContent = `${month.name} ${year}`;
+                    monthFilter.appendChild(option);
+                });
+            });
+        }
+
+        // Filter notes
+        function filterNotes() {
+            const monthFilter = document.getElementById('monthFilter').value;
+            const notesList = document.getElementById('notesList');
+            notesList.innerHTML = '';
+
+            let filteredNotes = notes;
+            if (monthFilter !== 'all') {
+                const [year, monthIndex] = monthFilter.split('-');
+                filteredNotes = notes.filter(note => note.date.startsWith(`${year}-${String(Number(monthIndex) + 1).padStart(2, '0')}`));
+            }
+
+            filteredNotes.forEach((note, index) => {
+                const noteItem = document.createElement('div');
+                noteItem.className = 'note-item';
+                noteItem.innerHTML = `
+                    <div><strong>${note.title}</strong></div>
+                    <div>${note.date} ${note.time ? `at ${note.time}` : ''}</div>
+                    <div>${note.description}</div>
+                    <div class="note-actions">
+                        <span class="edit-note" onclick="editNote(${index})">Edit</span>
+                        <span class="delete-note" onclick="deleteNote(${index})">Delete</span>
+                    </div>
+                `;
+                notesList.appendChild(noteItem);
+            });
+        }
+
+        // Edit note
+        function editNote(index) {
+            const note = notes[index];
+            openNoteForm(note.date, note.date.split('-')[2], calendarData[note.date.split('-')[0]][Number(note.date.split('-')[1]) - 1].name);
+            document.getElementById('noteTitle').value = note.title;
+            document.getElementById('noteTime').value = note.time;
+            document.getElementById('noteDescription').value = note.description;
+            notes.splice(index, 1);
+            localStorage.setItem('notes', JSON.stringify(notes));
+        }
+
+        // Delete note
+        function deleteNote(index) {
+            notes.splice(index, 1);
+            localStorage.setItem('notes', JSON.stringify(notes));
+            filterNotes();
+            renderCalendar();
+        }
+
+        // Export notes to Excel
+        function exportNotesToExcel() {
+            const ws = XLSX.utils.json_to_sheet(notes);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Notes');
+            XLSX.writeFile(wb, 'NepaliCalendarNotes.xlsx');
+        }
+
+        // Clear all notes
+        function clearAllNotes() {
+            if (confirm('Are you sure you want to clear all notes?')) {
+                notes = [];
+                localStorage.setItem('notes', JSON.stringify(notes));
+                filterNotes();
+                renderCalendar();
+            }
+        }
+
+        // Initialize on load
+        window.onload = initCalendar;
+    </script>
+</body>
+</html>
