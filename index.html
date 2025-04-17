@@ -3,191 +3,241 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nepali Calendar</title>
+    <title>Nepali Calendar 2082</title>
     <!-- SheetJS CDN for Excel Export -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <!-- Google Fonts: Poppins and Noto Sans Devanagari -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            font-family: 'Roboto', Arial, sans-serif;
+        :root {
+            --primary: #d32f2f; /* Nepali red */
+            --secondary: #0288d1; /* Blue */
+            --accent: #fbc02d; /* Gold */
+            --background: #f5f5f5;
+            --card-bg: #ffffff;
+            --text: #212121;
+            --text-light: #757575;
+        }
+
+        * {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
-            background-color: #f5f5f5;
-            color: #333;
         }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
         .header {
-            background-color: #0288d1;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
             color: white;
             text-align: center;
-            padding: 15px;
-            font-size: 1.3em;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            position: relative;
         }
+
         .month-tabs {
             display: flex;
             flex-wrap: wrap;
             justify-content: center;
-            background-color: #fff;
-            padding: 10px 0;
-            border-bottom: 1px solid #e0e0e0;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+            background-color: var(--card-bg);
+            padding: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            margin: 1rem 0;
         }
+
         .month-tab {
-            padding: 10px 20px;
-            margin: 5px;
+            padding: 0.75rem 1.5rem;
+            margin: 0.5rem;
             cursor: pointer;
-            border-radius: 20px;
+            border-radius: 25px;
             background-color: #e3f2fd;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            font-weight: 500;
         }
+
         .month-tab.active {
-            background-color: #0288d1;
+            background-color: var(--secondary);
             color: white;
+            transform: scale(1.05);
         }
+
         .month-tab:hover {
             background-color: #bbdefb;
+            transform: scale(1.03);
         }
-        .month-tab.active:hover {
-            background-color: #0277bd;
+
+        .month-tab.nepali {
+            font-family: 'Noto Sans Devanagari', sans-serif;
         }
+
         .nav-buttons {
             position: absolute;
             top: 50%;
             transform: translateY(-50%);
             display: flex;
-            gap: 10px;
+            gap: 0.5rem;
         }
-        .nav-buttons.left {
-            left: 15px;
-        }
-        .nav-buttons.right {
-            right: 15px;
-        }
+
+        .nav-buttons.left { left: 1rem; }
+        .nav-buttons.right { right: 1rem; }
+
         .nav-buttons button {
             background-color: white;
-            color: #0288d1;
+            color: var(--secondary);
             border: none;
-            padding: 5px 15px;
-            border-radius: 4px;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
+            transition: all 0.3s ease;
         }
+
+        .nav-buttons button:hover {
+            background-color: var(--accent);
+            color: var(--text);
+        }
+
         .nav-buttons button:disabled {
             background-color: #ddd;
             cursor: not-allowed;
         }
+
         .calendar-container {
             max-width: 1200px;
-            margin: 20px auto;
-            padding: 15px;
-            background-color: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            margin: 2rem auto;
+            padding: 1.5rem;
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
         }
+
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 8px;
+            gap: 0.75rem;
             text-align: center;
         }
+
         .calendar-day {
             background-color: #fff;
             border: 1px solid #e0e0e0;
-            padding: 12px;
+            padding: 1rem;
             cursor: pointer;
+            min-height: 140px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
             position: relative;
-            min-height: 120px;
-            border-radius: 4px;
-            transition: background-color 0.2s;
         }
+
         .calendar-day:hover {
             background-color: #f5f5f5;
+            transform: translateY(-2px);
         }
-        .maghe-sankranti {
-            background-color: #4caf50;
-            color: white;
-        }
-        .sonam-lhosar {
-            background-color: #ff9800;
-            color: white;
-        }
+
+        .maghe-sankranti { background-color: #4caf50; color: white; }
+        .sonam-lhosar { background-color: #ff9800; color: white; }
+        .dashain { background-color: #d81b60; color: white; }
+        .tihar { background-color: #7b1fa2; color: white; }
+
         .bs-date {
-            font-weight: bold;
-            font-size: 1.1em;
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 0.25rem;
         }
+
         .greg-date {
-            font-size: 0.85em;
-            color: #666;
-            margin-top: 2px;
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 0.25rem;
         }
+
         .festival, .tithi, .saiet {
-            font-size: 0.8em;
-            margin-top: 5px;
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+            font-family: 'Noto Sans Devanagari', sans-serif; /* Nepali font */
         }
+
         .note-indicator {
             position: absolute;
-            top: 5px;
-            right: 5px;
-            width: 8px;
-            height: 8px;
-            background-color: #0288d1;
+            top: 0.5rem;
+            right: 0.5rem;
+            width: 10px;
+            height: 10px;
+            background-color: var(--secondary);
             border-radius: 50%;
         }
+
         .note-tooltip {
             display: none;
             position: absolute;
-            background-color: #333;
+            background-color: var(--text);
             color: white;
-            padding: 5px 10px;
-            border-radius: 4px;
-            font-size: 0.8em;
+            padding: 0.5rem;
+            border-radius: 6px;
+            font-size: 0.8rem;
             z-index: 100;
-            top: -40px;
+            top: -2.5rem;
             left: 50%;
             transform: translateX(-50%);
             white-space: nowrap;
         }
-        .calendar-day:hover .note-tooltip {
-            display: block;
-        }
+
+        .calendar-day:hover .note-tooltip { display: block; }
+
         .note-form-container {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
-            background-color: #fff;
-            box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-            padding: 15px;
+            background-color: var(--card-bg);
+            box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.1);
+            padding: 1.5rem;
             display: none;
             z-index: 1000;
         }
-        .note-form-container.active {
-            display: block;
-        }
+
+        .note-form-container.active { display: block; }
+
         .note-form-container h3 {
-            margin: 0 0 10px;
-            font-size: 1.2em;
-            color: #0288d1;
+            margin: 0 0 1rem;
+            font-size: 1.25rem;
+            color: var(--primary);
         }
+
         .note-form-container input,
         .note-form-container textarea {
             width: 100%;
-            margin-bottom: 10px;
-            padding: 8px;
+            margin-bottom: 1rem;
+            padding: 0.75rem;
             border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box;
+            border-radius: 8px;
+            font-family: 'Poppins', sans-serif;
         }
+
         .note-form-container button {
-            background-color: #0288d1;
+            background-color: var(--secondary);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
             cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
         }
-        .note-form-container button:hover {
-            background-color: #0277bd;
+
+        .note-form-container button:hover { background-color: #0277bd; }
+
+        .note-form-container .nepali {
+            font-family: 'Noto Sans Devanagari', sans-serif;
         }
+
         .notes-modal {
             display: none;
             position: fixed;
@@ -195,133 +245,171 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-color: rgba(0, 0, 0, 0.6);
+            background-color: rgba(0, 0, 0, 0.7);
             z-index: 2000;
         }
+
         .notes-modal-content {
-            background-color: white;
+            background-color: var(--card-bg);
             margin: 10% auto;
-            padding: 20px;
+            padding: 1.5rem;
             width: 90%;
             max-width: 600px;
-            border-radius: 8px;
+            border-radius: 12px;
             position: relative;
         }
+
         .notes-modal-content h2 {
-            margin: 0 0 15px;
-            color: #0288d1;
+            margin: 0 0 1rem;
+            color: var(--primary);
+            font-size: 1.5rem;
         }
+
+        .notes-modal-content .nepali {
+            font-family: 'Noto Sans Devanagari', sans-serif;
+        }
+
         .close-modal {
             position: absolute;
-            top: 10px;
-            right: 15px;
-            font-size: 1.5em;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
             cursor: pointer;
-            color: #666;
+            color: var(--text-light);
         }
+
         .filter-section {
-            margin-bottom: 15px;
+            margin-bottom: 1rem;
         }
+
         .filter-section select {
-            padding: 8px;
-            border-radius: 4px;
+            padding: 0.75rem;
+            border-radius: 8px;
             border: 1px solid #ddd;
             width: 100%;
             max-width: 200px;
+            font-family: 'Poppins', sans-serif;
         }
+
+        .filter-section select.nepali {
+            font-family: 'Noto Sans Devanagari', sans-serif;
+        }
+
         .notes-list {
             max-height: 300px;
             overflow-y: auto;
-            margin-bottom: 15px;
+            margin-bottom: 1rem;
         }
+
         .note-item {
             border-bottom: 1px solid #eee;
-            padding: 10px 0;
+            padding: 0.75rem 0;
             position: relative;
         }
-        .note-item:last-child {
-            border-bottom: none;
-        }
+
+        .note-item:last-child { border-bottom: none; }
+
         .note-actions {
             position: absolute;
-            top: 10px;
+            top: 0.75rem;
             right: 0;
             display: flex;
-            gap: 10px;
+            gap: 0.5rem;
         }
+
         .edit-note, .delete-note {
             cursor: pointer;
-            font-size: 0.9em;
+            font-size: 0.9rem;
         }
-        .edit-note {
-            color: #0288d1;
-        }
-        .edit-note:hover {
-            color: #0277bd;
-        }
-        .delete-note {
-            color: #f44336;
-        }
-        .delete-note:hover {
-            color: #d32f2f;
-        }
+
+        .edit-note { color: var(--secondary); }
+        .edit-note:hover { color: #0277bd; }
+        .delete-note { color: var(--primary); }
+        .delete-note:hover { color: #b71c1c; }
+
         .action-buttons {
             display: flex;
-            gap: 10px;
+            gap: 0.75rem;
             justify-content: space-between;
         }
+
         .export-btn, .clear-btn {
             border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
         }
+
         .export-btn {
             background-color: #4caf50;
             color: white;
         }
-        .export-btn:hover {
-            background-color: #388e3c;
-        }
+
+        .export-btn:hover { background-color: #388e3c; }
+
         .clear-btn {
-            background-color: #f44336;
+            background-color: var(--primary);
             color: white;
         }
-        .clear-btn:hover {
-            background-color: #d32f2f;
-        }
+
+        .clear-btn:hover { background-color: #b71c1c; }
+
         .access-notes-btn {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            background-color: #0288d1;
+            top: 1.5rem;
+            right: 1.5rem;
+            background-color: var(--secondary);
             color: white;
             border: none;
-            padding: 10px 20px;
-            border-radius: 4px;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
             cursor: pointer;
             z-index: 1000;
+            transition: background-color 0.3s ease;
         }
-        .access-notes-btn:hover {
-            background-color: #0277bd;
+
+        .access-notes-btn:hover { background-color: #0277bd; }
+
+        .access-notes-btn.nepali {
+            font-family: 'Noto Sans Devanagari', sans-serif;
         }
+
         .language-toggle {
             position: fixed;
-            top: 20px;
-            left: 20px;
+            top: 1.5rem;
+            left: 1.5rem;
             z-index: 1000;
         }
+
         .language-toggle button {
-            background-color: #0288d1;
+            background-color: var(--secondary);
             color: white;
             border: none;
-            padding: 8px 15px;
-            border-radius: 4px;
+            padding: 0.75rem 1rem;
+            border-radius: 8px;
             cursor: pointer;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
         }
-        .language-toggle button:hover {
-            background-color: #0277bd;
+
+        .language-toggle button:hover { background-color: #0277bd; }
+
+        .footer {
+            text-align: center;
+            padding: 1rem;
+            background-color: var(--card-bg);
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-top: 2rem;
+            box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        @media (max-width: 768px) {
+            .header { font-size: 1.2rem; }
+            .month-tab { padding: 0.5rem 1rem; }
+            .calendar-day { min-height: 100px; }
+            .nav-buttons { flex-direction: column; }
         }
     </style>
 </head>
@@ -348,7 +436,6 @@
         <div class="calendar-grid" id="calendarGrid"></div>
     </div>
 
-    <!-- Add Note Form at Bottom -->
     <div class="note-form-container" id="noteForm">
         <h3><span data-en="Add Note for" data-ne="नोट थप्नुहोस्">Add Note for</span> <span id="selectedDate">Date</span></h3>
         <input type="text" id="noteTitle" placeholder="Note Title">
@@ -357,7 +444,6 @@
         <button onclick="saveNote()" data-en="Save Note" data-ne="नोट बचत गर्नुहोस्">Save Note</button>
     </div>
 
-    <!-- Notes Modal -->
     <div class="notes-modal" id="notesModal">
         <div class="notes-modal-content">
             <span class="close-modal" onclick="closeNotesModal()">×</span>
@@ -365,7 +451,6 @@
             <div class="filter-section">
                 <select id="monthFilter" onchange="filterNotes()">
                     <option value="all" data-en="All Months" data-ne="सबै महिनाहरू">All Months</option>
-                    <!-- Options will be dynamically added -->
                 </select>
             </div>
             <div class="notes-list" id="notesList"></div>
@@ -376,8 +461,12 @@
         </div>
     </div>
 
+    <div class="footer">
+        Calendar Concept and Design by Santosh Phuyal
+    </div>
+
     <script>
-        // Calendar data for 2081 BS to 2083 BS
+        // Calendar data for 2081–2083, with 2082 corrected per official data
         const calendarData = {
             2081: [
                 { name: "Baishakh", days: 31, gregStart: "2024-04-13" },
@@ -385,7 +474,7 @@
                 { name: "Ashadh", days: 31, gregStart: "2024-06-15" },
                 { name: "Shrawan", days: 32, gregStart: "2024-07-16" },
                 { name: "Bhadra", days: 31, gregStart: "2024-08-17" },
-                { name: "Ashoj", days: 31, gregStart: "2024-09-17" },
+                { name: "Asoj", days: 31, gregStart: "2024-09-17" },
                 { name: "Kartik", days: 30, gregStart: "2024-10-18" },
                 { name: "Mangsir", days: 29, gregStart: "2024-11-17" },
                 { name: "Poush", days: 30, gregStart: "2024-12-16" },
@@ -398,44 +487,49 @@
                 { name: "Jestha", days: 31, gregStart: "2025-05-15" },
                 { name: "Ashadh", days: 32, gregStart: "2025-06-15" },
                 { name: "Shrawan", days: 31, gregStart: "2025-07-17" },
-                { name: "Bhadra", days: 32, gregStart: "2025-08-17" },
-                { name: "Ashoj", days: 30, gregStart: "2025-09-18" },
+                { name: "Bhadra", days: 31, gregStart: "2025-08-17" },
+                { name: "Asoj", days: 31, gregStart: "2025-09-17" },
                 { name: "Kartik", days: 30, gregStart: "2025-10-18" },
-                { name: "Mangsir", days: 30, gregStart: "2025-11-17" },
-                { name: "Poush", days: 29, gregStart: "2025-12-17" },
-                { name: "Magh", days: 30, gregStart: "2026-01-15" },
-                { name: "Falgun", days: 30, gregStart: "2026-02-14" },
+                { name: "Mangsir", days: 29, gregStart: "2025-11-17" },
+                { name: "Poush", days: 30, gregStart: "2025-12-16" },
+                { name: "Magh", days: 29, gregStart: "2026-01-15" },
+                { name: "Falgun", days: 30, gregStart: "2026-02-13" },
                 { name: "Chaitra", days: 31, gregStart: "2026-03-16" }
             ],
             2083: [
-                { name: "Baishakh", days: 31, gregStart: "2026-04-14" },
-                { name: "Jestha", days: 32, gregStart: "2026-05-15" },
-                { name: "Ashadh", days: 31, gregStart: "2026-06-16" },
-                { name: "Shrawan", days: 32, gregStart: "2026-07-17" },
-                { name: "Bhadra", days: 31, gregStart: "2026-08-18" },
-                { name: "Ashoj", days: 31, gregStart: "2026-09-18" },
-                { name: "Kartik", days: 30, gregStart: "2026-10-19" },
-                { name: "Mangsir", days: 29, gregStart: "2026-11-18" },
-                { name: "Poush", days: 30, gregStart: "2026-12-17" },
-                { name: "Magh", days: 30, gregStart: "2027-01-16" },
-                { name: "Falgun", days: 30, gregStart: "2027-02-15" },
-                { name: "Chaitra", days: 30, gregStart: "2027-03-17" }
+                { name: "Baishakh", days: 31, gregStart: "2026-04-16" },
+                { name: "Jestha", days: 32, gregStart: "2026-05-17" },
+                { name: "Ashadh", days: 31, gregStart: "2026-06-18" },
+                { name: "Shrawan", days: 32, gregStart: "2026-07-19" },
+                { name: "Bhadra", days: 31, gregStart: "2026-08-20" },
+                { name: "Asoj", days: 31, gregStart: "2026-09-20" },
+                { name: "Kartik", days: 30, gregStart: "2026-10-21" },
+                { name: "Mangsir", days: 29, gregStart: "2026-11-20" },
+                { name: "Poush", days: 30, gregStart: "2026-12-19" },
+                { name: "Magh", days: 30, gregStart: "2027-01-18" },
+                { name: "Falgun", days: 30, gregStart: "2027-02-17" },
+                { name: "Chaitra", days: 30, gregStart: "2027-03-19" }
             ]
         };
 
-        // Festival data (example for demonstration)
+        // Festival and holiday data based on official data
         const festivals = {
-            "2081-10-01": { name: "Maghe Sankranti", class: "maghe-sankranti" },
-            "2081-11-15": { name: "Sonam Lhosar", class: "sonam-lhosar" }
+            "2082-01-01": { name: "Nepali New Year", class: "dashain" },
+            "2082-05-01": { name: "Gai Jatra", class: "maghe-sankranti" }, // Bhadra
+            "2082-06-15": { name: "Dashain (Vijaya Dashami)", class: "dashain" }, // Asoj
+            "2082-07-05": { name: "Tihar (Deepawali)", class: "tihar" }, // Kartik
+            "2082-08-14": { name: "Bala Chaturdashi", class: "maghe-sankranti" }, // Mangsir
+            "2082-10-01": { name: "Maghe Sankranti", class: "maghe-sankranti" }, // Magh
+            "2082-11-15": { name: "Sonam Lhosar", class: "sonam-lhosar" } // Falgun
         };
 
         // State
         let currentYear = 2082;
-        let currentMonth = 0; // Index of the month (0 = Baishakh)
-        let language = 'en'; // Default language
+        let currentMonth = 0; // Baishakh
+        let language = 'en';
         let notes = JSON.parse(localStorage.getItem('notes')) || [];
 
-        // Initialize the calendar
+        // Initialize
         function initCalendar() {
             renderMonthTabs();
             renderCalendar();
@@ -449,8 +543,21 @@
             monthTabs.innerHTML = '';
             calendarData[currentYear].forEach((month, index) => {
                 const tab = document.createElement('div');
-                tab.className = `month-tab ${index === currentMonth ? 'active' : ''}`;
-                tab.textContent = language === 'en' ? month.name : month.name; // Add Nepali names if available
+                tab.className = `month-tab ${index === currentMonth ? 'active' : ''} ${language === 'ne' ? 'nepali' : ''}`;
+                tab.textContent = language === 'en' ? month.name : {
+                    "Baishakh": "बैशाख",
+                    "Jestha": "जेठ",
+                    "Ashadh": "असार",
+                    "Shrawan": "साउन",
+                    "Bhadra": "भदौ",
+                    "Asoj": "असोज",
+                    "Kartik": "कार्तिक",
+                    "Mangsir": "मंसिर",
+                    "Poush": "पुस",
+                    "Magh": "माघ",
+                    "Falgun": "फागुन",
+                    "Chaitra": "चैत"
+                }[month.name];
                 tab.onclick = () => {
                     currentMonth = index;
                     renderMonthTabs();
@@ -467,45 +574,50 @@
             const daysInMonth = currentMonthData.days;
             const gregStart = new Date(currentMonthData.gregStart);
 
-            // Update header
-            document.getElementById('currentMonth').textContent = `${currentMonthData.name} ${currentYear} BS`;
+            document.getElementById('currentMonth').textContent = `${language === 'en' ? currentMonthData.name : {
+                "Baishakh": "बैशाख",
+                "Jestha": "जेठ",
+                "Ashadh": "असार",
+                "Shrawan": "साउन",
+                "Bhadra": "भदौ",
+                "Asoj": "असोज",
+                "Kartik": "कार्तिक",
+                "Mangsir": "मंसिर",
+                "Poush": "पुस",
+                "Magh": "माघ",
+                "Falgun": "फागुन",
+                "Chaitra": "चैत"
+            }[currentMonthData.name]} ${currentYear} BS`;
 
-            // Clear previous grid
             calendarGrid.innerHTML = '';
 
-            // Add weekday headers
-            const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-            weekdays.forEach(day => {
+            const weekdays = language === 'en' ? ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'] : ['आइत', 'सोम', 'मंगल', 'बुध', 'बिही', 'शुक्र', 'शनि'];
+            weekdays.forEach((day, index) => {
                 const dayHeader = document.createElement('div');
                 dayHeader.className = 'calendar-day';
-                dayHeader.style.backgroundColor = '#0288d1';
+                dayHeader.style.backgroundColor = 'var(--secondary)';
                 dayHeader.style.color = 'white';
-                dayHeader.textContent = day;
+                dayHeader.textContent = language === 'ne' ? weekdays[index] : day;
+                if (language === 'ne') dayHeader.classList.add('nepali');
                 calendarGrid.appendChild(dayHeader);
             });
 
-            // Calculate the first day of the month
             const firstDay = gregStart.getDay();
-
-            // Add empty cells before the first day
             for (let i = 0; i < firstDay; i++) {
                 const emptyDay = document.createElement('div');
                 emptyDay.className = 'calendar-day';
                 calendarGrid.appendChild(emptyDay);
             }
 
-            // Add days of the month
             for (let day = 1; day <= daysInMonth; day++) {
                 const dayDiv = document.createElement('div');
                 dayDiv.className = 'calendar-day';
 
-                // BS date
                 const bsDate = document.createElement('div');
                 bsDate.className = 'bs-date';
                 bsDate.textContent = day;
                 dayDiv.appendChild(bsDate);
 
-                // Gregorian date
                 const gregDate = new Date(gregStart);
                 gregDate.setDate(gregStart.getDate() + (day - 1));
                 const gregDateDiv = document.createElement('div');
@@ -513,17 +625,23 @@
                 gregDateDiv.textContent = gregDate.toISOString().split('T')[0];
                 dayDiv.appendChild(gregDateDiv);
 
-                // Festivals
                 const dateKey = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                 if (festivals[dateKey]) {
                     dayDiv.classList.add(festivals[dateKey].class);
                     const festivalDiv = document.createElement('div');
                     festivalDiv.className = 'festival';
-                    festivalDiv.textContent = festivals[dateKey].name;
+                    festivalDiv.textContent = language === 'en' ? festivals[dateKey].name : {
+                        "Nepali New Year": "नेपाली नयाँ वर्ष",
+                        "Gai Jatra": "गाईजात्रा",
+                        "Dashain (Vijaya Dashami)": "दशैं (विजया दशमी)",
+                        "Tihar (Deepawali)": "तिहार (दीपावली)",
+                        "Bala Chaturdashi": "बाला चतुर्दशी",
+                        "Maghe Sankranti": "माघे संक्रान्ति",
+                        "Sonam Lhosar": "सोनम ल्होसार"
+                    }[festivals[dateKey].name] || festivals[dateKey].name;
                     dayDiv.appendChild(festivalDiv);
                 }
 
-                // Notes
                 const dayNotes = notes.filter(note => note.date === dateKey);
                 if (dayNotes.length > 0) {
                     const noteIndicator = document.createElement('div');
@@ -535,13 +653,10 @@
                     dayDiv.appendChild(noteTooltip);
                 }
 
-                // Click to add note
                 dayDiv.onclick = () => openNoteForm(dateKey, day, currentMonthData.name);
-
                 calendarGrid.appendChild(dayDiv);
             }
 
-            // Update navigation buttons
             document.getElementById('prevMonth').disabled = currentYear === 2081 && currentMonth === 0;
             document.getElementById('nextMonth').disabled = currentYear === 2083 && currentMonth === calendarData[2083].length - 1;
         }
@@ -568,17 +683,35 @@
             renderCalendar();
         }
 
-        // Update language for elements
+        // Update language
         function updateLanguage() {
             document.querySelectorAll('[data-en]').forEach(elem => {
                 elem.textContent = elem.dataset[language];
+                if (language === 'ne') {
+                    elem.classList.add('nepali');
+                } else {
+                    elem.classList.remove('nepali');
+                }
             });
         }
 
         // Open note form
         function openNoteForm(dateKey, day, monthName) {
             const noteForm = document.getElementById('noteForm');
-            document.getElementById('selectedDate').textContent = `${monthName} ${day}, ${currentYear} BS`;
+            document.getElementById('selectedDate').textContent = `${language === 'en' ? monthName : {
+                "Baishakh": "बैशाख",
+                "Jestha": "जेठ",
+                "Ashadh": "असार",
+                "Shrawan": "साउन",
+                "Bhadra": "भदौ",
+                "Asoj": "असोज",
+                "Kartik": "कार्तिक",
+                "Mangsir": "मंसिर",
+                "Poush": "पुस",
+                "Magh": "माघ",
+                "Falgun": "फागुन",
+                "Chaitra": "चैत"
+            }[monthName]} ${day}, ${currentYear} BS`;
             noteForm.dataset.date = dateKey;
             noteForm.classList.add('active');
         }
@@ -621,7 +754,21 @@
                 calendarData[year].forEach((month, index) => {
                     const option = document.createElement('option');
                     option.value = `${year}-${index}`;
-                    option.textContent = `${month.name} ${year}`;
+                    option.textContent = `${language === 'en' ? month.name : {
+                        "Baishakh": "बैशाख",
+                        "Jestha": "जेठ",
+                        "Ashadh": "असार",
+                        "Shrawan": "साउन",
+                        "Bhadra": "भदौ",
+                        "Asoj": "असोज",
+                        "Kartik": "कार्तिक",
+                        "Mangsir": "मंसिर",
+                        "Poush": "पुस",
+                        "Magh": "माघ",
+                        "Falgun": "फागुन",
+                        "Chaitra": "चैत"
+                    }[month.name]} ${year}`;
+                    if (language === 'ne') option.classList.add('nepali');
                     monthFilter.appendChild(option);
                 });
             });
@@ -684,7 +831,7 @@
 
         // Clear all notes
         function clearAllNotes() {
-            if (confirm('Are you sure you want to clear all notes?')) {
+            if (confirm(language === 'en' ? 'Are you sure you want to clear all notes?' : 'के तपाईं सबै नोटहरू मेटाउन निश्चित हुनुहुन्छ?')) {
                 notes = [];
                 localStorage.setItem('notes', JSON.stringify(notes));
                 filterNotes();
@@ -692,7 +839,7 @@
             }
         }
 
-        // Initialize on load
+        // Initialize
         window.onload = initCalendar;
     </script>
 </body>
