@@ -12,7 +12,13 @@
         font-src 'self' https://fonts.gstatic.com;
         connect-src 'self' https://api.grok.com;
     ">
+    <!-- Notes on CSP:
+         - 'strict-dynamic' requires nonced or trusted scripts to load external scripts.
+         - Nonce OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2 is applied to all scripts.
+         - https://cdnjs.cloudflare.com is included as a fallback, though 'strict-dynamic' may ignore it.
+    -->
     <title>Nepali Calendar 2082</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo="> <!-- Blank favicon to suppress 404 -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
     <style>
         :root{--primary:#d32f2f;--secondary:#0288d1;--accent:#fbc02d;--bg:#f5f5f5;--card-bg:#fff;--text:#212121;--text-light:#757575}
@@ -37,7 +43,7 @@
         .calendar-day{background:#fff;border:1px solid #e0e0e0;padding:0.75rem;cursor:pointer;min-height:100px;border-radius:8px;transition:.3s;position:relative}
         .mini-calendar .calendar-day{padding:0.2rem;min-height:30px;font-size:0.5rem}
         .calendar-day:hover{background:#f5f5f5;transform:translateY(-2px)}
-        .calendar-day.today{background:#e3f2fd;border:2px solid var(--secondary)} /* Highlight for today */
+        .calendar-day.today{background:#e3f2fd;border:2px solid var(--secondary)}
         .saturday{background:#b0bec5;color:#fff}.dashain{background:#d81b60;color:#fff}.tihar{background:#7b1fa2;color:#fff}
         .national{background:#4caf50;color:#fff}.ethnic{background:#ff9800;color:#fff}.women{background:#f06292;color:#fff}
         .education{background:#0288d1;color:#fff}.jatra{background:#ab47bc;color:#fff}.observed{background:#689f38;color:#fff}
@@ -89,10 +95,10 @@
         .access-notes-btn{position:fixed;top:1.5rem;right:1.5rem;background:var(--secondary);color:#fff;border:none;padding:0.75rem 1.5rem;border-radius:8px;cursor:pointer;z-index:1000;transition:.3s;font-size:0.9rem}
         .access-notes-btn:hover{background:#0277bd}
         .access-notes-btn.nepali{font-family:'Noto Sans Devanagari',sans-serif}
-        .language-toggle{position:fixed;top:5rem;right:1.5rem;z-index:1000} /* Moved below View Notes */
+        .language-toggle{position:fixed;top:5rem;right:1.5rem;z-index:1000}
         .language-toggle button{background:var(--secondary);color:#fff;border:none;padding:0.75rem 1rem;border-radius:8px;cursor:pointer;font-weight:600;transition:.3s;font-size:0.9rem}
         .language-toggle button:hover{background:#0277bd}
-        .year-filter{text-align:center;margin:1rem 0} /* Style for year dropdown */
+        .year-filter{text-align:center;margin:1rem 0}
         .year-filter select{padding:0.75rem;border-radius:8px;border:1px solid #ddd;font-family:'Poppins',sans-serif;font-size:0.9rem;background:#e3f2fd}
         .year-filter select:focus{outline:none;border-color:var(--secondary)}
         .footer{text-align:center;padding:1rem;background:var(--card-bg);color:var(--text-light);font-size:0.8rem;margin-top:2rem;box-shadow:0 -2px 8px rgba(0,0,0,0.1)}
@@ -103,7 +109,7 @@
             .nav-buttons{flex-direction:column}
             .calendar-container{grid-template-columns:1fr;grid-template-rows:auto auto auto;gap:1rem}
             .mini-calendar,.main-calendar{max-width:100%}
-            .language-toggle{top:6rem} /* Adjust for mobile */
+            .language-toggle{top:6rem}
         }
     </style>
 </head>
@@ -175,8 +181,8 @@
         </div>
     </div>
     <div class="footer">Calendar Concept and Design by Santosh Phuyal</div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.20.2/xlsx.full.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.20.2/xlsx.full.min.js"></script>
+    <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2">
         // Calendar data
         const calendarData = {
@@ -240,7 +246,7 @@
 
         // Initialize
         function init() {
-            findTodayBSDate(); // Set currentYear and currentMonth to today
+            findTodayBSDate();
             renderYearFilter();
             renderMonthTabs();
             renderCalendar();
@@ -285,7 +291,7 @@
         // Change year
         function changeYear() {
             currentYear = parseInt(document.getElementById('yearFilter').value);
-            currentMonth = 0; // Reset to first month of selected year
+            currentMonth = 0;
             renderMonthTabs();
             renderCalendar();
             renderMiniCalendars();
@@ -341,7 +347,7 @@
                 dayDiv.className = 'calendar-day';
                 const dateKey = `${currentYear}-${(currentMonth+1).toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
                 const gregDate = new Date(gregStart.getTime() + (day-1)*86400000).toISOString().split('T')[0];
-                if (dateKey === todayBS) dayDiv.classList.add('today'); // Highlight today
+                if (dateKey === todayBS) dayDiv.classList.add('today');
                 dayDiv.innerHTML = `
                     <div class="bs-date">${day}</div>
                     <div class="greg-date">${gregDate}</div>
@@ -421,7 +427,7 @@
                 dayDiv.className = 'calendar-day';
                 const dateKey = `${year}-${(month+1).toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
                 const gregDate = new Date(gregStart.getTime() + (day-1)*86400000).toISOString().split('T')[0];
-                if (dateKey === todayBS) dayDiv.classList.add('today'); // Highlight today
+                if (dateKey === todayBS) dayDiv.classList.add('today');
                 dayDiv.innerHTML = `
                     <div class="bs-date">${day}</div>
                     <div class="greg-date">${gregDate}</div>
