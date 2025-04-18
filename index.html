@@ -62,8 +62,13 @@
         .note-form-container h3{margin:0 0 1rem;font-size:1.1rem;color:var(--primary)}
         .note-form-container select,.note-form-container input,.note-form-container textarea{width:100%;margin-bottom:1rem;padding:0.75rem;border:1px solid #ddd;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.9rem}
         .note-form-container select.nepali{font-family:'Noto Sans Devanagari',sans-serif}
+        .note-form-container .form-buttons{display:flex;gap:0.75rem;justify-content:flex-end}
         .note-form-container button{background:var(--secondary);color:#fff;border:none;padding:0.75rem 1.5rem;border-radius:8px;cursor:pointer;font-weight:600;transition:.3s}
         .note-form-container button:hover{background:#0277bd}
+        .note-form-container #closeEntry{background:#757575}
+        .note-form-container #closeEntry:hover{background:#616161}
+        .note-form-container #editEntry{background:#4caf50}
+        .note-form-container #editEntry:hover{background:#388e3c}
         .note-form-container .nepali{font-family:'Noto Sans Devanagari',sans-serif}
         .notes-modal,.report-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:2000}
         .notes-modal-content,.report-modal-content{background:var(--card-bg);margin:5% auto;padding:1.5rem;width:90%;max-width:800px;border-radius:12px;position:relative}
@@ -85,23 +90,20 @@
         .edit-note{color:var(--secondary)}.edit-note:hover{color:#0277bd}
         .delete-note{color:var(--primary)}.delete-note:hover{color:#b71c1c}
         .action-buttons{display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:space-between}
-        .action-buttons button{border:none;padding:0.75rem 1.5rem;border-radius:8px;cursor:pointer;font-weight:600}
-        .notes-btn{background:#0288d1;color:#fff}
-        .notes-btn:hover{background:#0277bd}
-        .finance-btn{background:#4caf50;color:#fff}
-        .finance-btn:hover{background:#388e3c}
-        .import-btn{background:#fbc02d;color:#000}
-        .import-btn:hover{background:#f9a825}
-        .export-btn{background:#ab47bc;color:#fff}
-        .export-btn:hover{background:#8e24aa}
-        .control-buttons{position:fixed;top:1.5rem;right:1rem;display:flex;gap:0.5rem;z-index:1000}
-        .control-buttons button{font-size:0.9rem}
-        .language-toggle{position:fixed;top:5rem;right:1rem;z-index:1000}
-        .language-toggle button{background:var(--secondary);color:#fff;border:none;padding:0.75rem 1rem;border-radius:8px;cursor:pointer;font-weight:600;transition:.3s;font-size:0.9rem}
-        .language-toggle button:hover{background:#0277bd}
-        .year-filter{text-align:center;margin:1rem 0}
+        .year-filter{text-align:center;margin:1rem 0;display:flex;align-items:center;justify-content:center;gap:0.5rem}
         .year-filter select{padding:0.75rem;border-radius:8px;border:1px solid #ddd;font-family:'Poppins',sans-serif;font-size:0.9rem;background:#e3f2fd}
         .year-filter select:focus{outline:none;border-color:var(--secondary)}
+        .year-filter button{background:var(--secondary);color:#fff;border:none;padding:0.75rem 1rem;border-radius:8px;cursor:pointer;font-family:'Poppins',sans-serif;font-size:0.9rem;transition:.3s}
+        .year-filter button:hover{background:#0277bd}
+        .year-filter .notes-btn{background:#0288d1}
+        .year-filter .notes-btn:hover{background:#0277bd}
+        .year-filter .finance-btn{background:#4caf50}
+        .year-filter .finance-btn:hover{background:#388e3c}
+        .year-filter button.nepali{font-family:'Noto Sans Devanagari',sans-serif}
+        .today-date-row{text-align:center;margin:0.5rem 0;font-size:1rem;color:var(--text);display:flex;justify-content:center;gap:2rem}
+        .blink{animation:blink 1s infinite}
+        @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+        .today-date-row .nepali{font-family:'Noto Sans Devanagari',sans-serif}
         .footer{text-align:center;padding:1rem;background:var(--card-bg);color:var(--text-light);font-size:0.8rem;margin-top:2rem;box-shadow:0 -2px 8px rgba(0,0,0,0.1)}
         .report-table{width:100%;border-collapse:collapse;margin-bottom:1rem}
         .report-table th,.report-table td{border:1px solid #ddd;padding:0.5rem;text-align:left;font-size:0.9rem}
@@ -113,9 +115,10 @@
             .nav-buttons{flex-direction:column}
             .calendar-container{grid-template-columns:1fr;grid-template-rows:auto auto auto;gap:1rem}
             .mini-calendar,.main-calendar{max-width:100%}
-            .language-toggle{top:6rem}
-            .control-buttons{right:0.5rem;top:0.5rem;flex-direction:column}
             .notes-modal-content,.report-modal-content{margin:10% auto;width:95%}
+            .year-filter{flex-direction:column}
+            .today-date-row{flex-direction:column;gap:0.5rem}
+            .note-form-container .form-buttons{flex-direction:column}
         }
     </style>
 </head>
@@ -135,14 +138,15 @@
             <option value="2082" selected>2082 BS</option>
             <option value="2083">2083 BS</option>
         </select>
+        <button id="todayButton" data-en="Today" data-ne="आज">Today</button>
+        <button id="viewNotes" class="notes-btn" data-en="View Notes" data-ne="नोटहरू हेर्नुहोस्">View Notes</button>
+        <button id="viewFinance" class="finance-btn" data-en="View Finances" data-ne="वित्त हेर्नुहोस्">View Finances</button>
+    </div>
+    <div class="today-date-row">
+        <span id="todayNepaliDate" class="blink"></span>
+        <span id="todayEnglishDate" class="blink"></span>
     </div>
     <div class="month-tabs" id="monthTabs"></div>
-    <div class="control-buttons">
-        <button class="notes-btn" id="viewNotes" data-en="View Notes" data-ne="नोटहरू हेर्नुहोस्">View Notes</button>
-        <button class="finance-btn" id="viewFinance" data-en="View Finances" data-ne="वित्त हेर्नुहोस्">View Finances</button>
-        <button class="import-btn" id="importData" data-en="Import Data" data-ne="डाटा आयात गर्नुहोस्">Import Data</button>
-        <button class="export-btn" id="exportData" data-en="Export Data" data-ne="डाटा निर्यात गर्नुहोस्">Export Data</button>
-    </div>
     <div class="language-toggle">
         <button id="languageToggle" data-en="Toggle Language (EN/NE)" data-ne="भाषा टगल गर्नुहोस् (EN/NE)">Toggle Language (EN/NE)</button>
     </div>
@@ -188,7 +192,11 @@
             <option value="Freelance" data-en="Freelance" data-ne="फ्रीलान्स">Freelance</option>
             <option value="Other" data-en="Other" data-ne="अन्य">Other</option>
         </select>
-        <button id="saveNote" data-en="Save Entry" data-ne="प्रवेश बचत गर्नुहोस्">Save Entry</button>
+        <div class="form-buttons">
+            <button id="saveNote" data-en="Save Entry" data-ne="प्रवेश बचत गर्नुहोस्">Save Entry</button>
+            <button id="editEntry" data-en="Edit Entry" data-ne="प्रवेश सम्पादन गर्नुहोस्">Edit Entry</button>
+            <button id="closeEntry" data-en="Close Entry" data-ne="प्रवेश बन्द गर्नुहोस्">Close Entry</button>
+        </div>
     </div>
     <div class="notes-modal" id="notesModal">
         <div class="notes-modal-content">
@@ -218,7 +226,6 @@
         </div>
     </div>
     <div class="footer">Calendar Concept and Design by Santosh Phuyal</div>
-    <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.20.2/xlsx.full.min.js"></script>
     <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2">
         // Calendar data
@@ -236,8 +243,8 @@
         // State
         let currentYear = 2082, currentMonth = 0, language = localStorage.getItem('language') || 'en';
         let entries = JSON.parse(localStorage.getItem('entries')) || [];
-        const todayGregorian = new Date('2025-04-17');
-        let todayBS = '2082-01-05';
+        const todayGregorian = new Date();
+        let todayBS = '';
 
         // Simulated data for testing
         function initializeTestData() {
@@ -253,6 +260,7 @@
 
         // Find today's BS date
         function findTodayBSDate() {
+            todayBS = '';
             for (const year in calendarData) {
                 calendarData[year].forEach((month, monthIndex) => {
                     const gregStart = new Date(month.gregStart);
@@ -265,6 +273,11 @@
                         }
                     }
                 });
+            }
+            if (!todayBS) {
+                todayBS = '2082-01-01'; // Fallback date if current date not found
+                currentYear = 2082;
+                currentMonth = 0;
             }
         }
 
@@ -304,6 +317,7 @@
             renderMonthlySummary();
             updateMonthFilter();
             updateLanguage();
+            renderTodayDates();
             bindEvents();
         }
 
@@ -314,9 +328,9 @@
             document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
             document.getElementById('viewNotes').addEventListener('click', showNotes);
             document.getElementById('viewFinance').addEventListener('click', showReports);
-            document.getElementById('importData').addEventListener('click', () => document.getElementById('fileInput').click());
-            document.getElementById('exportData').addEventListener('click', exportEntriesToExcel);
             document.getElementById('saveNote').addEventListener('click', saveEntry);
+            document.getElementById('editEntry').addEventListener('click', editEntry);
+            document.getElementById('closeEntry').addEventListener('click', closeEntryForm);
             document.getElementById('closeModal').addEventListener('click', closeNotesModal);
             document.getElementById('monthFilter').addEventListener('change', filterEntries);
             document.getElementById('clearNotes').addEventListener('click', clearAllEntries);
@@ -326,14 +340,7 @@
             document.getElementById('monthlyReportTab').addEventListener('click', () => renderReport('monthly'));
             document.getElementById('yearlyReportTab').addEventListener('click', () => renderReport('yearly'));
             document.getElementById('entryType').addEventListener('change', toggleEntryFormFields);
-            // Hidden file input for import
-            const fileInput = document.createElement('input');
-            fileInput.type = 'file';
-            fileInput.id = 'fileInput';
-            fileInput.accept = '.xlsx';
-            fileInput.style.display = 'none';
-            fileInput.addEventListener('change', importEntries);
-            document.body.appendChild(fileInput);
+            document.getElementById('todayButton').addEventListener('click', goToToday);
         }
 
         // Render year filter
@@ -358,6 +365,37 @@
             renderMiniCalendars();
             renderMonthlySummary();
             updateMonthFilter();
+        }
+
+        // Navigate to today
+        function goToToday() {
+            const [year, month] = todayBS.split('-').map(Number);
+            currentYear = year;
+            currentMonth = month - 1;
+            document.getElementById('yearFilter').value = currentYear;
+            renderMonthTabs();
+            renderCalendar();
+            renderMiniCalendars();
+            renderMonthlySummary();
+        }
+
+        // Render today’s Nepali and English dates
+        function renderTodayDates() {
+            const [year, month, day] = todayBS.split('-').map(Number);
+            const monthData = calendarData[year][month - 1];
+            const gregStart = new Date(monthData.gregStart);
+            const gregDate = new Date(gregStart.getTime() + (day - 1) * 86400000).toISOString().split('T')[0];
+            
+            const nepaliDate = `${language === 'en' ? monthData.name : translations.months[monthData.name]} ${day}, ${year} BS`;
+            const englishDate = gregDate;
+            
+            const nepaliElement = document.getElementById('todayNepaliDate');
+            const englishElement = document.getElementById('todayEnglishDate');
+            
+            nepaliElement.textContent = nepaliDate;
+            englishElement.textContent = englishDate;
+            
+            nepaliElement.classList.toggle('nepali', language === 'ne');
         }
 
         // Render month tabs
@@ -595,6 +633,7 @@
             renderMiniCalendars();
             renderMonthlySummary();
             updateMonthFilter();
+            renderTodayDates();
             renderReport(document.querySelector('.report-tab.active')?.id.replace('ReportTab', '') || 'weekly');
         }
 
@@ -607,13 +646,37 @@
         }
 
         // Open entry form
-        function openEntryForm(dateKey, day, monthName, type) {
+        function openEntryForm(dateKey, day, monthName, type, entryIndex = null) {
             const form = document.getElementById('noteForm');
             document.getElementById('selectedDate').textContent = `${language === 'en' ? monthName : translations.months[monthName]} ${day}, ${currentYear} BS`;
             form.dataset.date = dateKey;
-            document.getElementById('entryType').value = type === 'note' ? 'note' : 'income';
+            form.dataset.entryIndex = entryIndex !== null ? entryIndex : '';
+            document.getElementById('entryType').value = type;
             toggleEntryFormFields();
+            if (entryIndex !== null) {
+                const entry = entries[entryIndex];
+                document.getElementById('noteTitle').value = entry.type === 'note' ? entry.title : entry.amount;
+                document.getElementById('noteTime').value = entry.time || '';
+                document.getElementById('noteDescription').value = entry.description || '';
+                document.getElementById('entryCategory').value = entry.category || '';
+            } else {
+                document.getElementById('noteTitle').value = '';
+                document.getElementById('noteTime').value = '';
+                document.getElementById('noteDescription').value = '';
+                document.getElementById('entryCategory').value = '';
+            }
             form.classList.add('active');
+        }
+
+        // Close entry form
+        function closeEntryForm() {
+            const form = document.getElementById('noteForm');
+            form.classList.remove('active');
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteTime').value = '';
+            document.getElementById('noteDescription').value = '';
+            document.getElementById('entryCategory').value = '';
+            form.dataset.entryIndex = '';
         }
 
         // Toggle entry form fields
@@ -655,14 +718,40 @@
             }
             entries.push(entry);
             localStorage.setItem('entries', JSON.stringify(entries));
-            form.classList.remove('active');
-            document.getElementById('noteTitle').value = '';
-            document.getElementById('noteTime').value = '';
-            document.getElementById('noteDescription').value = '';
-            document.getElementById('entryCategory').value = '';
+            closeEntryForm();
             renderCalendar();
             renderMiniCalendars();
             renderMonthlySummary();
+        }
+
+        // Edit entry
+        function editEntry() {
+            const form = document.getElementById('noteForm');
+            const entryIndex = form.dataset.entryIndex;
+            if (!entryIndex) return alert(language === 'en' ? 'No entry selected for editing.' : 'सम्पादनको लागि कुनै प्रवेश चयन गरिएको छैन।');
+            const type = document.getElementById('entryType').value;
+            const entry = {
+                type,
+                date: form.dataset.date,
+                time: document.getElementById('noteTime').value,
+                description: document.getElementById('noteDescription').value
+            };
+            if (type === 'note') {
+                entry.title = document.getElementById('noteTitle').value;
+                if (!entry.title) return alert(language === 'en' ? 'Note title is required.' : 'नोट शीर्षक आवश्यक छ।');
+            } else {
+                entry.amount = parseFloat(document.getElementById('noteTitle').value);
+                entry.category = document.getElementById('entryCategory').value;
+                if (!entry.amount || isNaN(entry.amount)) return alert(language === 'en' ? 'Valid amount is required.' : 'मान्य रकम आवश्यक छ।');
+                if (!entry.category) return alert(language === 'en' ? 'Category is required.' : 'श्रेणी आवश्यक छ।');
+            }
+            entries[parseInt(entryIndex)] = entry;
+            localStorage.setItem('entries', JSON.stringify(entries));
+            closeEntryForm();
+            renderCalendar();
+            renderMiniCalendars();
+            renderMonthlySummary();
+            filterEntries();
         }
 
         // Show notes
@@ -709,25 +798,13 @@
                         <span class="delete-note" data-index="${i}">Delete</span>
                     </div>
                 `;
-                item.querySelector('.edit-note').addEventListener('click', () => editEntry(i));
+                item.querySelector('.edit-note').addEventListener('click', () => {
+                    const monthData = calendarData[entry.date.split('-')[0]][parseInt(entry.date.split('-')[1])-1];
+                    openEntryForm(entry.date, parseInt(entry.date.split('-')[2]), monthData.name, entry.type, i);
+                });
                 item.querySelector('.delete-note').addEventListener('click', () => deleteEntry(i));
                 list.appendChild(item);
             });
-        }
-
-        // Edit entry
-        function editEntry(index) {
-            const entry = entries[index];
-            const monthData = calendarData[entry.date.split('-')[0]][parseInt(entry.date.split('-')[1])-1];
-            openEntryForm(entry.date, parseInt(entry.date.split('-')[2]), monthData.name, entry.type);
-            document.getElementById('entryType').value = entry.type;
-            toggleEntryFormFields();
-            document.getElementById('noteTitle').value = entry.type === 'note' ? entry.title : entry.amount;
-            document.getElementById('noteTime').value = entry.time;
-            document.getElementById('noteDescription').value = entry.description;
-            document.getElementById('entryCategory').value = entry.category || '';
-            entries.splice(index, 1);
-            localStorage.setItem('entries', JSON.stringify(entries));
         }
 
         // Delete entry
@@ -750,54 +827,6 @@
                 renderMiniCalendars();
                 renderMonthlySummary();
             }
-        }
-
-        // Export entries to Excel
-        function exportEntriesToExcel() {
-            if (!window.XLSX) {
-                alert(language === 'en' ? 'Excel export library not loaded. Please try again later.' : 'एक्सेल निर्यात लाइब्रेरी लोड भएन। कृपया पछि पुन: प्रयास गर्नुहोस्।');
-                return;
-            }
-            const ws = XLSX.utils.json_to_sheet(entries, { header: ['type','date','title','amount','time','description','category'] });
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Entries');
-            XLSX.writeFile(wb, 'Entries.xlsx');
-        }
-
-        // Import entries
-        function importEntries(e) {
-            const file = e.target.files[0];
-            if (!file) {
-                alert(language === 'en' ? 'No file selected.' : 'कुनै फाइल चयन गरिएको छैन।');
-                return;
-            }
-            if (!window.XLSX) {
-                alert(language === 'en' ? 'Excel import library not loaded. Please try again later.' : 'एक्सेल आयात लाइब्रेरी लोड भएन। कृपया पछि पुन: प्रयास गर्नुहोस्।');
-                return;
-            }
-            const reader = new FileReader();
-            reader.onload = evt => {
-                try {
-                    const data = new Uint8Array(evt.target.result);
-                    const wb = XLSX.read(data, { type: 'array', raw: true });
-                    const ws = wb.Sheets[wb.SheetNames[0]];
-                    const json = XLSX.utils.sheet_to_json(ws);
-                    entries = json.filter(row => row.type && row.date && (row.type === 'note' ? row.title : (row.amount && row.category)));
-                    localStorage.setItem('entries', JSON.stringify(entries));
-                    filterEntries();
-                    renderCalendar();
-                    renderMiniCalendars();
-                    renderMonthlySummary();
-                    alert(language === 'en' ? 'Entries imported successfully.' : 'प्रवेशहरू सफलतापूर्वक आयात गरियो।');
-                } catch (err) {
-                    alert(language === 'en' ? 'Error importing file. Please ensure it is a valid Excel file.' : 'फाइल आयात गर्दा त्रुटि। कृपया यो मान्य एक्सेल फाइल हो भनेर सुनिश्चित गर्नुहोस्।');
-                }
-            };
-            reader.onerror = () => {
-                alert(language === 'en' ? 'Error reading file.' : 'फाइल पढ्दा त्रुटि।');
-            };
-            reader.readAsArrayBuffer(file);
-            e.target.value = ''; // Reset file input
         }
 
         // Show reports
@@ -895,5 +924,5 @@
         // Initialize application
         init();
     </script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'931ff3716ab46789',t:'MTc0NDkzNTE1MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
