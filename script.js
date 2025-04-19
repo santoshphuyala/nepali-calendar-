@@ -1,10 +1,58 @@
-// Include external libraries for Excel, PDF, and Chart.js operations
 const sheetJsUrl = 'https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js';
 const jsPdfUrl = 'https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js';
 const jsPdfAutoTableUrl = 'https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js';
 const chartJsUrl = 'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js';
 
+const fs = require('fs').promises;
+const path = require('path');
+
+// Define a storage abstraction
+const storage = {
+    storageFile: path.join(__dirname, 'storage.json'),
+
+    async initStorageFile() {
+        try {
+            await fs.access(this.storageFile);
+        } catch (error) {
+            await fs.writeFile(this.storageFile, JSON.stringify({}));
+        }
+    },
+
+    async getItem(key) {
+        if (typeof window !== 'undefined' && window.localStorage) {
+            return localStorage.getItem(key);
+        } else {
+            try {
+                await this.initStorageFile();
+                const data = await fs.readFile(this.storageFile, 'utf8');
+                const storageData = JSON.parse(data || '{}');
+                return storageData[key] || null;
+            } catch (error) {
+                console.error(`Error reading storage for key ${key}:`, error);
+                return null;
+            }
+        }
+    },
+
+    async setItem(key, value) {
+        if (typeof window !== 'undefined' && window.localStorage) {
+            localStorage.setItem(key, value);
+        } else {
+            try {
+                await this.initStorageFile();
+                const data = await fs.readFile(this.storageFile, 'utf8');
+                const storageData = JSON.parse(data || '{}');
+                storageData[key] = value;
+                await fs.writeFile(this.storageFile, JSON.stringify(storageData));
+            } catch (error) {
+                console.error(`Error writing storage for key ${key}:`, error);
+            }
+        }
+    }
+};
+
 function loadExternalScripts() {
+    console.log("Loading external scripts...");
     const scripts = [
         { src: sheetJsUrl, loaded: false },
         { src: jsPdfUrl, loaded: false },
@@ -12,22 +60,40 @@ function loadExternalScripts() {
         { src: chartJsUrl, loaded: false }
     ];
 
+    let anyScriptLoaded = false;
+
     scripts.forEach(script => {
         const scriptElement = document.createElement('script');
         scriptElement.src = script.src;
         scriptElement.async = true;
         scriptElement.onload = () => {
             script.loaded = true;
-            if (scripts.every(s => s.loaded)) {
+            anyScriptLoaded = true;
+            console.log(`${script.src} loaded`);
+            if (scripts.every(s => s.loaded || s.failed)) {
+                console.log("All scripts processed, initializing...");
                 init();
             }
         };
-        scriptElement.onerror = () => console.error(`Failed to load ${script.src}`);
+        scriptElement.onerror = () => {
+            script.failed = true;
+            console.error(`Failed to load ${script.src}, proceeding anyway...`);
+            if (scripts.every(s => s.loaded || s.failed)) {
+                console.log("All scripts processed, initializing...");
+                init();
+            }
+        };
         document.head.appendChild(scriptElement);
     });
+
+    setTimeout(() => {
+        if (!anyScriptLoaded) {
+            console.warn("Script loading timeout, proceeding with initialization...");
+            init();
+        }
+    }, 5000);
 }
 
-// Calendar data
 const calendarData = {
     2082: [
         { name: "Baishakh", days: 31, gregStart: "2025-04-14" },
@@ -45,7 +111,6 @@ const calendarData = {
     ]
 };
 
-// Festival data
 const festivals = {
     "2082-01-06": { name: "Saturday (Weekly Holiday)", class: "saturday" },
     "2082-01-13": { name: "Saturday (Weekly Holiday)", class: "saturday" },
@@ -144,22 +209,187 @@ const festivals = {
     "2082-09-27": { name: "Prithvi Jayanti", class: "birth" }
 };
 
-// State
-let currentYear = 2082;
-let currentMonth = 0;
-let language = localStorage.getItem('language') || 'en';
-let entries = JSON.parse(localStorage.getItem('entries')) || [];
-let categories = JSON.parse(localStorage.getItem('categories')) || [
-    "Food", "Salary", "Rent", "Utilities", "Transport", "Entertainment", "Freelance", "Other"
-];
-let customTranslations = JSON.parse(localStorage.getItem('customTranslations')) || {};
-const todayGregorian = new Date();
-let todayBS = '';
-let selectedDate = '';
-let observers = [];
-let encryptionKey = null;
+let state = {
+    currentYear: 2082,
+    currentMonth: 0,
+    todayGregorian: new Date(),
+    todayBS: '',
+    selectedDate: '',
+    encryptionKey: null,
+    entries: [],
+    categories: ["Food", "Salary", "Rent", "Utilities", "Transport", "Entertainment", "Freelance", "Other"],
+    customTranslations: {},
+    language: 'en'
+};
 
-// Encryption Functions using Web Crypto API
+async function init() {
+    try {
+        console.log("Initializing application...");
+
+        // Initialize storage-dependent state properties
+        console.log("Fetching language from storage...");
+        state.language = (await storage.getItem('language')) || 'en';
+        console.log("Language set to:", state.language);
+
+        console.log("Fetching entries from storage...");
+        const entriesData = (await storage.getItem('entries')) || '[]';
+        state.entries = JSON.parse(entriesData);
+        console.log("Entries loaded:", state.entries.length);
+
+        console.log("Fetching categories from storage...");
+        state.categories = JSON.parse((await storage.getItem('categories')) || '["Food", "Salary", "Rent", "Utilities", "Transport", "Entertainment", "Freelance", "Other"]');
+        console.log("Categories loaded:", state.categories);
+
+        console.log("Fetching custom translations from storage...");
+        state.customTranslations = JSON.parse((await storage.getItem('customTranslations')) || '{}');
+        console.log("Custom translations loaded:", state.customTranslations);
+
+        // Set today's BS date
+        console.log("Converting today's date to BS...");
+        state.todayBS = gregorianToBS(state.todayGregorian);
+        if (!state.todayBS) {
+            console.error("Failed to set todayBS, defaulting to Baishakh 1, 2082");
+            state.todayBS = "2082-01-01";
+        }
+        console.log("Today BS Date:", state.todayBS);
+
+        // Set the current month based on today's BS date if applicable
+        console.log("Setting current month...");
+        const [year, month] = state.todayBS.split('-').map(Number);
+        if (year === state.currentYear) {
+            state.currentMonth = month - 1;
+        }
+        console.log("Current month set to:", state.currentMonth);
+
+        // Populate year filter
+        console.log("Populating year filter...");
+        const yearFilter = document.getElementById('yearFilter');
+        if (yearFilter) {
+            Object.keys(calendarData).forEach(year => {
+                const option = document.createElement('option');
+                option.value = year;
+                option.textContent = year;
+                if (year == state.currentYear) option.selected = true;
+                yearFilter.appendChild(option);
+            });
+            yearFilter.addEventListener('change', () => {
+                state.currentYear = parseInt(yearFilter.value);
+                state.currentMonth = 0;
+                renderMonthTabs();
+                renderCalendar();
+            });
+        } else {
+            console.error("yearFilter element not found");
+        }
+
+        // Set up event listeners
+        console.log("Setting up event listeners...");
+        document.getElementById('prevMonth')?.addEventListener('click', () => {
+            state.currentMonth--;
+            if (state.currentMonth < 0) {
+                state.currentMonth = 11;
+                state.currentYear--;
+                yearFilter.value = state.currentYear;
+            }
+            renderMonthTabs();
+            renderCalendar();
+        });
+
+        document.getElementById('nextMonth')?.addEventListener('click', () => {
+            state.currentMonth++;
+            if (state.currentMonth > 11) {
+                state.currentMonth = 0;
+                state.currentYear++;
+                yearFilter.value = state.currentYear;
+            }
+            renderMonthTabs();
+            renderCalendar();
+        });
+
+        document.getElementById('todayButton')?.addEventListener('click', () => {
+            const [year, month] = state.todayBS.split('-').map(Number);
+            state.currentYear = year;
+            state.currentMonth = month - 1;
+            yearFilter.value = state.currentYear;
+            renderMonthTabs();
+            renderCalendar();
+        });
+
+        document.getElementById('languageToggle')?.addEventListener('click', async () => {
+            state.language = state.language === 'en' ? 'ne' : 'en';
+            await storage.setItem('language', state.language);
+            updateLanguage();
+        });
+
+        document.getElementById('themeToggle')?.addEventListener('click', () => {
+            document.body.classList.toggle('dark-theme');
+        });
+
+        document.getElementById('addBirthdayReminder')?.addEventListener('click', () => {
+            state.selectedDate = state.todayBS;
+            openEntryForm();
+        });
+
+        document.getElementById('saveNote')?.addEventListener('click', saveEntry);
+        document.getElementById('closeEntry')?.addEventListener('click', () => {
+            document.getElementById('noteForm').style.display = 'none';
+        });
+
+        document.getElementById('viewNotes')?.addEventListener('click', openNotesModal);
+        document.getElementById('closeModal')?.addEventListener('click', () => {
+            document.getElementById('notesModal').style.display = 'none';
+        });
+
+        document.getElementById('viewFinance')?.addEventListener('click', openReportModal);
+        document.getElementById('closeReportModal')?.addEventListener('click', () => {
+            document.getElementById('reportModal').style.display = 'none';
+        });
+
+        document.getElementById('backupData')?.addEventListener('click', backupData);
+        document.getElementById('restoreData')?.addEventListener('click', () => {
+            document.getElementById('importExcelNotes').click();
+        });
+
+        document.getElementById('exportExcelMonth')?.addEventListener('click', exportMonthToExcel);
+        document.getElementById('exportPDFMonth')?.addEventListener('click', exportMonthToPDF);
+
+        // Set up report tabs
+        const reportTabs = document.querySelectorAll('.report-tab');
+        reportTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                reportTabs.forEach(t => {
+                    t.classList.remove('active');
+                    t.setAttribute('aria-selected', 'false');
+                    t.setAttribute('tabindex', '-1');
+                });
+                tab.classList.add('active');
+                tab.setAttribute('aria-selected', 'true');
+                tab.setAttribute('tabindex', '0');
+                renderReports(tab.id.replace('Tab', ''));
+            });
+        });
+
+        // Update today section
+        console.log("Updating today's date section...");
+        const todayNepaliDate = document.getElementById('todayNepaliDate');
+        const todayEnglishDate = document.getElementById('todayEnglishDate');
+        if (todayNepaliDate) todayNepaliDate.textContent = state.todayBS;
+        else console.error("todayNepaliDate element not found");
+        if (todayEnglishDate) todayEnglishDate.textContent = state.todayGregorian.toISOString().split('T')[0];
+        else console.error("todayEnglishDate element not found");
+
+        // Force initial render
+        console.log("Forcing initial render...");
+        renderMonthTabs();
+        renderCalendar();
+        updateLanguage();
+        console.log("Initialization complete");
+    } catch (error) {
+        console.error("Initialization failed:", error);
+        showAlert("Failed to initialize the application. Please refresh the page.", "error");
+    }
+}
+
 async function generateEncryptionKey() {
     try {
         const key = await crypto.subtle.generateKey(
@@ -169,7 +399,7 @@ async function generateEncryptionKey() {
         );
         const exportedKey = await crypto.subtle.exportKey("raw", key);
         const keyString = btoa(String.fromCharCode(...new Uint8Array(exportedKey)));
-        localStorage.setItem('encryptionKey', keyString);
+        await storage.setItem('encryptionKey', keyString);
         return key;
     } catch (error) {
         console.error("Error generating encryption key:", error);
@@ -179,7 +409,7 @@ async function generateEncryptionKey() {
 
 async function importEncryptionKey() {
     try {
-        const keyString = localStorage.getItem('encryptionKey');
+        const keyString = await storage.getItem('encryptionKey');
         if (!keyString) return null;
         const keyData = Uint8Array.from(atob(keyString), c => c.charCodeAt(0));
         return await crypto.subtle.importKey(
@@ -197,14 +427,14 @@ async function importEncryptionKey() {
 
 async function encryptData(data) {
     try {
-        if (!encryptionKey) {
-            encryptionKey = await importEncryptionKey() || await generateEncryptionKey();
+        if (!state.encryptionKey) {
+            state.encryptionKey = await importEncryptionKey() || await generateEncryptionKey();
         }
         const iv = crypto.getRandomValues(new Uint8Array(12));
         const encodedData = new TextEncoder().encode(data);
         const encrypted = await crypto.subtle.encrypt(
             { name: "AES-GCM", iv: iv },
-            encryptionKey,
+            state.encryptionKey,
             encodedData
         );
         const encryptedArray = new Uint8Array(encrypted);
@@ -220,15 +450,15 @@ async function encryptData(data) {
 
 async function decryptData(encryptedObj) {
     try {
-        if (!encryptionKey) {
-            encryptionKey = await importEncryptionKey();
-            if (!encryptionKey) throw new Error("Encryption key not found.");
+        if (!state.encryptionKey) {
+            state.encryptionKey = await importEncryptionKey();
+            if (!state.encryptionKey) throw new Error("Encryption key not found.");
         }
         const iv = Uint8Array.from(atob(encryptedObj.iv), c => c.charCodeAt(0));
         const data = Uint8Array.from(atob(encryptedObj.data), c => c.charCodeAt(0));
         const decrypted = await crypto.subtle.decrypt(
             { name: "AES-GCM", iv: iv },
-            encryptionKey,
+            state.encryptionKey,
             data
         );
         return new TextDecoder().decode(decrypted);
@@ -238,18 +468,6 @@ async function decryptData(encryptedObj) {
     }
 }
 
-async function resetEncryptionKey() {
-    if (confirm("Resetting the encryption key will clear all encrypted data. Are you sure?")) {
-        localStorage.removeItem('encryptionKey');
-        entries = [];
-        localStorage.setItem('entries', JSON.stringify(entries));
-        encryptionKey = null;
-        notifyObservers();
-        showAlert("Encryption key reset successfully. All encrypted data has been cleared.", "success");
-    }
-}
-
-// Date conversion utility
 function gregorianToBS(gregorianDate) {
     try {
         const gregYear = gregorianDate.getFullYear();
@@ -298,11 +516,10 @@ function bsToGregorian(bsDate) {
     }
 }
 
-// Translation utility
 function translate(text, lang) {
     try {
         if (lang === 'ne') {
-            return customTranslations[text] || document.querySelector(`[data-en="${text}"]`)?.getAttribute('data-ne') || text;
+            return state.customTranslations[text] || document.querySelector(`[data-en="${text}"]`)?.getAttribute('data-ne') || text;
         }
         return text;
     } catch (error) {
@@ -313,87 +530,86 @@ function translate(text, lang) {
 
 function updateLanguage() {
     try {
+        console.log("Updating language to:", state.language);
         document.querySelectorAll('[data-en]').forEach(elem => {
             const text = elem.getAttribute('data-en');
-            elem.textContent = translate(text, language);
+            elem.textContent = translate(text, state.language);
         });
-        document.querySelectorAll('.month-tab').forEach((tab, idx) => {
-            tab.textContent = language === 'ne' ? calendarData[currentYear][idx].name : translate(calendarData[currentYear][idx].name, 'en');
-            tab.classList.toggle('nepali', language === 'ne');
-        });
+        renderMonthTabs();
         renderCalendar();
     } catch (error) {
         console.error("Error updating language:", error);
     }
 }
 
-// Observer pattern for state changes
-function addObserver(observer) {
-    observers.push(observer);
-}
-
-function notifyObservers() {
-    observers.forEach(observer => observer());
-}
-
-// Weather fetch
-async function fetchWeather() {
+function showAlert(message, type) {
     try {
-        const response = await fetch('https://api.grok.com/weather?location=Kathmandu');
-        const data = await response.json();
-        const weatherInfo = document.getElementById('weatherInfo');
-        weatherInfo.innerHTML = `
-            <img src="${data.icon}" alt="Weather Icon">
-            <span>${data.temperature}°C, ${data.description}</span>
-        `;
+        const alert = document.getElementById('alertMessage');
+        if (!alert) throw new Error("Alert element not found");
+        alert.textContent = message;
+        alert.className = `alert ${type}`;
+        alert.style.display = 'block';
+        setTimeout(() => alert.style.display = 'none', 3000);
     } catch (error) {
-        console.error("Error fetching weather:", error);
-        document.getElementById('weatherInfo').innerHTML = "Unable to fetch weather.";
+        console.error("Error showing alert:", error);
     }
 }
 
-// Render functions
 function renderMonthTabs() {
     try {
+        console.log("Rendering month tabs...");
         const monthTabs = document.getElementById('monthTabs');
+        if (!monthTabs) {
+            console.error("monthTabs element not found in DOM");
+            throw new Error("monthTabs element not found");
+        }
         monthTabs.innerHTML = '';
-        calendarData[currentYear].forEach((month, idx) => {
+        const months = calendarData[state.currentYear];
+        if (!months) {
+            console.error("No months data for year", state.currentYear);
+            throw new Error("Months data not found");
+        }
+        months.forEach((month, idx) => {
             const tab = document.createElement('div');
-            tab.className = `month-tab ${language === 'ne' ? 'nepali' : ''} ${idx === currentMonth ? 'active' : ''}`;
-            tab.textContent = language === 'ne' ? month.name : translate(month.name, 'en');
+            tab.className = `month-tab ${state.language === 'ne' ? 'nepali' : ''} ${idx === state.currentMonth ? 'active' : ''}`;
+            tab.textContent = state.language === 'ne' ? month.name : translate(month.name, 'en');
             tab.setAttribute('role', 'tab');
-            tab.setAttribute('aria-selected', idx === currentMonth ? 'true' : 'false');
-            tab.setAttribute('tabindex', idx === currentMonth ? '0' : '-1');
+            tab.setAttribute('aria-selected', idx === state.currentMonth ? 'true' : 'false');
+            tab.setAttribute('tabindex', idx === state.currentMonth ? '0' : '-1');
             tab.addEventListener('click', () => {
-                currentMonth = idx;
-                document.querySelectorAll('.month-tab').forEach(t => {
-                    t.classList.remove('active');
-                    t.setAttribute('aria-selected', 'false');
-                    t.setAttribute('tabindex', '-1');
-                });
-                tab.classList.add('active');
-                tab.setAttribute('aria-selected', 'true');
-                tab.setAttribute('tabindex', '0');
+                console.log(`Switching to month ${idx}`);
+                state.currentMonth = idx;
+                renderMonthTabs();
                 renderCalendar();
             });
             monthTabs.appendChild(tab);
         });
+        console.log("Month tabs rendered successfully");
     } catch (error) {
         console.error("Error rendering month tabs:", error);
+        showAlert("Failed to render month tabs.", "error");
     }
 }
 
 async function renderCalendar() {
     try {
+        console.log("Rendering calendar...");
         const calendarGrid = document.getElementById('calendarGrid');
+        if (!calendarGrid) {
+            console.error("calendarGrid element not found in DOM");
+            throw new Error("calendarGrid element not found");
+        }
         calendarGrid.innerHTML = '';
-        const monthData = calendarData[currentYear][currentMonth];
+        const monthData = calendarData[state.currentYear][state.currentMonth];
+        if (!monthData) {
+            console.error("Month data not found for year", state.currentYear, "month", state.currentMonth);
+            throw new Error("Month data not found");
+        }
         const startDate = new Date(monthData.gregStart);
         const startDay = startDate.getDay();
         const daysInMonth = monthData.days;
 
-        // Add day headers
-        const daysOfWeek = language === 'ne' ? ['आइत', 'सोम', 'मङ्गल', 'बुध', 'बिही', 'शुक्र', 'शनि'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        const daysOfWeek = state.language === 'ne' ? ['आइत', 'सोम', 'मङ्गल', 'बुध', 'बिही', 'शुक्र', 'शनि'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
         daysOfWeek.forEach(day => {
             const dayHeader = document.createElement('div');
             dayHeader.className = 'calendar-day header';
@@ -401,17 +617,19 @@ async function renderCalendar() {
             calendarGrid.appendChild(dayHeader);
         });
 
-        // Add empty slots before the first day
         for (let i = 0; i < startDay; i++) {
             const emptyDay = document.createElement('div');
             emptyDay.className = 'calendar-day empty';
             calendarGrid.appendChild(emptyDay);
         }
 
-        // Add days
         for (let day = 1; day <= daysInMonth; day++) {
-            const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dateStr = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
             const gregDate = bsToGregorian(dateStr);
+            if (!gregDate) {
+                console.error("Failed to convert BS date to Gregorian:", dateStr);
+                continue;
+            }
             const dayDiv = document.createElement('div');
             dayDiv.className = 'calendar-day';
             dayDiv.setAttribute('tabindex', '0');
@@ -422,7 +640,7 @@ async function renderCalendar() {
                 dayDiv.classList.add(festivals[dateStr].class);
                 const festivalSpan = document.createElement('span');
                 festivalSpan.className = 'festival';
-                festivalSpan.textContent = language === 'ne' ? translate(festivals[dateStr].name, 'ne') : festivals[dateStr].name;
+                festivalSpan.textContent = state.language === 'ne' ? translate(festivals[dateStr].name, 'ne') : festivals[dateStr].name;
                 const tooltip = document.createElement('span');
                 tooltip.className = 'festival-tooltip';
                 tooltip.textContent = festivalSpan.textContent;
@@ -440,16 +658,17 @@ async function renderCalendar() {
             gregDateDiv.textContent = gregDate.toISOString().split('T')[0];
             dayDiv.appendChild(gregDateDiv);
 
-            // Check for entries
-            const dayEntries = entries.filter(e => e.date === dateStr);
+            const dayEntries = state.entries.filter(e => e.date === dateStr);
             for (const entry of dayEntries) {
-                let title = entry.title;
-                if (entry.encrypted) {
-                    try {
+                let title = "[Encrypted]";
+                try {
+                    if (entry.encrypted) {
                         title = await decryptData(entry.title);
-                    } catch (error) {
-                        title = "[Encrypted]";
+                    } else {
+                        title = entry.title;
                     }
+                } catch (error) {
+                    console.error("Failed to decrypt entry title for date", dateStr, ":", error);
                 }
                 const indicator = document.createElement('div');
                 indicator.className = `${entry.type}-indicator`;
@@ -470,75 +689,255 @@ async function renderCalendar() {
                 }
             }
 
-            if (dateStr === todayBS) {
+            if (dateStr === state.todayBS) {
                 dayDiv.classList.add('today');
             }
 
             dayDiv.addEventListener('click', () => {
-                selectedDate = dateStr;
+                console.log(`Opening entry form for date ${dateStr}`);
+                state.selectedDate = dateStr;
                 openEntryForm();
             });
-            dayDiv.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    selectedDate = dateStr;
-                    openEntryForm();
-                }
-            });
-
             calendarGrid.appendChild(dayDiv);
         }
 
-        document.getElementById('currentMonth').textContent = `${monthData.name} ${currentYear} BS`;
+        const currentMonthElement = document.getElementById('currentMonth');
+        if (currentMonthElement) {
+            currentMonthElement.textContent = `${monthData.name} ${state.currentYear} BS`;
+        } else {
+            console.error("currentMonth element not found in DOM");
+        }
         renderHolidays();
         renderSummary();
         renderReminders();
+        console.log("Calendar rendered successfully");
     } catch (error) {
         console.error("Error rendering calendar:", error);
+        showAlert("Failed to render calendar.", "error");
     }
 }
 
 function renderHolidays() {
     try {
+        console.log("Rendering holidays...");
         const holidayList = document.getElementById('holidayList');
+        if (!holidayList) throw new Error("holidayList element not found");
         holidayList.innerHTML = '';
-        const monthStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
-        Object.keys(festivals).forEach(date => {
-            if (date.startsWith(monthStr)) {
-                const li = document.createElement('li');
-                li.textContent = `${date}: ${language === 'ne' ? translate(festivals[date].name, 'ne') : festivals[date].name}`;
-                li.classList.add(language === 'ne' ? 'nepali' : '');
-                holidayList.appendChild(li);
-            }
-        });
+        const monthStr = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}`;
+        const holidays = Object.keys(festivals)
+            .filter(date => date.startsWith(monthStr))
+            .map(date => ({
+                date,
+                festival: festivals[date]
+            }));
+        
+        if (holidays.length === 0) {
+            const noHoliday = document.createElement('p');
+            noHoliday.textContent = state.language === 'ne' ? 'यो महिनामा कुनै चाडपर्व छैन।' : 'No holidays this month.';
+            holidayList.appendChild(noHoliday);
+        } else {
+            holidays.forEach(holiday => {
+                const holidayItem = document.createElement('div');
+                holidayItem.className = 'holiday-item';
+                const dateSpan = document.createElement('span');
+                dateSpan.className = 'holiday-date';
+                dateSpan.textContent = holiday.date;
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'holiday-name';
+                nameSpan.textContent = state.language === 'ne' ? translate(holiday.festival.name, 'ne') : holiday.festival.name;
+                holidayItem.appendChild(dateSpan);
+                holidayItem.appendChild(nameSpan);
+                holidayList.appendChild(holidayItem);
+            });
+        }
+        console.log("Holidays rendered successfully");
     } catch (error) {
         console.error("Error rendering holidays:", error);
+        showAlert("Failed to render holidays.", "error");
     }
 }
 
 function renderSummary() {
     try {
-        const summary = document.getElementById('monthlySummary');
-        const monthEntries = entries.filter(e => e.date.startsWith(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`));
-        const income = monthEntries.filter(e => e.type === 'income').reduce((sum, e) => sum + (parseFloat(e.title.data || e.title) || 0), 0);
-        const expense = monthEntries.filter(e => e.type === 'expense').reduce((sum, e) => sum + (parseFloat(e.title.data || e.title) || 0), 0);
-        summary.textContent = `Income: ${income.toFixed(2)}, Expense: ${expense.toFixed(2)}, Balance: ${(income - expense).toFixed(2)}`;
+        console.log("Rendering summary...");
+        const summaryList = document.getElementById('summaryList');
+        if (!summaryList) throw new Error("summaryList element not found");
+        summaryList.innerHTML = '';
+
+        const monthStr = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}`;
+        const monthEntries = state.entries.filter(e => e.date.startsWith(monthStr));
+
+        const summary = {
+            income: 0,
+            expense: 0,
+            reminders: 0
+        };
+
+        monthEntries.forEach(entry => {
+            if (entry.type === 'income') summary.income += parseFloat(entry.amount || 0);
+            if (entry.type === 'expense') summary.expense += parseFloat(entry.amount || 0);
+            if (entry.reminder) summary.reminders++;
+        });
+
+        const incomeItem = document.createElement('p');
+        incomeItem.textContent = `${state.language === 'ne' ? 'आय' : 'Income'}: ${summary.income}`;
+        summaryList.appendChild(incomeItem);
+
+        const expenseItem = document.createElement('p');
+        expenseItem.textContent = `${state.language === 'ne' ? 'खर्च' : 'Expense'}: ${summary.expense}`;
+        summaryList.appendChild(expenseItem);
+
+        const reminderItem = document.createElement('p');
+        reminderItem.textContent = `${state.language === 'ne' ? 'रिमाइन्डरहरू' : 'Reminders'}: ${summary.reminders}`;
+        summaryList.appendChild(reminderItem);
+
+        console.log("Summary rendered successfully");
     } catch (error) {
         console.error("Error rendering summary:", error);
+        showAlert("Failed to render summary.", "error");
     }
 }
 
 function renderReminders() {
     try {
-        const remindersList = document.getElementById('upcomingReminders');
-        remindersList.innerHTML = '';
-        const upcomingEntries = entries.filter(e => e.reminder && e.reminderTime).sort((a, b) => a.date.localeCompare(b.date));
-        const now = new Date();
-        for (const entry of upcomingEntries) {
-            const entryDate = bsToGregorian(entry.date);
-            entryDate.setHours(parseInt(entry.time.split(':')[0]), parseInt(entry.time.split(':')[1]));
-            const reminderTime = new Date(entryDate.getTime() - entry.reminderTime * 60 * 1000);
-            if (reminderTime > now) {
-                const li = document.createElement('li');
+        console.log("Rendering reminders...");
+        const reminderList = document.getElementById('reminderList');
+        if (!reminderList) throw new Error("reminderList element not found");
+        reminderList.innerHTML = '';
+
+        const upcomingReminders = state.entries
+            .filter(e => e.reminder && e.reminderTime && e.date >= state.todayBS)
+            .sort((a, b) => a.date.localeCompare(b.date))
+            .slice(0, 5);
+
+        if (upcomingReminders.length === 0) {
+            const noReminder = document.createElement('p');
+            noReminder.textContent = state.language === 'ne' ? 'कुनै आगामी रिमाइन्डरहरू छैनन्।' : 'No upcoming reminders.';
+            reminderList.appendChild(noReminder);
+        } else {
+            upcomingReminders.forEach(async reminder => {
+                const reminderItem = document.createElement('div');
+                reminderItem.className = 'reminder-item';
+                const dateSpan = document.createElement('span');
+                dateSpan.className = 'reminder-date';
+                dateSpan.textContent = reminder.date;
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'reminder-title';
+                let title = reminder.title;
+                if (reminder.encrypted) {
+                    try {
+                        title = await decryptData(reminder.title);
+                    } catch (error) {
+                        title = "[Encrypted]";
+                    }
+                }
+                titleSpan.textContent = title;
+                reminderItem.appendChild(dateSpan);
+                reminderItem.appendChild(titleSpan);
+                reminderList.appendChild(reminderItem);
+            });
+        }
+        console.log("Reminders rendered successfully");
+    } catch (error) {
+        console.error("Error rendering reminders:", error);
+        showAlert("Failed to render reminders.", "error");
+    }
+}
+
+function openEntryForm() {
+    try {
+        console.log("Opening entry form...");
+        const form = document.getElementById('noteForm');
+        if (!form) throw new Error("noteForm element not found");
+        form.style.display = 'block';
+        document.getElementById('entryDate').value = state.selectedDate;
+        document.getElementById('entryTitle').value = '';
+        document.getElementById('entryAmount').value = '';
+        document.getElementById('entryType').value = 'expense';
+        document.getElementById('entryCategory').innerHTML = state.categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        document.getElementById('entryReminder').checked = false;
+        document.getElementById('entryReminderTime').value = '';
+        document.getElementById('entryReminderTime').style.display = 'none';
+        document.getElementById('entryEncrypt').checked = false;
+
+        document.getElementById('entryReminder').addEventListener('change', (e) => {
+            document.getElementById('entryReminderTime').style.display = e.target.checked ? 'block' : 'none';
+        });
+    } catch (error) {
+        console.error("Error opening entry form:", error);
+        showAlert("Failed to open entry form.", "error");
+    }
+}
+
+async function saveEntry() {
+    try {
+        console.log("Saving entry...");
+        const date = document.getElementById('entryDate').value;
+        let title = document.getElementById('entryTitle').value;
+        const amount = document.getElementById('entryAmount').value;
+        const type = document.getElementById('entryType').value;
+        const category = document.getElementById('entryCategory').value;
+        const reminder = document.getElementById('entryReminder').checked;
+        const reminderTime = document.getElementById('entryReminderTime').value;
+        const encrypt = document.getElementById('entryEncrypt').checked;
+
+        if (!date || !title) {
+            showAlert("Date and title are required.", "error");
+            return;
+        }
+
+        let entry = {
+            date,
+            title,
+            amount,
+            type,
+            category,
+            reminder,
+            reminderTime,
+            encrypted: false
+        };
+
+        if (encrypt) {
+            entry.title = await encryptData(title);
+            entry.encrypted = true;
+        }
+
+        state.entries.push(entry);
+        await storage.setItem('entries', JSON.stringify(state.entries));
+        document.getElementById('noteForm').style.display = 'none';
+        renderCalendar();
+        showAlert("Entry saved successfully.", "success");
+    } catch (error) {
+        console.error("Error saving entry:", error);
+        showAlert("Failed to save entry.", "error");
+    }
+}
+
+async function openNotesModal() {
+    try {
+        console.log("Opening notes modal...");
+        const modal = document.getElementById('notesModal');
+        if (!modal) throw new Error("notesModal element not found");
+        const notesList = document.getElementById('notesList');
+        if (!notesList) throw new Error("notesList element not found");
+        notesList.innerHTML = '';
+
+        const monthStr = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}`;
+        const monthEntries = state.entries.filter(e => e.date.startsWith(monthStr));
+
+        if (monthEntries.length === 0) {
+            const noNotes = document.createElement('p');
+            noNotes.textContent = state.language === 'ne' ? 'यो महिनामा कुनै नोटहरू छैनन्।' : 'No notes for this month.';
+            notesList.appendChild(noNotes);
+        } else {
+            for (const entry of monthEntries) {
+                const noteItem = document.createElement('div');
+                noteItem.className = 'note-item';
+                const dateSpan = document.createElement('span');
+                dateSpan.className = 'note-date';
+                dateSpan.textContent = entry.date;
+                const titleSpan = document.createElement('span');
+                titleSpan.className = 'note-title';
                 let title = entry.title;
                 if (entry.encrypted) {
                     try {
@@ -547,890 +946,294 @@ function renderReminders() {
                         title = "[Encrypted]";
                     }
                 }
-                li.textContent = `${entry.date} ${entry.time}: ${title} (${entry.reminderTime} minutes before)`;
-                li.classList.add(language === 'ne' ? 'nepali' : '');
-                remindersList.appendChild(li);
+                titleSpan.textContent = title;
+                noteItem.appendChild(dateSpan);
+                noteItem.appendChild(titleSpan);
+                notesList.appendChild(noteItem);
             }
         }
-    } catch (error) {
-        console.error("Error rendering reminders:", error);
-    }
-}
-
-// Entry form handling
-function openEntryForm() {
-    try {
-        const form = document.getElementById('noteForm');
-        const selectedDateSpan = document.getElementById('selectedDate');
-        const entryType = document.getElementById('entryType');
-        const noteTitle = document.getElementById('noteTitle');
-        const noteTime = document.getElementById('noteTime');
-        const setReminder = document.getElementById('setReminder');
-        const reminderTime = document.getElementById('reminderTime');
-        const recurringOption = document.getElementById('recurringOption');
-        const noteDescription = document.getElementById('noteDescription');
-        const entryCategory = document.getElementById('entryCategory');
-
-        selectedDateSpan.textContent = selectedDate;
-        noteTitle.value = '';
-        noteTime.value = '';
-        setReminder.checked = false;
-        reminderTime.style.display = 'none';
-        recurringOption.value = 'none';
-        noteDescription.value = '';
-        entryCategory.innerHTML = '<option value="">Select Category</option>';
-        categories.forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat;
-            option.textContent = cat;
-            entryCategory.appendChild(option);
-        });
-
-        entryType.addEventListener('change', () => {
-            noteTitle.placeholder = entryType.value === 'note' ? 'Note Title' : 'Amount';
-            entryCategory.style.display = entryType.value === 'note' ? 'none' : 'block';
-        });
-
-        setReminder.addEventListener('change', () => {
-            reminderTime.style.display = setReminder.checked ? 'block' : 'none';
-        });
-
-        form.classList.add('active');
-    } catch (error) {
-        console.error("Error opening entry form:", error);
-    }
-}
-
-async function saveEntry() {
-    try {
-        const entryType = document.getElementById('entryType').value;
-        const noteTitle = document.getElementById('noteTitle').value;
-        const noteTime = document.getElementById('noteTime').value;
-        const setReminder = document.getElementById('setReminder').checked;
-        const reminderTime = document.getElementById('reminderTime').value;
-        const recurringOption = document.getElementById('recurringOption').value;
-        const noteDescription = document.getElementById('noteDescription').value;
-        const entryCategory = document.getElementById('entryCategory').value;
-
-        if (!noteTitle) {
-            showAlert("Title or amount is required.", "error");
-            return;
-        }
-
-        const encryptedTitle = await encryptData(noteTitle);
-        let encryptedDescription = null;
-        if (noteDescription) {
-            encryptedDescription = await encryptData(noteDescription);
-        }
-
-        const entry = {
-            date: selectedDate,
-            type: entryType,
-            title: encryptedTitle,
-            time: noteTime,
-            reminder: setReminder,
-            reminderTime: setReminder ? reminderTime : null,
-            recurring: recurringOption,
-            description: encryptedDescription,
-            category: entryType !== 'note' ? entryCategory : null,
-            encrypted: true
-        };
-
-        entries.push(entry);
-        localStorage.setItem('entries', JSON.stringify(entries));
-        notifyObservers();
-        document.getElementById('noteForm').classList.remove('active');
-        showAlert("Entry saved successfully.", "success");
-
-        // Handle recurring entries
-        if (recurringOption !== 'none') {
-            let nextDate = bsToGregorian(selectedDate);
-            const [year, month] = selectedDate.split('-').map(Number);
-            while (nextDate.getFullYear() <= 2082) {
-                if (recurringOption === 'daily') nextDate.setDate(nextDate.getDate() + 1);
-                else if (recurringOption === 'weekly') nextDate.setDate(nextDate.getDate() + 7);
-                else if (recurringOption === 'monthly') nextDate.setMonth(nextDate.getMonth() + 1);
-                const nextBSDate = gregorianToBS(nextDate);
-                if (!nextBSDate || parseInt(nextBSDate.split('-')[0]) > 2082) break;
-                entries.push({ ...entry, date: nextBSDate });
-            }
-            localStorage.setItem('entries', JSON.stringify(entries));
-        }
-    } catch (error) {
-        console.error("Error saving entry:", error);
-        showAlert("Error saving entry.", "error");
-    }
-}
-
-// Notes modal
-async function openNotesModal() {
-    try {
-        const modal = document.getElementById('notesModal');
-        const monthFilter = document.getElementById('monthFilter');
-        monthFilter.innerHTML = '<option value="all">All Months</option>';
-        calendarData[currentYear].forEach((month, idx) => {
-            const option = document.createElement('option');
-            option.value = idx + 1;
-            option.textContent = language === 'ne' ? month.name : translate(month.name, 'en');
-            monthFilter.appendChild(option);
-        });
-
         modal.style.display = 'block';
-        renderNotesList();
     } catch (error) {
         console.error("Error opening notes modal:", error);
+        showAlert("Failed to open notes modal.", "error");
     }
 }
 
-async function renderNotesList() {
-    try {
-        const notesList = document.getElementById('notesList');
-        const monthFilter = document.getElementById('monthFilter').value;
-        const dateFrom = document.getElementById('notesDateFrom').value;
-        const dateTo = document.getElementById('notesDateTo').value;
-        const typeFilter = document.getElementById('notesTypeFilter').value;
-        const sortBy = document.getElementById('notesSortBy').value;
-        const searchQuery = document.getElementById('notesSearch').value.toLowerCase();
-
-        let filteredEntries = [...entries];
-        if (monthFilter !== 'all') {
-            filteredEntries = filteredEntries.filter(e => e.date.startsWith(`${currentYear}-${String(monthFilter).padStart(2, '0')}`));
-        }
-        if (dateFrom) {
-            filteredEntries = filteredEntries.filter(e => e.date >= dateFrom.replace(/-/g, '-'));
-        }
-        if (dateTo) {
-            filteredEntries = filteredEntries.filter(e => e.date <= dateTo.replace(/-/g, '-'));
-        }
-        if (typeFilter !== 'all') {
-            filteredEntries = filteredEntries.filter(e => e.type === typeFilter);
-        }
-        if (searchQuery) {
-            filteredEntries = filteredEntries.filter(async e => {
-                let title = e.title;
-                if (e.encrypted) {
-                    try {
-                        title = await decryptData(e.title);
-                    } catch (error) {
-                        title = "[Encrypted]";
-                    }
-                }
-                return title.toLowerCase().includes(searchQuery);
-            });
-        }
-
-        if (sortBy === 'date-asc') filteredEntries.sort((a, b) => a.date.localeCompare(b.date));
-        else if (sortBy === 'date-desc') filteredEntries.sort((a, b) => b.date.localeCompare(a.date));
-        else if (sortBy === 'title-asc') filteredEntries.sort(async (a, b) => {
-            const titleA = a.encrypted ? await decryptData(a.title) : a.title;
-            const titleB = b.encrypted ? await decryptData(b.title) : b.title;
-            return titleA.localeCompare(titleB);
-        });
-        else if (sortBy === 'title-desc') filteredEntries.sort(async (a, b) => {
-            const titleA = a.encrypted ? await decryptData(a.title) : a.title;
-            const titleB = b.encrypted ? await decryptData(b.title) : b.title;
-            return titleB.localeCompare(titleA);
-        });
-
-        notesList.innerHTML = '';
-        for (const entry of filteredEntries) {
-            const div = document.createElement('div');
-            div.className = 'note-item';
-            let title = entry.title;
-            let description = entry.description;
-            if (entry.encrypted) {
-                try {
-                    title = await decryptData(entry.title);
-                    if (entry.description) description = await decryptData(entry.description);
-                } catch (error) {
-                    title = "[Encrypted]";
-                    description = "[Encrypted]";
-                }
-            }
-            div.innerHTML = `
-                <p><strong>${entry.date} (${entry.type})</strong>: ${title}</p>
-                ${description ? `<p>${description}</p>` : ''}
-                <div class="note-actions">
-                    <span class="edit-note">Edit</span>
-                    <span class="delete-note">Delete</span>
-                </div>
-            `;
-            div.querySelector('.edit-note').addEventListener('click', () => editEntry(entry));
-            div.querySelector('.delete-note').addEventListener('click', () => deleteEntry(entry));
-            notesList.appendChild(div);
-        }
-    } catch (error) {
-        console.error("Error rendering notes list:", error);
-    }
-}
-
-function editEntry(entry) {
-    try {
-        selectedDate = entry.date;
-        openEntryForm();
-        document.getElementById('entryType').value = entry.type;
-        document.getElementById('noteTitle').value = entry.encrypted ? decryptData(entry.title) : entry.title;
-        document.getElementById('noteTime').value = entry.time || '';
-        document.getElementById('setReminder').checked = entry.reminder;
-        document.getElementById('reminderTime').value = entry.reminderTime || '0';
-        document.getElementById('reminderTime').style.display = entry.reminder ? 'block' : 'none';
-        document.getElementById('recurringOption').value = entry.recurring || 'none';
-        document.getElementById('noteDescription').value = entry.description ? (entry.encrypted ? decryptData(entry.description) : entry.description) : '';
-        document.getElementById('entryCategory').value = entry.category || '';
-        document.getElementById('saveNote').style.display = 'none';
-        document.getElementById('editEntry').style.display = 'block';
-        document.getElementById('editEntry').onclick = async () => {
-            const updatedEntry = {
-                date: selectedDate,
-                type: document.getElementById('entryType').value,
-                title: await encryptData(document.getElementById('noteTitle').value),
-                time: document.getElementById('noteTime').value,
-                reminder: document.getElementById('setReminder').checked,
-                reminderTime: document.getElementById('setReminder').checked ? document.getElementById('reminderTime').value : null,
-                recurring: document.getElementById('recurringOption').value,
-                description: document.getElementById('noteDescription').value ? await encryptData(document.getElementById('noteDescription').value) : null,
-                category: document.getElementById('entryType').value !== 'note' ? document.getElementById('entryCategory').value : null,
-                encrypted: true
-            };
-            const index = entries.indexOf(entry);
-            entries[index] = updatedEntry;
-            localStorage.setItem('entries', JSON.stringify(entries));
-            notifyObservers();
-            document.getElementById('noteForm').classList.remove('active');
-            renderNotesList();
-            showAlert("Entry updated successfully.", "success");
-        };
-    } catch (error) {
-        console.error("Error editing entry:", error);
-    }
-}
-
-function deleteEntry(entry) {
-    try {
-        if (confirm("Are you sure you want to delete this entry?")) {
-            entries = entries.filter(e => e !== entry);
-            localStorage.setItem('entries', JSON.stringify(entries));
-            notifyObservers();
-            renderNotesList();
-            showAlert("Entry deleted successfully.", "success");
-        }
-    } catch (error) {
-        console.error("Error deleting entry:", error);
-    }
-}
-
-// Financial reports modal
 function openReportModal() {
     try {
+        console.log("Opening report modal...");
         const modal = document.getElementById('reportModal');
-        const financeCategoryFilter = document.getElementById('financeCategoryFilter');
-        financeCategoryFilter.innerHTML = '<option value="all">All Categories</option>';
-        categories.forEach(cat => {
-            const option = document.createElement('option');
-            option.value = cat;
-            option.textContent = cat;
-            financeCategoryFilter.appendChild(option);
-        });
+        if (!modal) throw new Error("reportModal element not found");
         modal.style.display = 'block';
-        renderReports('weeklySummary');
+        renderReports('summary');
     } catch (error) {
         console.error("Error opening report modal:", error);
+        showAlert("Failed to open report modal.", "error");
     }
 }
 
-async function renderReports(tab) {
+async function renderReports(type) {
     try {
+        console.log(`Rendering ${type} report...`);
         const reportContent = document.getElementById('reportContent');
-        const dateFrom = document.getElementById('financeDateFrom').value;
-        const dateTo = document.getElementById('financeDateTo').value;
-        const categoryFilter = document.getElementById('financeCategoryFilter').value;
-        const sortBy = document.getElementById('financeSortBy').value;
-        const searchQuery = document.getElementById('financeSearch').value.toLowerCase();
-
-        let filteredEntries = entries.filter(e => e.type === 'income' || e.type === 'expense');
-        if (dateFrom) {
-            filteredEntries = filteredEntries.filter(e => e.date >= dateFrom.replace(/-/g, '-'));
-        }
-        if (dateTo) {
-            filteredEntries = filteredEntries.filter(e => e.date <= dateTo.replace(/-/g, '-'));
-        }
-        if (categoryFilter !== 'all') {
-            filteredEntries = filteredEntries.filter(e => e.category === categoryFilter);
-        }
-        if (searchQuery) {
-            filteredEntries = filteredEntries.filter(async e => {
-                let title = e.title;
-                if (e.encrypted) {
-                    try {
-                        title = await decryptData(e.title);
-                    } catch (error) {
-                        title = "[Encrypted]";
-                    }
-                }
-                return title.toLowerCase().includes(searchQuery);
-            });
-        }
-
-        if (sortBy === 'date-asc') filteredEntries.sort((a, b) => a.date.localeCompare(b.date));
-        else if (sortBy === 'date-desc') filteredEntries.sort((a, b) => b.date.localeCompare(a.date));
-        else if (sortBy === 'amount-asc') filteredEntries.sort(async (a, b) => {
-            const amountA = parseFloat(a.encrypted ? await decryptData(a.title) : a.title) || 0;
-            const amountB = parseFloat(b.encrypted ? await decryptData(b.title) : b.title) || 0;
-            return amountA - amountB;
-        });
-        else if (sortBy === 'amount-desc') filteredEntries.sort(async (a, b) => {
-            const amountA = parseFloat(a.encrypted ? await decryptData(a.title) : a.title) || 0;
-            const amountB = parseFloat(b.encrypted ? await decryptData(b.title) : b.title) || 0;
-            return amountB - amountA;
-        });
-
+        if (!reportContent) throw new Error("reportContent element not found");
         reportContent.innerHTML = '';
-        if (tab === 'weeklySummary') {
-            const weeklyData = {};
-            for (const entry of filteredEntries) {
-                const gregDate = bsToGregorian(entry.date);
-                const weekNumber = Math.ceil((gregDate.getDate() + gregDate.getDay()) / 7);
-                const key = `${gregDate.getFullYear()}-${weekNumber}`;
-                if (!weeklyData[key]) weeklyData[key] = { income: 0, expense: 0 };
-                const amount = parseFloat(entry.encrypted ? await decryptData(entry.title) : entry.title) || 0;
-                if (entry.type === 'income') weeklyData[key].income += amount;
-                else weeklyData[key].expense += amount;
-            }
-            const table = document.createElement('table');
-            table.className = 'report-table';
-            table.innerHTML = `
-                <tr><th>Week</th><th>Income</th><th>Expense</th><th>Balance</th></tr>
-            `;
-            for (const [week, data] of Object.entries(weeklyData)) {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${week}</td>
-                    <td>${data.income.toFixed(2)}</td>
-                    <td>${data.expense.toFixed(2)}</td>
-                    <td>${(data.income - data.expense).toFixed(2)}</td>
-                `;
-                table.appendChild(row);
-            }
-            reportContent.appendChild(table);
-        } else if (tab === 'weekly') {
-            const table = document.createElement('table');
-            table.className = 'report-table';
-            table.innerHTML = `
-                <tr><th>Date</th><th>Type</th><th>Amount</th><th>Category</th></tr>
-            `;
-            for (const entry of filteredEntries) {
-                let amount = entry.title;
-                if (entry.encrypted) {
-                    amount = await decryptData(entry.title);
-                }
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${entry.date}</td>
-                    <td>${entry.type}</td>
-                    <td>${amount}</td>
-                    <td>${entry.category || '-'}</td>
-                `;
-                table.appendChild(row);
-            }
-            reportContent.appendChild(table);
-        } else if (tab === 'monthly') {
-            const monthlyData = {};
-            for (const entry of filteredEntries) {
-                const month = entry.date.substring(0, 7);
-                if (!monthlyData[month]) monthlyData[month] = { income: 0, expense: 0 };
-                const amount = parseFloat(entry.encrypted ? await decryptData(entry.title) : entry.title) || 0;
-                if (entry.type === 'income') monthlyData[month].income += amount;
-                else monthlyData[month].expense += amount;
-            }
-            const table = document.createElement('table');
-            table.className = 'report-table';
-            table.innerHTML = `
-                <tr><th>Month</th><th>Income</th><th>Expense</th><th>Balance</th></tr>
-            `;
-            for (const [month, data] of Object.entries(monthlyData)) {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${month}</td>
-                    <td>${data.income.toFixed(2)}</td>
-                    <td>${data.expense.toFixed(2)}</td>
-                    <td>${(data.income - data.expense).toFixed(2)}</td>
-                `;
-                table.appendChild(row);
-            }
-            reportContent.appendChild(table);
-        } else if (tab === 'yearly') {
-            const yearlyData = {};
-            for (const entry of filteredEntries) {
-                const year = entry.date.substring(0, 4);
-                if (!yearlyData[year]) yearlyData[year] = { income: 0, expense: 0 };
-                const amount = parseFloat(entry.encrypted ? await decryptData(entry.title) : entry.title) || 0;
-                if (entry.type === 'income') yearlyData[year].income += amount;
-                else yearlyData[year].expense += amount;
-            }
-            const table = document.createElement('table');
-            table.className = 'report-table';
-            table.innerHTML = `
-                <tr><th>Year</th><th>Income</th><th>Expense</th><th>Balance</th></tr>
-            `;
-            for (const [year, data] of Object.entries(yearlyData)) {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${year}</td>
-                    <td>${data.income.toFixed(2)}</td>
-                    <td>${data.expense.toFixed(2)}</td>
-                    <td>${(data.income - data.expense).toFixed(2)}</td>
-                `;
-                table.appendChild(row);
-            }
-            reportContent.appendChild(table);
-        } else if (tab === 'analytics') {
-            const monthlyIncome = Array(12).fill(0);
-            const monthlyExpense = Array(12).fill(0);
-            for (const entry of filteredEntries) {
-                const month = parseInt(entry.date.split('-')[1]) - 1;
-                const amount = parseFloat(entry.encrypted ? await decryptData(entry.title) : entry.title) || 0;
-                if (entry.type === 'income') monthlyIncome[month] += amount;
-                else monthlyExpense[month] += amount;
-            }
-            const chartDiv = document.createElement('div');
-            chartDiv.className = 'chart-container';
+
+        const monthStr = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}`;
+        const monthEntries = state.entries.filter(e => e.date.startsWith(monthStr));
+
+        if (type === 'summary') {
+            const summary = { income: 0, expense: 0 };
+            monthEntries.forEach(entry => {
+                if (entry.type === 'income') summary.income += parseFloat(entry.amount || 0);
+                if (entry.type === 'expense') summary.expense += parseFloat(entry.amount || 0);
+            });
+
             const canvas = document.createElement('canvas');
-            chartDiv.appendChild(canvas);
-            reportContent.appendChild(chartDiv);
+            canvas.id = 'financeChart';
+            reportContent.appendChild(canvas);
+
             new Chart(canvas, {
                 type: 'bar',
                 data: {
-                    labels: calendarData[currentYear].map(m => m.name),
+                    labels: [state.language === 'ne' ? 'आय' : 'Income', state.language === 'ne' ? 'खर्च' : 'Expense'],
+                    datasets: [{
+                        label: state.language === 'ne' ? 'रकम' : 'Amount',
+                        data: [summary.income, summary.expense],
+                        backgroundColor: ['#4CAF50', '#FF5733']
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: { beginAtZero: true }
+                    }
+                }
+            });
+        } else if (type === 'category') {
+            const categorySummary = {};
+            state.categories.forEach(cat => categorySummary[cat] = { income: 0, expense: 0 });
+            monthEntries.forEach(entry => {
+                if (entry.type === 'income') categorySummary[entry.category].income += parseFloat(entry.amount || 0);
+                if (entry.type === 'expense') categorySummary[entry.category].expense += parseFloat(entry.amount || 0);
+            });
+
+            const table = document.createElement('table');
+            table.className = 'report-table';
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            ['Category', 'Income', 'Expense'].forEach(header => {
+                const th = document.createElement('th');
+                th.textContent = state.language === 'ne' ? translate(header, 'ne') : header;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            const tbody = document.createElement('tbody');
+            state.categories.forEach(cat => {
+                const row = document.createElement('tr');
+                const catCell = document.createElement('td');
+                catCell.textContent = cat;
+                const incomeCell = document.createElement('td');
+                incomeCell.textContent = categorySummary[cat].income;
+                const expenseCell = document.createElement('td');
+                expenseCell.textContent = categorySummary[cat].expense;
+                row.appendChild(catCell);
+                row.appendChild(incomeCell);
+                row.appendChild(expenseCell);
+                tbody.appendChild(row);
+            });
+            table.appendChild(tbody);
+            reportContent.appendChild(table);
+        } else if (type === 'trends') {
+            const monthlyData = { income: [], expense: [] };
+            const labels = calendarData[state.currentYear].map(m => m.name);
+            for (let month = 0; month < 12; month++) {
+                const monthKey = `${state.currentYear}-${String(month + 1).padStart(2, '0')}`;
+                const entries = state.entries.filter(e => e.date.startsWith(monthKey));
+                let income = 0, expense = 0;
+                entries.forEach(entry => {
+                    if (entry.type === 'income') income += parseFloat(entry.amount || 0);
+                    if (entry.type === 'expense') expense += parseFloat(entry.amount || 0);
+                });
+                monthlyData.income.push(income);
+                monthlyData.expense.push(expense);
+            }
+
+            const canvas = document.createElement('canvas');
+            canvas.id = 'trendsChart';
+            reportContent.appendChild(canvas);
+
+            new Chart(canvas, {
+                type: 'line',
+                data: {
+                    labels,
                     datasets: [
                         {
-                            label: 'Income',
-                            data: monthlyIncome,
-                            backgroundColor: '#28a745'
+                            label: state.language === 'ne' ? 'आय' : 'Income',
+                            data: monthlyData.income,
+                            borderColor: '#4CAF50',
+                            fill: false
                         },
                         {
-                            label: 'Expense',
-                            data: monthlyExpense,
-                            backgroundColor: '#dc3545'
+                            label: state.language === 'ne' ? 'खर्च' : 'Expense',
+                            data: monthlyData.expense,
+                            borderColor: '#FF5733',
+                            fill: false
                         }
                     ]
                 },
                 options: {
-                    responsive: true,
                     scales: {
                         y: { beginAtZero: true }
                     }
                 }
             });
         }
+        console.log(`${type} report rendered successfully`);
     } catch (error) {
-        console.error("Error rendering reports:", error);
+        console.error(`Error rendering ${type} report:`, error);
+        showAlert(`Failed to render ${type} report.`, "error");
     }
 }
 
-// Export functions
-async function exportToExcel(data, filename, type) {
+async function exportMonthToExcel() {
     try {
-        const decryptedData = [];
-        for (const entry of data) {
+        console.log("Exporting month to Excel...");
+        const monthStr = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}`;
+        const monthEntries = state.entries.filter(e => e.date.startsWith(monthStr));
+
+        const data = [];
+        for (const entry of monthEntries) {
             let title = entry.title;
-            let description = entry.description;
             if (entry.encrypted) {
-                title = await decryptData(entry.title);
-                if (entry.description) description = await decryptData(entry.description);
+                try {
+                    title = await decryptData(entry.title);
+                } catch (error) {
+                    title = "[Encrypted]";
+                }
             }
-            decryptedData.push({ ...entry, title, description });
+            data.push({
+                Date: entry.date,
+                Title: title,
+                Amount: entry.amount,
+                Type: entry.type,
+                Category: entry.category,
+                Reminder: entry.reminder ? 'Yes' : 'No',
+                ReminderTime: entry.reminderTime || ''
+            });
         }
-        const ws = XLSX.utils.json_to_sheet(decryptedData);
+
+        const ws = XLSX.utils.json_to_sheet(data);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, type);
-        XLSX.writeFile(wb, `${filename}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "Entries");
+        XLSX.writeFile(wb, `Entries_${monthStr}.xlsx`);
+        showAlert("Exported to Excel successfully.", "success");
     } catch (error) {
-        console.error(`Error exporting ${type} to Excel:`, error);
-        showAlert(`Error exporting ${type} to Excel.`, "error");
+        console.error("Error exporting to Excel:", error);
+        showAlert("Failed to export to Excel.", "error");
     }
 }
 
-async function exportToPDF(data, filename, type) {
+async function exportMonthToPDF() {
     try {
+        console.log("Exporting month to PDF...");
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-        const decryptedData = [];
-        for (const entry of data) {
+        const monthStr = `${state.currentYear}-${String(state.currentMonth + 1).padStart(2, '0')}`;
+        const monthEntries = state.entries.filter(e => e.date.startsWith(monthStr));
+
+        const data = [];
+        for (const entry of monthEntries) {
             let title = entry.title;
-            let description = entry.description;
             if (entry.encrypted) {
-                title = await decryptData(entry.title);
-                if (entry.description) description = await decryptData(entry.description);
+                try {
+                    title = await decryptData(entry.title);
+                } catch (error) {
+                    title = "[Encrypted]";
+                }
             }
-            decryptedData.push([entry.date, entry.type, title, description || '', entry.category || '']);
+            data.push([
+                entry.date,
+                title,
+                entry.amount,
+                entry.type,
+                entry.category,
+                entry.reminder ? 'Yes' : 'No',
+                entry.reminderTime || ''
+            ]);
         }
+
+        doc.text(`Entries for ${monthStr}`, 10, 10);
         doc.autoTable({
-            head: [['Date', 'Type', 'Title/Amount', 'Description', 'Category']],
-            body: decryptedData
+            head: [['Date', 'Title', 'Amount', 'Type', 'Category', 'Reminder', 'Reminder Time']],
+            body: data,
+            startY: 20
         });
-        doc.save(`${filename}.pdf`);
+        doc.save(`Entries_${monthStr}.pdf`);
+        showAlert("Exported to PDF successfully.", "success");
     } catch (error) {
-        console.error(`Error exporting ${type} to PDF:`, error);
-        showAlert(`Error exporting ${type} to PDF.`, "error");
+        console.error("Error exporting to PDF:", error);
+        showAlert("Failed to export to PDF.", "error");
     }
 }
 
-// Import functions
-function importFromExcel(file, type) {
+async function backupData() {
     try {
+        console.log("Backing up data...");
+        const data = {
+            entries: state.entries,
+            categories: state.categories,
+            customTranslations: state.customTranslations,
+            language: state.language
+        };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'calendar_backup.json';
+        a.click();
+        URL.revokeObjectURL(url);
+        showAlert("Data backed up successfully.", "success");
+    } catch (error) {
+        console.error("Error backing up data:", error);
+        showAlert("Failed to backup data.", "error");
+    }
+}
+
+document.getElementById('importExcelNotes')?.addEventListener('change', async (event) => {
+    try {
+        console.log("Importing data...");
+        const file = event.target.files[0];
+        if (!file) return;
         const reader = new FileReader();
         reader.onload = async (e) => {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: 'array' });
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const json = XLSX.utils.sheet_to_json(sheet);
-            if (type === 'notes') {
-                for (const entry of json) {
-                    entries.push({
-                        date: entry.date,
-                        type: entry.type || 'note',
-                        title: await encryptData(entry.title),
-                        time: entry.time || '',
-                        description: entry.description ? await encryptData(entry.description) : null,
-                        encrypted: true
-                    });
-                }
-            } else if (type === 'finance') {
-                for (const entry of json) {
-                    entries.push({
-                        date: entry.date,
-                        type: entry.type,
-                        title: await encryptData(entry.title),
-                        category: entry.category || 'Other',
-                        encrypted: true
-                    });
-                }
-            }
-            localStorage.setItem('entries', JSON.stringify(entries));
-            notifyObservers();
-            showAlert("Data imported successfully.", "success");
-        };
-        reader.readAsArrayBuffer(file);
-    } catch (error) {
-        console.error(`Error importing ${type} from Excel:`, error);
-        showAlert(`Error importing ${type} from Excel.`, "error");
-    }
-}
-
-// Utility functions
-function showAlert(message, type) {
-    try {
-        const alert = document.getElementById('alertMessage');
-        alert.textContent = message;
-        alert.className = `alert ${type}`;
-        alert.style.display = 'block';
-        setTimeout(() => {
-            alert.style.display = 'none';
-        }, 3000);
-    } catch (error) {
-        console.error("Error showing alert:", error);
-    }
-}
-
-// Initialization
-async function init() {
-    try {
-        // Initialize todayBS
-        todayBS = gregorianToBS(todayGregorian);
-        if (todayBS) {
-            const [year, month] = todayBS.split('-').map(Number);
-            currentYear = year;
-            currentMonth = month - 1;
-            selectedDate = todayBS;
-        } else {
-            currentMonth = 0; // Default to Baishakh if todayBS is not in 2082
-        }
-
-        // Set up today date display
-        document.getElementById('todayNepaliDate').textContent = `Nepali: ${todayBS}`;
-        document.getElementById('todayEnglishDate').textContent = `Gregorian: ${todayGregorian.toISOString().split('T')[0]}`;
-
-        // Populate year filter
-        const yearFilter = document.getElementById('yearFilter');
-        Object.keys(calendarData).forEach(year => {
-            const option = document.createElement('option');
-            option.value = year;
-            option.textContent = `${year} BS`;
-            yearFilter.appendChild(option);
-        });
-        yearFilter.value = currentYear;
-
-        // Set up event listeners
-        yearFilter.addEventListener('change', () => {
-            currentYear = parseInt(yearFilter.value);
-            currentMonth = 0;
-            renderMonthTabs();
-            renderCalendar();
-        });
-
-        document.getElementById('prevMonth').addEventListener('click', () => {
-            if (currentMonth > 0) {
-                currentMonth--;
-            } else if (currentYear > Math.min(...Object.keys(calendarData).map(Number))) {
-                currentYear--;
-                currentMonth = calendarData[currentYear].length - 1;
-                yearFilter.value = currentYear;
-            }
-            renderMonthTabs();
-            renderCalendar();
-        });
-
-        document.getElementById('nextMonth').addEventListener('click', () => {
-            if (currentMonth < calendarData[currentYear].length - 1) {
-                currentMonth++;
-            } else if (currentYear < Math.max(...Object.keys(calendarData).map(Number))) {
-                currentYear++;
-                currentMonth = 0;
-                yearFilter.value = currentYear;
-            }
-            renderMonthTabs();
-            renderCalendar();
-        });
-
-        document.getElementById('todayButton').addEventListener('click', () => {
-            if (todayBS) {
-                const [year, month] = todayBS.split('-').map(Number);
-                currentYear = year;
-                currentMonth = month - 1;
-                yearFilter.value = currentYear;
-                renderMonthTabs();
+            try {
+                const data = JSON.parse(e.target.result);
+                state.entries = data.entries || [];
+                state.categories = data.categories || state.categories;
+                state.customTranslations = data.customTranslations || state.customTranslations;
+                state.language = data.language || state.language;
+                await storage.setItem('entries', JSON.stringify(state.entries));
+                await storage.setItem('categories', JSON.stringify(state.categories));
+                await storage.setItem('customTranslations', JSON.stringify(state.customTranslations));
+                await storage.setItem('language', state.language);
                 renderCalendar();
+                showAlert("Data restored successfully.", "success");
+            } catch (error) {
+                console.error("Error parsing imported data:", error);
+                showAlert("Failed to parse imported data.", "error");
             }
-        });
-
-        document.getElementById('languageToggle').addEventListener('click', () => {
-            language = language === 'en' ? 'ne' : 'en';
-            localStorage.setItem('language', language);
-            updateLanguage();
-        });
-
-        document.getElementById('themeToggle').addEventListener('click', () => {
-            document.body.classList.toggle('dark-theme');
-        });
-
-        document.getElementById('resetEncryption').addEventListener('click', resetEncryptionKey);
-
-        document.getElementById('saveNote').addEventListener('click', saveEntry);
-        document.getElementById('closeEntry').addEventListener('click', () => {
-            document.getElementById('noteForm').classList.remove('active');
-        });
-
-        document.getElementById('viewNotes').addEventListener('click', openNotesModal);
-        document.getElementById('closeModal').addEventListener('click', () => {
-            document.getElementById('notesModal').style.display = 'none';
-        });
-
-        document.getElementById('monthFilter').addEventListener('change', renderNotesList);
-        document.getElementById('notesDateFrom').addEventListener('change', renderNotesList);
-        document.getElementById('notesDateTo').addEventListener('change', renderNotesList);
-        document.getElementById('notesTypeFilter').addEventListener('change', renderNotesList);
-        document.getElementById('notesSortBy').addEventListener('change', renderNotesList);
-        document.getElementById('notesSearch').addEventListener('input', renderNotesList);
-        document.getElementById('clearNotes').addEventListener('click', () => {
-            if (confirm("Are you sure you want to clear all notes?")) {
-                entries = entries.filter(e => e.type !== 'note');
-                localStorage.setItem('entries', JSON.stringify(entries));
-                notifyObservers();
-                renderNotesList();
-                showAlert("Notes cleared successfully.", "success");
-            }
-        });
-
-        document.getElementById('viewFinance').addEventListener('click', openReportModal);
-        document.getElementById('closeReportModal').addEventListener('click', () => {
-            document.getElementById('reportModal').style.display = 'none';
-        });
-
-        document.getElementById('weeklySummaryTab').addEventListener('click', () => {
-            document.querySelectorAll('.report-tab').forEach(tab => {
-                tab.classList.remove('active');
-                tab.setAttribute('aria-selected', 'false');
-                tab.setAttribute('tabindex', '-1');
-            });
-            document.getElementById('weeklySummaryTab').classList.add('active');
-            document.getElementById('weeklySummaryTab').setAttribute('aria-selected', 'true');
-            document.getElementById('weeklySummaryTab').setAttribute('tabindex', '0');
-            renderReports('weeklySummary');
-        });
-
-        document.getElementById('weeklyReportTab').addEventListener('click', () => {
-            document.querySelectorAll('.report-tab').forEach(tab => {
-                tab.classList.remove('active');
-                tab.setAttribute('aria-selected', 'false');
-                tab.setAttribute('tabindex', '-1');
-            });
-            document.getElementById('weeklyReportTab').classList.add('active');
-            document.getElementById('weeklyReportTab').setAttribute('aria-selected', 'true');
-            document.getElementById('weeklyReportTab').setAttribute('tabindex', '0');
-            renderReports('weekly');
-        });
-
-        document.getElementById('monthlyReportTab').addEventListener('click', () => {
-            document.querySelectorAll('.report-tab').forEach(tab => {
-                tab.classList.remove('active');
-                tab.setAttribute('aria-selected', 'false');
-                tab.setAttribute('tabindex', '-1');
-            });
-            document.getElementById('monthlyReportTab').classList.add('active');
-            document.getElementById('monthlyReportTab').setAttribute('aria-selected', 'true');
-            document.getElementById('monthlyReportTab').setAttribute('tabindex', '0');
-            renderReports('monthly');
-        });
-
-        document.getElementById('yearlyReportTab').addEventListener('click', () => {
-            document.querySelectorAll('.report-tab').forEach(tab => {
-                tab.classList.remove('active');
-                tab.setAttribute('aria-selected', 'false');
-                tab.setAttribute('tabindex', '-1');
-            });
-            document.getElementById('yearlyReportTab').classList.add('active');
-            document.getElementById('yearlyReportTab').setAttribute('aria-selected', 'true');
-            document.getElementById('yearlyReportTab').setAttribute('tabindex', '0');
-            renderReports('yearly');
-        });
-
-        document.getElementById('analyticsTab').addEventListener('click', () => {
-            document.querySelectorAll('.report-tab').forEach(tab => {
-                tab.classList.remove('active');
-                tab.setAttribute('aria-selected', 'false');
-                tab.setAttribute('tabindex', '-1');
-            });
-            document.getElementById('analyticsTab').classList.add('active');
-            document.getElementById('analyticsTab').setAttribute('aria-selected', 'true');
-            document.getElementById('analyticsTab').setAttribute('tabindex', '0');
-            renderReports('analytics');
-        });
-
-        document.getElementById('financeDateFrom').addEventListener('change', () => renderReports(document.querySelector('.report-tab.active').id.replace('Tab', '')));
-        document.getElementById('financeDateTo').addEventListener('change', () => renderReports(document.querySelector('.report-tab.active').id.replace('Tab', '')));
-        document.getElementById('financeCategoryFilter').addEventListener('change', () => renderReports(document.querySelector('.report-tab.active').id.replace('Tab', '')));
-        document.getElementById('financeSortBy').addEventListener('change', () => renderReports(document.querySelector('.report-tab.active').id.replace('Tab', '')));
-        document.getElementById('financeSearch').addEventListener('input', () => renderReports(document.querySelector('.report-tab.active').id.replace('Tab', '')));
-
-        // Export event listeners
-        document.getElementById('exportExcelNotes').addEventListener('click', () => {
-            const notes = entries.filter(e => e.type === 'note');
-            exportToExcel(notes, 'notes_export', 'Notes');
-        });
-        document.getElementById('exportExcelFinance').addEventListener('click', () => {
-            const finances = entries.filter(e => e.type === 'income' || e.type === 'expense');
-            exportToExcel(finances, 'finance_export', 'Finance');
-        });
-        document.getElementById('exportExcelMonth').addEventListener('click', () => {
-            const monthEntries = entries.filter(e => e.date.startsWith(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`));
-            exportToExcel(monthEntries, 'month_export', 'Month');
-        });
-        document.getElementById('exportExcelYear').addEventListener('click', () => {
-            const yearEntries = entries.filter(e => e.date.startsWith(`${currentYear}`));
-            exportToExcel(yearEntries, 'year_export', 'Year');
-        });
-        document.getElementById('exportExcelHoliday').addEventListener('click', () => {
-            const holidays = Object.entries(festivals).map(([date, info]) => ({ date, name: info.name }));
-            exportToExcel(holidays, 'holidays_export', 'Holidays');
-        });
-
-        document.getElementById('exportPDFNotes').addEventListener('click', () => {
-            const notes = entries.filter(e => e.type === 'note');
-            exportToPDF(notes, 'notes_export', 'Notes');
-        });
-        document.getElementById('exportPDFFinance').addEventListener('click', () => {
-            const finances = entries.filter(e => e.type === 'income' || e.type === 'expense');
-            exportToPDF(finances, 'finance_export', 'Finance');
-        });
-        document.getElementById('exportPDFMonth').addEventListener('click', () => {
-            const monthEntries = entries.filter(e => e.date.startsWith(`${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`));
-            exportToPDF(monthEntries, 'month_export', 'Month');
-        });
-        document.getElementById('exportPDFYear').addEventListener('click', () => {
-            const yearEntries = entries.filter(e => e.date.startsWith(`${currentYear}`));
-            exportToPDF(yearEntries, 'year_export', 'Year');
-        });
-        document.getElementById('exportPDFHoliday').addEventListener('click', () => {
-            const holidays = Object.entries(festivals).map(([date, info]) => ({ date, name: info.name }));
-            exportToPDF(holidays, 'holidays_export', 'Holidays');
-        });
-
-        // Import event listeners
-        document.getElementById('importExcelNotes').addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                importFromExcel(e.target.files[0], 'notes');
-                e.target.value = ''; // Reset file input
-            }
-        });
-        document.getElementById('importExcelFinance').addEventListener('change', (e) => {
-            if (e.target.files.length > 0) {
-                importFromExcel(e.target.files[0], 'finance');
-                e.target.value = '';
-            }
-        });
-
-        // Backup and Restore
-        document.getElementById('backupData').addEventListener('click', () => {
-            const backup = {
-                entries,
-                categories,
-                customTranslations
-            };
-            const blob = new Blob([JSON.stringify(backup)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'calendar_backup.json';
-            a.click();
-            URL.revokeObjectURL(url);
-            showAlert("Data backed up successfully.", "success");
-        });
-
-        document.getElementById('restoreData').addEventListener('click', () => {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                const reader = new FileReader();
-                reader.onload = (event) => {
-                    try {
-                        const backup = JSON.parse(event.target.result);
-                        entries = backup.entries || [];
-                        categories = backup.categories || [];
-                        customTranslations = backup.customTranslations || {};
-                        localStorage.setItem('entries', JSON.stringify(entries));
-                        localStorage.setItem('categories', JSON.stringify(categories));
-                        localStorage.setItem('customTranslations', JSON.stringify(customTranslations));
-                        notifyObservers();
-                        showAlert("Data restored successfully.", "success");
-                    } catch (error) {
-                        console.error("Error restoring data:", error);
-                        showAlert("Error restoring data.", "error");
-                    }
-                };
-                reader.readAsText(file);
-            };
-            input.click();
-        });
-
-        // Add observer to update calendar on entries change
-        addObserver(() => {
-            renderCalendar();
-            renderNotesList();
-            renderReports(document.querySelector('.report-tab.active')?.id.replace('Tab', '') || 'weeklySummary');
-        });
-
-        // Initial render
-        renderMonthTabs();
-        renderCalendar();
-        fetchWeather();
-        updateLanguage();
+        };
+        reader.readAsText(file);
     } catch (error) {
-        console.error("Error initializing application:", error);
-        showAlert("Error initializing application.", "error");
+        console.error("Error importing data:", error);
+        showAlert("Failed to import data.", "error");
     }
-}
+});
 
-// Start the application
-loadExternalScripts();
+if (typeof window !== 'undefined') {
+    window.onload = loadExternalScripts;
+} else {
+    init();
+}

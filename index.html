@@ -42,242 +42,96 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="strict-origin-when-cross-origin">
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self';
-        script-src 'self' 'nonce-OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2' 'strict-dynamic';
-        img-src 'self' blob: data: https://assets.grok.com https://imgs.search.brave.com;
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
-        font-src 'self' https://fonts.gstatic.com;
-        connect-src 'self' https://api.grok.com;
-    ">
-    <title>Nepali Calendar 2082</title>
-    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="styles.css">
+    <title>Nepali Calendar</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="script.js" defer></script>
 </head>
 <body>
-    <div class="header">
-        <span class="header-title" data-en="Nepali Calendar" data-ne="नेपाली पात्रो" aria-label="Nepali Calendar Title">Nepali Calendar</span> - <span id="currentMonth" aria-live="polite">2082 BS</span>
-        <div class="nav-buttons left">
-            <button id="prevMonth" data-en="Previous" data-ne="अघिल्लो" aria-label="Go to Previous Month">Previous</button>
-        </div>
-        <div class="nav-buttons right">
-            <button id="nextMonth" data-en="Next" data-ne="पछिल्लो" aria-label="Go to Next Month">Next</button>
-        </div>
+    <header>
+        <h1 data-en="Nepali Calendar">Nepali Calendar</h1>
+    </header>
+    <main>
+        <section id="calendarSection">
+            <div class="controls">
+                <select id="yearFilter" aria-label="Select Year"></select>
+                <button id="todayButton" data-en="Today">Today</button>
+                <button id="languageToggle" data-en="Switch to Nepali">Switch to Nepali</button>
+                <button id="themeToggle" data-en="Toggle Theme">Toggle Theme</button>
+            </div>
+            <h2 id="currentMonth"></h2>
+            <div class="nav">
+                <button id="prevMonth" aria-label="Previous Month">← Previous</button>
+                <button id="nextMonth" aria-label="Next Month">Next →</button>
+            </div>
+            <div id="monthTabs" role="tablist"></div>
+            <div id="calendarGrid" role="grid"></div>
+        </section>
+        <aside>
+            <section>
+                <h2 data-en="Today's Date">Today's Date</h2>
+                <p><span data-en="Nepali Date">Nepali Date</span>: <span id="todayNepaliDate"></span></p>
+                <p><span data-en="English Date">English Date</span>: <span id="todayEnglishDate"></span></p>
+            </section>
+            <section>
+                <h2 data-en="Monthly Summary">Monthly Summary</h2>
+                <div id="summaryList"></div>
+            </section>
+            <section>
+                <h2 data-en="Upcoming Reminders">Upcoming Reminders</h2>
+                <div id="reminderList"></div>
+            </section>
+            <section>
+                <h2 data-en="Holidays this Month">Holidays this Month</h2>
+                <div id="holidayList"></div>
+            </section>
+            <button id="addBirthdayReminder" data-en="Add Reminder">Add Reminder</button>
+            <button id="viewNotes" data-en="View Notes">View Notes</button>
+            <button id="viewFinance" data-en="View Reports">View Reports</button>
+            <button id="backupData" data-en="Backup Data">Backup Data</button>
+            <button id="restoreData" data-en="Restore Data">Restore Data</button>
+            <button id="exportExcelMonth" data-en="Export Month to Excel">Export Month to Excel</button>
+            <button id="exportPDFMonth" data-en="Export Month to PDF">Export Month to PDF</button>
+        </aside>
+    </main>
+    <div id="noteForm">
+        <h2 data-en="Add Entry">Add Entry</h2>
+        <form>
+            <label for="entryDate"><span data-en="Date">Date</span>:</label>
+            <input type="text" id="entryDate" readonly>
+            <label for="entryTitle"><span data-en="Title">Title</span>:</label>
+            <input type="text" id="entryTitle">
+            <label for="entryAmount"><span data-en="Amount">Amount</span>:</label>
+            <input type="number" id="entryAmount">
+            <label for="entryType"><span data-en="Type">Type</span>:</label>
+            <select id="entryType">
+                <option value="expense" data-en="Expense">Expense</option>
+                <option value="income" data-en="Income">Income</option>
+            </select>
+            <label for="entryCategory"><span data-en="Category">Category</span>:</label>
+            <select id="entryCategory"></select>
+            <label><input type="checkbox" id="entryReminder"> <span data-en="Set Reminder">Set Reminder</span></label>
+            <input type="datetime-local" id="entryReminderTime" style="display: none;">
+            <label><input type="checkbox" id="entryEncrypt"> <span data-en="Encrypt Entry">Encrypt Entry</span></label>
+            <button type="button" id="saveNote" data-en="Save">Save</button>
+            <button type="button" id="closeEntry" data-en="Close">Close</button>
+        </form>
     </div>
-    <div class="year-filter">
-        <select id="yearFilter" aria-label="Select Year">
-            <option value="2082" selected>2082 BS</option>
-        </select>
-        <button id="todayButton" data-en="Today" data-ne="आज" title="Go to Today's Date" aria-label="Go to Today">Today</button>
-        <button id="addBirthdayReminder" data-en="Add Birthday Reminder" data-ne="जन्मदिन रिमाइन्डर थप्नुहोस्" title="Add a Birthday Reminder" aria-label="Add Birthday Reminder">Add Birthday Reminder</button>
-        <button id="themeToggle" data-en="Toggle Theme" data-ne="थिम टगल गर्नुहोस्" title="Switch between Light and Dark Theme" aria-label="Toggle Theme">Toggle Theme</button>
-        <button id="backupData" class="backup-btn" data-en="Backup Data" data-ne="डाटा ब्याकअप गर्नुहोस्" title="Backup All Data" aria-label="Backup Data">Backup Data</button>
-        <button id="restoreData" class="restore-btn" data-en="Restore Data" data-ne="डाटा पुनर्स्थापना गर्नुहोस्" title="Restore Data from Backup" aria-label="Restore Data">Restore Data</button>
-        <div class="dropdown">
-            <button class="export-btn" data-en="Export" data-ne="निर्यात गर्नुहोस्" title="Export Data" aria-label="Export Data Options">Export</button>
-            <div class="dropdown-content">
-                <div class="dropdown-submenu">
-                    <span data-en="Excel Export" data-ne="एक्सेल निर्यात" aria-label="Excel Export Options">Excel Export</span>
-                    <div class="submenu-content">
-                        <a href="#" id="exportExcelNotes" data-en="Export Notes" data-ne="नोटहरू निर्यात गर्नुहोस्" aria-label="Export Notes to Excel">Export Notes</a>
-                        <a href="#" id="exportExcelFinance" data-en="Export Finance" data-ne="वित्त निर्यात गर्नुहोस्" aria-label="Export Finance to Excel">Export Finance</a>
-                        <a href="#" id="exportExcelMonth" data-en="Export Month" data-ne="महिना निर्यात गर्नुहोस्" aria-label="Export Current Month to Excel">Export Month</a>
-                        <a href="#" id="exportExcelYear" data-en="Export Year" data-ne="वर्ष निर्यात गर्नुहोस्" aria-label="Export Current Year to Excel">Export Year</a>
-                        <a href="#" id="exportExcelHoliday" data-en="Export Holiday" data-ne="बिदा निर्यात गर्नुहोस्" aria-label="Export Holidays to Excel">Export Holiday</a>
-                    </div>
-                </div>
-                <div class="dropdown-submenu">
-                    <span data-en="PDF Export" data-ne="PDF निर्यात" aria-label="PDF Export Options">PDF Export</span>
-                    <div class="submenu-content">
-                        <a href="#" id="exportPDFNotes" data-en="Export Notes" data-ne="नोटहरू निर्यात गर्नुहोस्" aria-label="Export Notes to PDF">Export Notes</a>
-                        <a href="#" id="exportPDFFinance" data-en="Export Finance" data-ne="वित्त निर्यात गर्नुहोस्" aria-label="Export Finance to PDF">Export Finance</a>
-                        <a href="#" id="exportPDFMonth" data-en="Export Month" data-ne="महिना निर्यात गर्नुहोस्" aria-label="Export Current Month to PDF">Export Month</a>
-                        <a href="#" id="exportPDFYear" data-en="Export Year" data-ne="वर्ष निर्यात गर्नुहोस्" aria-label="Export Current Year to PDF">Export Year</a>
-                        <a href="#" id="exportPDFHoliday" data-en="Export Holiday" data-ne="बिदा निर्यात गर्नुहोस्" aria-label="Export Holidays to PDF">Export Holiday</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="dropdown">
-            <button class="import-btn" data-en="Import" data-ne="आयात गर्नुहोस्" title="Import Data" aria-label="Import Data Options">Import</button>
-            <div class="dropdown-content">
-                <div class="dropdown-submenu">
-                    <span data-en="Excel Import" data-ne="एक्सेल आयात" aria-label="Excel Import Options">Excel Import</span>
-                    <div class="submenu-content">
-                        <label class="import-label">
-                            <span data-en="Import Notes" data-ne="नोटहरू आयात गर्नुहोस्" aria-label="Import Notes from Excel">Import Notes</span>
-                            <input type="file" id="importExcelNotes" accept=".xlsx,.xls" style="display:none;">
-                        </label>
-                        <label class="import-label">
-                            <span data-en="Import Finance" data-ne="वित्त आयात गर्नुहोस्" aria-label="Import Finance from Excel">Import Finance</span>
-                            <input type="file" id="importExcelFinance" accept=".xlsx,.xls" style="display:none;">
-                        </label>
-                        <label class="import-label">
-                            <span data-en="Import Month" data-ne="महिना आयात गर्नुहोस्" aria-label="Import Month Data from Excel">Import Month</span>
-                            <input type="file" id="importExcelMonth" accept=".xlsx,.xls" style="display:none;">
-                        </label>
-                        <label class="import-label">
-                            <span data-en="Import Year" data-ne="वर्ष आयात गर्नुहोस्" aria-label="Import Year Data from Excel">Import Year</span>
-                            <input type="file" id="importExcelYear" accept=".xlsx,.xls" style="display:none;">
-                        </label>
-                        <label class="import-label">
-                            <span data-en="Import Holiday" data-ne="बिदा आयात गर्नुहोस्" aria-label="Import Holidays from Excel">Import Holiday</span>
-                            <input type="file" id="importExcelHoliday" accept=".xlsx,.xls" style="display:none;">
-                        </label>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <button id="viewNotes" class="notes-btn" data-en="View Notes" data-ne="नोटहरू हेर्नुहोस्" title="View All Notes" aria-label="View Notes">View Notes</button>
-        <button id="viewFinance" class="finance-btn" data-en="View Finances" data-ne="वित्त हेर्नुहोस्" title="View Financial Reports" aria-label="View Finances">View Finances</button>
+    <div id="notesModal">
+        <h2 data-en="Notes for this Month">Notes for this Month</h2>
+        <div id="notesList"></div>
+        <button id="closeModal" data-en="Close">Close</button>
     </div>
-    <div class="today-date-row">
-        <span id="todayNepaliDate" class="blink" aria-live="polite"></span>
-        <span id="todayEnglishDate" class="blink" aria-live="polite"></span>
-    </div>
-    <div class="month-tabs" id="monthTabs" role="tablist"></div>
-    <div class="language-toggle">
-        <button id="languageToggle" data-en="Toggle Language (EN/NE)" data-ne="भाषा टगल गर्नुहोस् (EN/NE)" title="Switch between English and Nepali" aria-label="Toggle Language">Toggle Language (EN/NE)</button>
-    </div>
-    <div class="calendar-container">
-        <div class="mini-calendar" id="miniCalendarLeft" aria-label="Previous Month Mini Calendar">
-            <h3 id="miniLeftTitle"></h3>
-            <div class="calendar-grid" id="miniCalendarGridLeft"></div>
+    <div id="reportModal">
+        <h2 data-en="Financial Reports">Financial Reports</h2>
+        <div class="report-tabs" role="tablist">
+            <button id="summaryTab" class="report-tab active" role="tab" aria-selected="true" tabindex="0" data-en="Summary">Summary</button>
+            <button id="categoryTab" class="report-tab" role="tab" aria-selected="false" tabindex="-1" data-en="Category Breakdown">Category Breakdown</button>
+            <button id="trendsTab" class="report-tab" role="tab" aria-selected="false" tabindex="-1" data-en="Trends">Trends</button>
         </div>
-        <div class="main-calendar">
-            <div class="weather-section" id="weatherSection">
-                <h3 data-en="Weather Today" data-ne="आजको मौसम" aria-label="Weather Information">Weather Today</h3>
-                <div id="weatherInfo" aria-live="polite"></div>
-            </div>
-            <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Main Calendar"></div>
-            <div class="summary-section">
-                <h3 data-en="Monthly Summary" data-ne="मासिक सारांश" aria-label="Monthly Summary">Monthly Summary</h3>
-                <p id="monthlySummary" aria-live="polite"></p>
-            </div>
-            <div class="reminders-section">
-                <h3 data-en="Upcoming Reminders" data-ne="आगामी रिमाइन्डरहरू" aria-label="Upcoming Reminders">Upcoming Reminders</h3>
-                <ul id="upcomingReminders" aria-live="polite"></ul>
-            </div>
-            <div class="footnote">
-                <h3 data-en="Holidays this Month" data-ne="यस महिनाका बिदाहरू" aria-label="Holidays this Month">Holidays this Month</h3>
-                <ul id="holidayList" aria-live="polite"></ul>
-            </div>
-        </div>
-        <div class="mini-calendar" id="miniCalendarRight" aria-label="Next Month Mini Calendar">
-            <h3 id="miniRightTitle"></h3>
-            <div class="calendar-grid" id="miniCalendarGridRight"></div>
-        </div>
+        <div id="reportContent"></div>
+        <button id="closeReportModal" data-en="Close">Close</button>
     </div>
-    <div class="note-form-container" id="noteForm" role="dialog" aria-label="Add or Edit Entry Form">
-        <h3><span data-en="Add Entry for" data-ne="प्रवेश थप्नुहोस्" aria-label="Add Entry for Date">Add Entry for</span> <span id="selectedDate" aria-live="polite">Date</span></h3>
-        <select id="entryType" aria-label="Entry Type">
-            <option value="note" data-en="Note" data-ne="नोट">Note</option>
-            <option value="income" data-en="Income" data-ne="आय">Income</option>
-            <option value="expense" data-en="Expense" data-ne="खर्च">Expense</option>
-        </select>
-        <input type="text" id="noteTitle" placeholder="Note Title / Amount" data-en="Note Title / Amount" data-ne="नोट शीर्षक / रकम" aria-label="Note Title or Amount" required>
-        <input type="time" id="noteTime" aria-label="Entry Time">
-        <label><input type="checkbox" id="setReminder" aria-label="Set Reminder Checkbox"> <span data-en="Set Reminder" data-ne="रिमाइन्डर सेट गर्नुहोस्">Set Reminder</span></label>
-        <select id="reminderTime" style="display:none;" aria-label="Reminder Time Before Event">
-            <option value="0" data-en="At Event Time" data-ne="घटना समयमा">At Event Time</option>
-            <option value="10" data-en="10 Minutes Before" data-ne="१० मिनेट अघि">10 Minutes Before</option>
-            <option value="60" data-en="1 Hour Before" data-ne="१ घण्टा अघि">1 Hour Before</option>
-            <option value="1440" data-en="1 Day Before" data-ne="१ दिन अघि">1 Day Before</option>
-        </select>
-        <select id="recurringOption" aria-label="Recurring Option">
-            <option value="none" data-en="None" data-ne="कुनै पनि होइन">None</option>
-            <option value="daily" data-en="Daily" data-ne="दैनिक">Daily</option>
-            <option value="weekly" data-en="Weekly" data-ne="साप्ताहिक">Weekly</option>
-            <option value="monthly" data-en="Monthly" data-ne="मासिक">Monthly</option>
-        </select>
-        <textarea id="noteDescription" placeholder="Description" data-en="Description" data-ne="विवरण" rows="3" aria-label="Entry Description"></textarea>
-        <select id="entryCategory" style="display:none;" aria-label="Entry Category">
-            <!-- Categories will be populated dynamically -->
-        </select>
-        <div class="form-buttons">
-            <button id="saveNote" data-en="Save Entry" data-ne="प्रवेश बचत गर्नुहोस्" aria-label="Save Entry">Save Entry</button>
-            <button id="editEntry" data-en="Edit Entry" data-ne="प्रवेश सम्पादन गर्नुहोस्" aria-label="Edit Entry">Edit Entry</button>
-            <button id="closeEntry" data-en="Close Entry" data-ne="प्रवेश बन्द गर्नुहोस्" aria-label="Close Entry Form">Close Entry</button>
-        </div>
-    </div>
-    <div class="notes-modal" id="notesModal" role="dialog" aria-label="Saved Notes Modal">
-        <div class="notes-modal-content">
-            <span class="close-modal" id="closeModal" aria-label="Close Notes Modal">×</span>
-            <h2 data-en="Saved Notes" data-ne="बचत गरिएका नोटहरू" aria-label="Saved Notes Title">Saved Notes</h2>
-            <div class="filter-section">
-                <select id="monthFilter" aria-label="Filter Notes by Month">
-                    <option value="all" data-en="All Months" data-ne="सबै महिनाहरू">All Months</option>
-                </select>
-                <input type="date" id="notesDateFrom" aria-label="Filter Notes From Date">
-                <input type="date" id="notesDateTo" aria-label="Filter Notes To Date">
-                <select id="notesTypeFilter" aria-label="Filter Notes by Type">
-                    <option value="all" data-en="All Types" data-ne="सबै प्रकार">All Types</option>
-                    <option value="note" data-en="Note" data-ne="नोट">Note</option>
-                    <option value="income" data-en="Income" data-ne="आय">Income</option>
-                    <option value="expense" data-en="Expense" data-ne="खर्च">Expense</option>
-                </select>
-                <select id="notesSortBy" aria-label="Sort Notes">
-                    <option value="date-asc" data-en="Date (Asc)" data-ne="मिति (बढ्दो)">Date (Asc)</option>
-                    <option value="date-desc" data-en="Date (Desc)" data-ne="मिति (घट्दो)">Date (Desc)</option>
-                    <option value="title-asc" data-en="Title (Asc)" data-ne="शीर्षक (बढ्दो)">Title (Asc)</option>
-                    <option value="title-desc" data-en="Title (Desc)" data-ne="शीर्षक (घट्दो)">Title (Desc)</option>
-                </select>
-                <input type="text" id="notesSearch" placeholder="Search notes..." data-en="Search notes..." data-ne="नोटहरू खोज्नुहोस्..." aria-label="Search Notes">
-            </div>
-            <div class="notes-list" id="notesList" aria-live="polite"></div>
-            <div class="action-buttons">
-                <button class="clear-btn" id="clearNotes" data-en="Clear All Notes" data-ne="सबै नोटहरू मेटाउनुहोस्" aria-label="Clear All Notes">Clear All Notes</button>
-            </div>
-        </div>
-    </div>
-    <div class="report-modal" id="reportModal" role="dialog" aria-label="Financial Reports Modal">
-        <div class="report-modal-content">
-            <span class="close-modal" id="closeReportModal" aria-label="Close Financial Reports Modal">×</span>
-            <h2 data-en="Financial Reports" data-ne="वित्तीय रिपोर्टहरू" aria-label="Financial Reports Title">Financial Reports</h2>
-            <div class="filter-section">
-                <input type="date" id="financeDateFrom" aria-label="Filter Finances From Date">
-                <input type="date" id="financeDateTo" aria-label="Filter Finances To Date">
-                <select id="financeCategoryFilter" aria-label="Filter Finances by Category">
-                    <option value="all" data-en="All Categories" data-ne="सबै श्रेणीहरू">All Categories</option>
-                    <!-- Categories will be populated dynamically -->
-                </select>
-                <select id="financeSortBy" aria-label="Sort Finances">
-                    <option value="date-asc" data-en="Date (Asc)" data-ne="मिति (बढ्दो)">Date (Asc)</option>
-                    <option value="date-desc" data-en="Date (Desc)" data-ne="मिति (घट्दो)">Date (Desc)</option>
-                    <option value="amount-asc" data-en="Amount (Asc)" data-ne="रकम (बढ्दो)">Amount (Asc)</option>
-                    <option value="amount-desc" data-en="Amount (Desc)" data-ne="रकम (घट्दो)">Amount (Desc)</option>
-                </select>
-                <input type="text" id="financeSearch" placeholder="Search finances..." data-en="Search finances..." data-ne="वित्त खोज्नुहोस्..." aria-label="Search Finances">
-                <button id="manageCategories" data-en="Manage Categories" data-ne="श्रेणीहरू व्यवस्थापन गर्नुहोस्" aria-label="Manage Categories">Manage Categories</button>
-            </div>
-            <div class="report-tabs" role="tablist">
-                <div class="report-tab active" id="weeklySummaryTab" data-en="Weekly Summary" data-ne="साप्ताहिक सारांश" role="tab" aria-selected="true" tabindex="0">Weekly Summary</div>
-                <div class="report-tab" id="weeklyReportTab" data-en="Weekly" data-ne="साप्ताहिक" role="tab" aria-selected="false" tabindex="-1">Weekly</div>
-                <div class="report-tab" id="monthlyReportTab" data-en="Monthly" data-ne="मासिक" role="tab" aria-selected="false" tabindex="-1">Monthly</div>
-                <div class="report-tab" id="yearlyReportTab" data-en="Yearly" data-ne="वार्षिक" role="tab" aria-selected="false" tabindex="-1">Yearly</div>
-                <div class="report-tab" id="analyticsTab" data-en="Analytics" data-ne="विश्लेषण" role="tab" aria-selected="false" tabindex="-1">Analytics</div>
-            </div>
-            <div class="report-content" id="reportContent" aria-live="polite"></div>
-        </div>
-    </div>
-    <div class="category-modal" id="categoryModal" role="dialog" aria-label="Manage Categories Modal">
-        <div class="category-modal-content">
-            <span class="close-modal" id="closeCategoryModal" aria-label="Close Manage Categories Modal">×</span>
-            <h2 data-en="Manage Categories" data-ne="श्रेणीहरू व्यवस्थापन गर्नुहोस्" aria-label="Manage Categories Title">Manage Categories</h2>
-            <div class="category-form">
-                <input type="text" id="newCategory" placeholder="New Category Name" data-en="New Category Name" data-ne="नयाँ श्रेणी नाम" aria-label="New Category Name" required>
-                <button id="addCategory" data-en="Add Category" data-ne="श्रेणी थप्नुहोस्" aria-label="Add New Category">Add Category</button>
-            </div>
-            <div class="category-list" id="categoryList" aria-live="polite"></div>
-        </div>
-    </div>
-    <div class="alert" id="alertMessage" aria-live="assertive"></div>
-    <div class="loading-spinner" id="loadingSpinner" aria-label="Loading">
-        <div class="spinner"></div>
-    </div>
-    <div class="footer">Calendar Concept and Design by Santosh Phuyal</div>
-    <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2" src="script.js"></script>
+    <div id="alertMessage" class="alert"></div>
+    <input type="file" id="importExcelNotes" style="display: none;" accept=".json">
 </body>
 </html>
