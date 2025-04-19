@@ -1,957 +1,353 @@
-:root {
-    --primary: #d32f2f;
-    --secondary: #0288d1;
-    --accent: #fbc02d;
-    --bg: #f5f5f5;
-    --card-bg: #fff;
-    --text: #212121;
-    --text-light: #757575;
-    --income: #4caf50;
-    --expense: #d32f2f;
-    --export: #ff5722;
-    --import: #2196f3;
-    --birthday: #ab47bc;
-    --weather: #26a69a;
-}
-
-body.dark-theme {
-    --bg: #212121;
-    --card-bg: #333;
-    --text: #e0e0e0;
-    --text-light: #b0b0b0;
-    --primary: #ef5350;
-    --secondary: #42a5f5;
-    --accent: #ffee58;
-    --income: #66bb6a;
-    --expense: #ef5350;
-    --export: #ff8a65;
-    --import: #64b5f6;
-    --birthday: #ce93d8;
-    --weather: #4db6ac;
-}
-
 * {
-    box-sizing: border-box;
     margin: 0;
     padding: 0;
+    box-sizing: border-box;
 }
 
 body {
-    font-family: 'Poppins', sans-serif;
-    background: var(--bg);
-    color: var(--text);
+    font-family: Arial, sans-serif;
     line-height: 1.6;
-    transition: background 0.3s, color 0.3s;
+    padding: 20px;
 }
 
-.header {
-    background: linear-gradient(135deg, var(--primary), var(--secondary));
-    color: #fff;
+header {
     text-align: center;
-    padding: 1.5rem;
-    font-size: 1.5rem;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
-    position: relative;
+    margin-bottom: 20px;
 }
 
-.month-tabs {
+.controls {
     display: flex;
-    overflow-x: auto;
-    background: var(--card-bg);
-    padding: 1rem;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    margin: 1rem 0;
-    min-height: 60px;
-    flex-wrap: nowrap;
-    justify-content: flex-start;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.nav {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 20px;
+}
+
+main {
+    display: flex;
+    gap: 20px;
+}
+
+#calendarSection {
+    flex: 3;
+    min-height: 400px;
+    background-color: #f9f9f9;
+    padding: 10px;
+}
+
+aside {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+aside section {
+    margin-bottom: 20px;
+}
+
+aside button {
+    margin-bottom: 10px;
+    padding: 10px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+aside button:hover {
+    background: #45a049;
+}
+
+#monthTabs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+    min-height: 40px;
 }
 
 .month-tab {
-    padding: 0.5rem 1rem;
-    margin: 0.5rem;
+    padding: 10px;
+    background: #f0f0f0;
     cursor: pointer;
-    border-radius: 25px;
-    background: #e3f2fd;
-    font-weight: 500;
-    font-size: 0.9rem;
-    transition: .3s;
-    white-space: nowrap;
+    border-radius: 5px;
 }
 
 .month-tab.active {
-    background: var(--secondary);
-    color: #fff;
-    transform: scale(1.05);
-}
-
-.month-tab:hover {
-    background: #bbdefb;
-    transform: scale(1.03);
+    background: #4CAF50;
+    color: white;
 }
 
 .month-tab.nepali {
-    font-family: 'Noto Sans Devanagari', sans-serif;
+    font-family: 'Preeti', sans-serif;
 }
 
-.nav-buttons {
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    gap: 0.5rem;
-}
-
-.nav-buttons.left {
-    left: 1rem;
-}
-
-.nav-buttons.right {
-    right: 1rem;
-}
-
-.nav-buttons button {
-    background: #fff;
-    color: var(--secondary);
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: .3s;
-}
-
-.nav-buttons button:hover {
-    background: var(--accent);
-    color: var(--text);
-}
-
-.nav-buttons button:disabled {
-    background: #ddd;
-    cursor: not-allowed;
-}
-
-.calendar-container {
-    max-width: 1600px;
-    margin: 2rem auto;
-    padding: 1.5rem;
-    background: var(--card-bg);
-    border-radius: 12px;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.1);
-    display: grid;
-    grid-template-columns: 1fr 2fr 1fr;
-    gap: 96px;
-}
-
-.mini-calendar, .main-calendar {
-    width: 100%;
-    max-width: 300px;
-}
-
-.main-calendar {
-    max-width: 600px;
-}
-
-.weather-section {
-    margin-bottom: 1rem;
-    padding: 1rem;
-    background: var(--card-bg);
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-}
-
-.weather-section h3 {
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
-    color: var(--weather);
-}
-
-.weather-info {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 0.9rem;
-}
-
-.weather-info img {
-    width: 24px;
-    height: 24px;
-}
-
-.calendar-grid {
+#calendarGrid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 0.5rem;
-    text-align: center;
-}
-
-.mini-calendar .calendar-grid {
-    gap: 0.2rem;
+    gap: 5px;
+    min-height: 300px;
 }
 
 .calendar-day {
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    padding: 0.75rem;
-    cursor: pointer;
-    min-height: 100px;
-    border-radius: 8px;
-    transition: .3s;
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: center;
     position: relative;
-    user-select: none;
 }
 
-body.dark-theme .calendar-day {
-    background: #444;
-    border-color: #555;
+.calendar-day.header {
+    background: #4CAF50;
+    color: white;
+    font-weight: bold;
 }
 
-.calendar-day:hover {
-    background: #f5f5f5;
-    transform: translateY(-2px);
-}
-
-body.dark-theme .calendar-day:hover {
-    background: #555;
+.calendar-day.empty {
+    background: #f0f0f0;
 }
 
 .calendar-day.today {
-    background: #e3f2fd;
-    border: 2px solid var(--secondary);
+    background: #ffeb3b;
 }
-
-body.dark-theme .calendar-day.today {
-    background: #0288d1;
-}
-
-.calendar-day:focus {
-    outline: 2px solid var(--secondary);
-    outline-offset: 2px;
-}
-
-.saturday { background: #b0bec5; color: #fff; }
-.dashain { background: #d81b60; color: #fff; }
-.tihar { background: #7b1fa2; color: #fff; }
-.national { background: #4caf50; color: #fff; }
-.ethnic { background: #ff9800; color: #fff; }
-.women { background: #f06292; color: #fff; }
-.education { background: #0288d1; color: #fff; }
-.jatra { background: #ab47bc; color: #fff; }
-.observed { background: #689f38; color: #fff; }
-.disability { background: #26a69a; color: #fff; }
-.birth { background: #ef6c00; color: #fff; }
 
 .bs-date {
-    font-weight: 600;
-    font-size: 1rem;
-    margin-bottom: 0.2rem;
-}
-
-.mini-calendar .bs-date {
-    font-size: 0.5rem;
+    font-size: 1.2em;
+    font-weight: bold;
 }
 
 .greg-date {
-    font-size: 0.7rem;
-    color: var(--text-light);
-    margin-bottom: 0.2rem;
-}
-
-.mini-calendar .greg-date {
-    font-size: 0.4rem;
+    font-size: 0.8em;
+    color: #666;
 }
 
 .festival {
-    font-size: 0.65rem;
-    margin-top: 0.2rem;
-    font-family: 'Noto Sans Devanagari', sans-serif;
+    display: block;
+    font-size: 0.8em;
+    color: #d32f2f;
 }
 
-.festival-tooltip, .note-tooltip, .finance-tooltip, .reminder-tooltip {
-    display: none;
+.festival-tooltip {
+    visibility: hidden;
     position: absolute;
-    background: var(--text);
-    color: #fff;
-    padding: 0.5rem;
-    border-radius: 6px;
-    font-size: 0.7rem;
-    z-index: 100;
-    top: -2rem;
+    top: -20px;
     left: 50%;
     transform: translateX(-50%);
-    white-space: nowrap;
+    background: #333;
+    color: white;
+    padding: 5px;
+    border-radius: 3px;
+    font-size: 0.7em;
 }
 
-.mini-calendar .festival-tooltip, .mini-calendar .note-tooltip, .mini-calendar .finance-tooltip, .mini-calendar .reminder-tooltip {
-    font-size: 0.4rem;
-    top: -1rem;
+.calendar-day:hover .festival-tooltip {
+    visibility: visible;
 }
 
-.calendar-day:hover .festival-tooltip, .calendar-day:hover .note-tooltip, .calendar-day:hover .finance-tooltip, .calendar-day:hover .reminder-tooltip {
-    display: block;
-}
-
-.note-indicator, .income-indicator, .expense-indicator, .reminder-indicator {
-    position: absolute;
-    top: 0.4rem;
-    right: 0.4rem;
-    width: 8px;
-    height: 8px;
+.note-indicator, .reminder-indicator {
+    width: 10px;
+    height: 10px;
     border-radius: 50%;
+    position: absolute;
+    top: 5px;
+    right: 5px;
 }
 
-.note-indicator { background: var(--secondary); }
-.income-indicator { background: var(--income); }
-.expense-indicator { background: var(--expense); }
-.reminder-indicator { background: #ff9800; }
-
-.mini-calendar .note-indicator, .mini-calendar .income-indicator, .mini-calendar .expense-indicator, .mini-calendar .reminder-indicator {
-    top: 0.2rem;
-    right: 0.2rem;
-    width: 5px;
-    height: 5px;
+.note-indicator {
+    background: #2196F3;
 }
 
-.footnote, .summary-section, .reminders-section {
-    margin-top: 1rem;
-    padding: 1rem;
-    background: var(--card-bg);
-    border-top: 1px solid #e0e0e0;
+.reminder-indicator {
+    background: #FF9800;
 }
 
-.footnote h3, .summary-section h3, .reminders-section h3 {
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
-    color: var(--primary);
+.note-tooltip, .reminder-tooltip {
+    visibility: hidden;
+    position: absolute;
+    top: -20px;
+    right: 15px;
+    background: #333;
+    color: white;
+    padding: 5px;
+    border-radius: 3px;
+    font-size: 0.7em;
 }
 
-.footnote ul, .reminders-section ul {
-    list-style: none;
-    font-size: 0.8rem;
+.calendar-day:hover .note-tooltip,
+.calendar-day:hover .reminder-tooltip {
+    visibility: visible;
 }
 
-.footnote li, .reminders-section li {
-    margin-bottom: 0.2rem;
-}
-
-.footnote .nepali, .reminders-section .nepali {
-    font-family: 'Noto Sans Devanagari', sans-serif;
-}
-
-.summary-section p {
-    font-size: 0.9rem;
-    color: var(--text);
-}
-
-.note-form-container {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: var(--card-bg);
-    box-shadow: 0 -4px 12px rgba(0,0,0,0.1);
-    padding: 1.5rem;
+#noteForm, #notesModal, #reportModal {
     display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0,0,0,0.3);
     z-index: 1000;
 }
 
-.note-form-container.active {
-    display: block;
-}
-
-.note-form-container h3 {
-    margin: 0 0 1rem;
-    font-size: 1.1rem;
-    color: var(--primary);
-}
-
-.note-form-container select, .note-form-container input, .note-form-container textarea {
-    width: 100%;
-    margin-bottom: 1rem;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.9rem;
-}
-
-.note-form-container select.nepali {
-    font-family: 'Noto Sans Devanagari', sans-serif;
-}
-
-.note-form-container .form-buttons {
+#noteForm form, #notesModal, #reportModal {
     display: flex;
-    gap: 0.75rem;
-    justify-content: flex-end;
+    flex-direction: column;
+    gap: 10px;
 }
 
-.note-form-container button {
-    background: var(--secondary);
-    color: #fff;
-    border: none;
-    padding: 0.75rem 1.5rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: .3s;
+#noteForm input, #noteForm select, #noteForm button {
+    padding: 5px;
 }
 
-.note-form-container button:hover {
-    background: #0277bd;
-}
-
-.note-form-container #closeEntry {
-    background: #757575;
-}
-
-.note-form-container #closeEntry:hover {
-    background: #616161;
-}
-
-.note-form-container #editEntry {
-    background: #4caf50;
-}
-
-.note-form-container #editEntry:hover {
-    background: #388e3c;
-}
-
-.note-form-container .nepali {
-    font-family: 'Noto Sans Devanagari', sans-serif;
-}
-
-.notes-modal, .report-modal, .category-modal {
-    display: none;
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.7);
-    z-index: 2000;
-}
-
-.notes-modal-content, .report-modal-content, .category-modal-content {
-    background: var(--card-bg);
-    margin: 5% auto;
-    padding: 1.5rem;
-    width: 90%;
-    max-width: 800px;
-    border-radius: 12px;
-    position: relative;
-}
-
-.notes-modal-content h2, .report-modal-content h2, .category-modal-content h2 {
-    margin: 0 0 1rem;
-    color: var(--primary);
-    font-size: 1.3rem;
-}
-
-.notes-modal-content .nepali, .report-modal-content .nepali, .category-modal-content .nepali {
-    font-family: 'Noto Sans Devanagari', sans-serif;
-}
-
-.close-modal {
-    position: absolute;
-    top: 1rem;
-    right: 1rem;
-    font-size: 1.5rem;
-    cursor: pointer;
-    color: var(--text-light);
-}
-
-.close-modal:hover {
-    color: var(--primary);
-}
-
-.filter-section, .report-tabs {
-    margin-bottom: 1rem;
+#notesList, #reminderList, #holidayList, #summaryList {
     display: flex;
-    gap: 1rem;
-    align-items: center;
-    flex-wrap: wrap;
+    flex-direction: column;
+    gap: 5px;
 }
 
-.filter-section select, .filter-section input {
-    padding: 0.75rem;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.9rem;
+.note-item, .reminder-item, .holiday-item {
+    display: flex;
+    gap: 10px;
 }
 
-.filter-section select {
-    width: 100%;
-    max-width: 200px;
-}
-
-.filter-section input {
-    flex: 1;
-    min-width: 150px;
-}
-
-.filter-section select.nepali {
-    font-family: 'Noto Sans Devanagari', sans-serif;
+.note-date, .reminder-date, .holiday-date {
+    font-weight: bold;
 }
 
 .report-tabs {
     display: flex;
-    gap: 1rem;
+    gap: 10px;
+    margin-bottom: 20px;
 }
 
 .report-tab {
-    padding: 0.5rem 1rem;
+    padding: 10px;
+    background: #f0f0f0;
     cursor: pointer;
-    border-radius: 8px;
-    background: #e3f2fd;
-    font-weight: 500;
-    font-size: 0.9rem;
-    transition: .3s;
+    border-radius: 5px;
 }
 
 .report-tab.active {
-    background: var(--secondary);
-    color: #fff;
-}
-
-.report-tab:hover, .report-tab:focus {
-    background: #bbdefb;
-    outline: none;
-}
-
-.report-tab:focus {
-    outline: 2px solid var(--secondary);
-    outline-offset: 2px;
-}
-
-.notes-list, .report-content, .category-list {
-    max-height: 400px;
-    overflow-y: auto;
-    margin-bottom: 1rem;
-}
-
-.note-item, .category-item {
-    border-bottom: 1px solid #eee;
-    padding: 0.75rem 0;
-    position: relative;
-}
-
-.note-item:last-child, .category-item:last-child {
-    border-bottom: none;
-}
-
-.note-actions, .category-actions {
-    position: absolute;
-    top: 0.75rem;
-    right: 0;
-    display: flex;
-    gap: 0.5rem;
-}
-
-.edit-note, .edit-category {
-    cursor: pointer;
-    font-size: 0.8rem;
-}
-
-.edit-note, .edit-category {
-    color: var(--secondary);
-}
-
-.edit-note:hover, .edit-category:hover {
-    color: #0277bd;
-}
-
-.delete-note, .delete-category {
-    color: var(--primary);
-}
-
-.delete-note:hover, .delete-category:hover {
-    color: #b71c1c;
-}
-
-.action-buttons {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    justify-content: space-between;
-}
-
-.category-form {
-    display: flex;
-    gap: 0.5rem;
-    margin-bottom: 1rem;
-}
-
-.category-form input {
-    flex: 1;
-    padding: 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.9rem;
-}
-
-.category-form button {
-    background: var(--secondary);
-    color: #fff;
-    border: none;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-weight: 600;
-    transition: .3s;
-}
-
-.category-form button:hover {
-    background: #0277bd;
-}
-
-.year-filter {
-    text-align: center;
-    margin: 1rem 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
-}
-
-.year-filter select {
-    padding: 0.75rem;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.9rem;
-    background: #e3f2fd;
-}
-
-.year-filter select:focus {
-    outline: 2px solid var(--secondary);
-    outline-offset: 2px;
-}
-
-.year-filter button {
-    background: var(--secondary);
-    color: #fff;
-    border: none;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    cursor: pointer;
-    font-family: 'Poppins', sans-serif;
-    font-size: 0.9rem;
-    transition: .3s;
-}
-
-.year-filter button:hover, .year-filter button:focus {
-    background: #0277bd;
-    outline: none;
-}
-
-.year-filter button:focus {
-    outline: 2px solid var(--secondary);
-    outline-offset: 2px;
-}
-
-.year-filter .notes-btn {
-    background: #0288d1;
-}
-
-.year-filter .notes-btn:hover {
-    background: #0277bd;
-}
-
-.year-filter .finance-btn {
-    background: #4caf50;
-}
-
-.year-filter .finance-btn:hover {
-    background: #388e3c;
-}
-
-.year-filter .backup-btn {
-    background: #fbc02d;
-}
-
-.year-filter .backup-btn:hover {
-    background: #f9a825;
-}
-
-.year-filter .restore-btn {
-    background: #7b1fa2;
-}
-
-.year-filter .restore-btn:hover {
-    background: #6a1b9a;
-}
-
-.year-filter .export-btn {
-    background: var(--export);
-}
-
-.year-filter .export-btn:hover {
-    background: #e64a19;
-}
-
-.year-filter .import-btn {
-    background: var(--import);
-}
-
-.year-filter .import-btn:hover {
-    background: #1976d2;
-}
-
-.year-filter #addBirthdayReminder {
-    background: var(--birthday);
-}
-
-.year-filter #addBirthdayReminder:hover {
-    background: #8e24aa;
-}
-
-.year-filter button.nepali {
-    font-family: 'Noto Sans Devanagari', sans-serif;
-}
-
-.dropdown {
-    position: relative;
-    display: inline-block;
-}
-
-.dropdown-content {
-    display: none;
-    position: absolute;
-    background-color: var(--card-bg);
-    min-width: 200px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    z-index: 1;
-    border-radius: 8px;
-}
-
-.dropdown:hover .dropdown-content {
-    display: block;
-}
-
-.dropdown-submenu {
-    position: relative;
-}
-
-.dropdown-submenu span {
-    display: block;
-    padding: 12px 16px;
-    color: var(--text);
-    text-decoration: none;
-    font-size: 0.9rem;
-    cursor: pointer;
-}
-
-.dropdown-submenu span:hover {
-    background-color: #ddd;
-}
-
-.submenu-content {
-    display: none;
-    position: absolute;
-    left: 100%;
-    top: 0;
-    background-color: var(--card-bg);
-    min-width: 200px;
-    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-    border-radius: 8px;
-}
-
-.dropdown-submenu:hover .submenu-content {
-    display: block;
-}
-
-.submenu-content a, .submenu-content label {
-    color: var(--text);
-    padding: 12px 16px;
-    text-decoration: none;
-    display: block;
-    font-size: 0.9rem;
-    cursor: pointer;
-}
-
-.submenu-content a:hover, .submenu-content label:hover {
-    background-color: #ddd;
-}
-
-.import-label {
-    display: block;
-    width: 100%;
-}
-
-.today-date-row {
-    text-align: center;
-    margin: 0.5rem 0;
-    font-size: 1rem;
-    color: var(--text);
-    display: flex;
-    justify-content: center;
-    gap: 2rem;
-}
-
-.blink {
-    animation: blink 1s infinite;
-}
-
-@keyframes blink {
-    0%, 100% { opacity: 1; }
-    50% { opacity: 0.3; }
-}
-
-.today-date-row .nepali {
-    font-family: 'Noto Sans Devanagari', sans-serif;
-}
-
-.footer {
-    text-align: center;
-    padding: 1rem;
-    background: var(--card-bg);
-    color: var(--text-light);
-    font-size: 0.8rem;
-    margin-top: 2rem;
-    box-shadow: 0 -2px 8px rgba(0,0,0,0.1);
+    background: #4CAF50;
+    color: white;
 }
 
 .report-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 1rem;
 }
 
 .report-table th, .report-table td {
     border: 1px solid #ddd;
-    padding: 0.5rem;
+    padding: 5px;
     text-align: left;
-    font-size: 0.9rem;
 }
 
 .report-table th {
-    background: var(--secondary);
-    color: #fff;
-}
-
-.chart-container {
-    margin: 1rem 0;
-    padding: 1rem;
-    background: var(--card-bg);
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-
-.chart-container canvas {
-    max-width: 100%;
+    background: #4CAF50;
+    color: white;
 }
 
 .alert {
     position: fixed;
-    top: 1rem;
-    right: 1rem;
-    padding: 1rem;
-    border-radius: 8px;
-    color: #fff;
-    font-size: 0.9rem;
-    z-index: 3000;
+    top: 20px;
+    right: 20px;
+    padding: 10px;
+    border-radius: 5px;
     display: none;
 }
 
 .alert.success {
-    background: #4caf50;
+    background: #4CAF50;
+    color: white;
 }
 
 .alert.error {
-    background: #d32f2f;
+    background: #f44336;
+    color: white;
 }
 
-.loading-spinner {
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    display: none;
-    z-index: 4000;
+.dark-theme {
+    background: #333;
+    color: #fff;
 }
 
-.spinner {
-    border: 4px solid #f3f3f3;
-    border-top: 4px solid var(--secondary);
-    border-radius: 50%;
-    width: 40px;
-    height: 40px;
-    animation: spin 1s linear infinite;
+.dark-theme header, .dark-theme aside section, .dark-theme .calendar-day {
+    background: #444;
+    color: #fff;
 }
 
-@keyframes spin {
-    0% { transform: rotate(0deg); }
-    100% { transform: rotate(360deg); }
+.dark-theme .month-tab {
+    background: #555;
+}
+
+.dark-theme .month-tab.active {
+    background: #4CAF50;
+}
+
+.dark-theme .calendar-day {
+    border-color: #666;
+}
+
+.dark-theme .calendar-day.header {
+    background: #4CAF50;
+}
+
+.dark-theme .calendar-day.empty {
+    background: #555;
+}
+
+.dark-theme .calendar-day.today {
+    background: #ffeb3b;
+    color: #000;
+}
+
+.dark-theme #noteForm, .dark-theme #notesModal, .dark-theme #reportModal {
+    background: #444;
+}
+
+.dark-theme .report-tab {
+    background: #555;
+}
+
+.dark-theme .report-tab.active {
+    background: #4CAF50;
+}
+
+.dark-theme .report-table th {
+    background: #4CAF50;
 }
 
 @media (max-width: 768px) {
-    .header {
-        font-size: 1.2rem;
+    main {
+        flex-direction: column;
     }
-    .month-tabs {
+
+    #calendarSection, aside {
+        flex: 1;
+    }
+
+    #calendarSection {
+        min-height: 300px;
+    }
+
+    #monthTabs {
+        justify-content: center;
+    }
+
+    .controls {
         flex-wrap: wrap;
         justify-content: center;
     }
-    .month-tab {
-        padding: 0.4rem 0.8rem;
-        font-size: 0.8rem;
-    }
-    .calendar-day {
-        min-height: 80px;
-        padding: 0.5rem;
-    }
-    .bs-date {
-        font-size: 0.9rem;
-    }
-    .greg-date {
-        font-size: 0.6rem;
-    }
-    .festival {
-        font-size: 0.55rem;
-    }
-    .nav-buttons {
-        flex-direction: column;
-    }
-    .calendar-container {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto auto auto;
-        gap: 1rem;
-    }
-    .mini-calendar, .main-calendar {
-        max-width: 100%;
-    }
-    .notes-modal-content, .report-modal-content, .category-modal-content {
-        margin: 10% auto;
-        width: 95%;
-    }
-    .year-filter {
-        flex-direction: column;
-    }
-    .today-date-row {
-        flex-direction: column;
-        gap: 0.5rem;
-    }
-    .note-form-container .form-buttons {
-        flex-direction: column;
-    }
-    .filter-section {
-        flex-direction: column;
-        align-items: stretch;
-    }
-    .dropdown-content, .submenu-content {
-        position: static;
+
+    aside button {
         width: 100%;
-        box-shadow: none;
-    }
-    .dropdown-submenu:hover .submenu-content {
-        display: none;
-    }
-    .dropdown-submenu span::after {
-        content: ' ▼';
-    }
-    .dropdown-submenu.active .submenu-content {
-        display: block;
     }
 }
