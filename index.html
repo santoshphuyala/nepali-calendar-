@@ -1278,3 +1278,114 @@
     </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nepali Calendar with Enhanced Features</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        :root {
+            --primary: #d32f2f;
+            --secondary: #0288d1;
+            --accent: #fbc02d;
+            --bg: #f5f5f5;
+            --card-bg: #fff;
+            --text: #212121;
+            --text-light: #757575;
+            --income: #4caf50;
+            --expense: #d32f2f;
+        }
+
+        [data-theme='dark'] {
+            --bg: #212121;
+            --card-bg: #333text: #f5f5f5;
+            --text-light: #bbb;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            transition: background 0.3s, color 0.3s;
+        }
+
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: #fff;
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 1.5rem;
+            position: relative;
+        }
+
+        .dark-mode-toggle {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: #fff;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .notification {
+            padding: 1rem;
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            margin: 1rem auto;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Other styles remain unchanged */
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span class="header-title">Nepali Calendar</span>
+        <button class="dark-mode-toggle" id="darkModeToggle">Dark Mode</button>
+    </div>
+
+    <div class="calendar-container">
+        <div class="calendar-grid" id="calendarGrid"></div>
+        <div class="notification">
+            <button id="requestNotificationPermission">Enable Notifications</button>
+        </div>
+    </div>
+
+    <script>
+        // Dark Mode Toggle
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        darkModeToggle.addEventListener('click', () => {
+            const theme = document.body.dataset.theme === 'dark' ? '' : 'dark';
+            document.body.dataset.theme = theme;
+        });
+
+        // Offline Mode Check
+        window.addEventListener('load', () => {
+            if (!navigator.onLine) {
+                alert('Offline Mode Activated');
+            }
+        });
+
+        // Expanded Event Categories
+        const expandedCategories = [
+            'Food', 'Salary', 'Rent', 'Utilities', 'Transport', 'Entertainment', 'Freelance', 'Healthcare', 'Education', 'Other'
+        ];
+
+        // Notification Reminder
+        const requestNotificationPermission = document.getElementById('requestNotificationPermission');
+        requestNotificationPermission.addEventListener('click', () => {
+            Notification.requestPermission().then((permission) => {
+                if (permission === 'granted') {
+                    new Notification('Notifications Enabled', { body: 'You will now receive reminders!' });
+                }
+            });
+        });
+    </script>
+</body>
+</html>
