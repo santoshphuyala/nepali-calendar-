@@ -1174,3 +1174,115 @@
     </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nepali Calendar 2082</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        /* Your existing CSS styles go here */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: #f5f5f5;
+            color: #212121;
+            margin: 0;
+            padding: 0;
+        }
+        .header {
+            text-align: center;
+            background: #0288d1;
+            color: #fff;
+            padding: 1.5rem;
+        }
+        .export-buttons {
+            text-align: center;
+            margin: 1rem;
+        }
+        .export-buttons button {
+            margin: 0.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .export-buttons button:hover {
+            background: #0277bd;
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Nepali Calendar 2082</h1>
+    </div>
+
+    <!-- Export Buttons -->
+    <div class="export-buttons">
+        <button id="exportNotesPDF">Export Notes to PDF</button>
+        <button id="exportNotesExcel">Export Notes to Excel</button>
+        <button id="exportFinancePDF">Export Finance to PDF</button>
+        <button id="exportFinanceExcel">Export Finance to Excel</button>
+    </div>
+
+    <script>
+        // Sample Notes and Finance Data for Testing
+        const notes = [
+            { date: "2082-01-01", type: "note", title: "Meeting with team", description: "Project discussion", category: "" },
+            { date: "2082-01-02", type: "income", title: "5000", description: "Freelance payment", category: "Freelance" },
+            { date: "2082-01-03", type: "expense", title: "1500", description: "Lunch with client", category: "Food" }
+        ];
+
+        // Export to PDF Function
+        function exportToPDF(data, title) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text(title, 10, 10);
+
+            let y = 20; // Starting Y position
+            data.forEach((item, index) => {
+                doc.text(`${index + 1}. ${item.date} - ${item.type}: ${item.title}`, 10, y);
+                if (item.description) doc.text(`    Description: ${item.description}`, 10, y + 10);
+                if (item.category) doc.text(`    Category: ${item.category}`, 10, y + 20);
+                y += 30; // Move down for the next entry
+            });
+
+            doc.save(`${title}.pdf`);
+        }
+
+        // Export to Excel Function
+        function exportToExcel(data, title) {
+            const worksheet = XLSX.utils.json_to_sheet(data);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Sheet1");
+            XLSX.writeFile(workbook, `${title}.xlsx`);
+        }
+
+        // Event Listeners for Export Buttons
+        document.getElementById('exportNotesPDF').addEventListener('click', () => {
+            const filteredNotes = notes.filter(note => note.type === 'note');
+            exportToPDF(filteredNotes, 'Notes');
+        });
+
+        document.getElementById('exportNotesExcel').addEventListener('click', () => {
+            const filteredNotes = notes.filter(note => note.type === 'note');
+            exportToExcel(filteredNotes, 'Notes');
+        });
+
+        document.getElementById('exportFinancePDF').addEventListener('click', () => {
+            const financeData = notes.filter(note => note.type === 'income' || note.type === 'expense');
+            exportToPDF(financeData, 'Finance');
+        });
+
+        document.getElementById('exportFinanceExcel').addEventListener('click', () => {
+            const financeData = notes.filter(note => note.type === 'income' || note.type === 'expense');
+            exportToExcel(financeData, 'Finance');
+        });
+    </script>
+</body>
+</html>
