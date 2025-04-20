@@ -426,7 +426,10 @@
 
         function renderCalendar() {
             let month = calendarData[currentYear][currentMonthIndex];
-            currentMonth.textContent = `${isNepali ? monthsNepali[currentMonthIndex] : month.name} ${currentYear} BS`;
+            // Update the header to include the month name and year
+            currentMonth.textContent = isNepali 
+                ? `${monthsNepali[currentMonthIndex]} ${currentYear} BS` 
+                : `${month.name} ${currentYear} BS`;
             calendarGrid.innerHTML = '';
 
             // Add weekday headers
