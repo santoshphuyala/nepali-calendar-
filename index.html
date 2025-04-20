@@ -94,6 +94,10 @@
         .year-filter .notes-btn:hover{background:#0277bd}
         .year-filter .finance-btn{background:#4caf50}
         .year-filter .finance-btn:hover{background:#388e3c}
+        .year-filter .backup-btn{background:#ff9800}
+        .year-filter .backup-btn:hover{background:#fb8c00}
+        .year-filter .restore-btn{background:#ab47bc}
+        .year-filter .restore-btn:hover{background:#9c27b0}
         .year-filter button.nepali{font-family:'Noto Sans Devanagari',sans-serif}
         .today-date-row{text-align:center;margin:0.5rem 0;font-size:1rem;color:var(--text);display:flex;justify-content:center;gap:2rem}
         .blink{animation:blink 1s infinite}
@@ -137,6 +141,9 @@
         <button id="todayButton" data-en="Today" data-ne="आज">Today</button>
         <button id="viewNotes" class="notes-btn" data-en="View Notes" data-ne="नोटहरू हेर्नुहोस्">View Notes</button>
         <button id="viewFinance" class="finance-btn" data-en="View Finances" data-ne="वित्त हेर्नुहोस्">View Finances</button>
+        <button id="backupData" class="backup-btn" data-en="Backup" data-ne="ब्याकअप">Backup</button>
+        <button id="restoreData" class="restore-btn" data-en="Restore" data-ne="पुनर्स्थापना">Restore</button>
+        <input type="file" id="restoreFileInput" style="display:none" accept=".json">
     </div>
     <div class="today-date-row">
         <span id="todayNepaliDate" class="blink"></span>
@@ -347,6 +354,9 @@
         const todayButton = document.getElementById('todayButton');
         const viewNotes = document.getElementById('viewNotes');
         const viewFinance = document.getElementById('viewFinance');
+        const backupData = document.getElementById('backupData');
+        const restoreData = document.getElementById('restoreData');
+        const restoreFileInput = document.getElementById('restoreFileInput');
         const languageToggle = document.getElementById('languageToggle');
         const noteForm = document.getElementById('noteForm');
         const entryType = document.getElementById('entryType');
@@ -951,6 +961,64 @@
             }
         }
 
+        // Backup and Restore Functions
+        function backupNotes() {
+            const dataStr = JSON.stringify(notes);
+            const blob = new Blob([dataStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `nepali_calendar_notes_${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function restoreNotes(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const faculty = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedNotes = JSON.parse(e.target.result);
+                    if (!Array.isArray(importedNotes)) {
+                        alert(isNepali ? 'अमान्य फाइल ढाँचा' : 'Invalid file format');
+                        return;
+                    }
+
+                    // Validate imported notes structure
+                    const validNotes = importedNotes.filter(note => 
+                        note.date && 
+                        ['note', 'income', 'expense'].includes(note.type) && 
+                        note.title
+                    );
+
+                    // Incrementally add new notes (append, don't overwrite)
+                    notes = [...notes, ...validNotes];
+
+                    try {
+                        localStorage.setItem('notes', JSON.stringify(notes));
+                    } catch (e) {
+                        alert(isNepali ? 'नोटहरू पुनर्स्थापना गर्न असफल: भण्डारण सीमा नाघ्यो' : 'Failed to restore notes: Storage limit exceeded');
+                        notes = JSON.parse(localStorage.getItem('notes')) || [];
+                        return;
+                    }
+
+                    renderCalendar();
+                    renderNotesList();
+                    renderFinancialRecords();
+                    renderMonthlySummary();
+                    alert(isNepali ? 'नोटहरू सफलतापूर्वक पुनर्स्थापना गरियो' : 'Notes restored successfully');
+                } catch (err) {
+                    alert(isNepali ? 'फाइल पढ्न असफल: अमान्य JSON' : 'Failed to read file: Invalid JSON');
+                }
+                restoreFileInput.value = ''; // Reset file input
+            };
+            reader.readAsText(file);
+        }
+
         // Event listeners
         prevMonth.addEventListener('click', () => {
             if (currentMonthIndex === 0) {
@@ -1003,6 +1071,14 @@
             reportModal.style.display = 'block';
             renderReport('weekly');
         });
+
+        backupData.addEventListener('click', backupNotes);
+
+        restoreData.addEventListener('click', () => {
+            restoreFileInput.click();
+        });
+
+        restoreFileInput.addEventListener('change', restoreNotes);
 
         languageToggle.addEventListener('click', toggleLanguage);
 
