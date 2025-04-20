@@ -77,9 +77,9 @@
         .report-tab{padding:0.5rem 1rem;cursor:pointer;border-radius:8px;background:#e3f2fd;font-weight:500;font-size:0.9rem;transition:.3s}
         .report-tab.active{background:var(--secondary);color:#fff}
         .report-tab:hover{background:#bbdefb}
-        .notes-list,.report-content{max-height:400px;overflow-y:auto;margin-bottom:1rem}
-        .note-item{border-bottom:1px solid #eee;padding:0.75rem 0;position:relative}
-        .note-item:last-child{border-bottom:none}
+        .notes-list,.finance-list,.report-content{max-height:400px;overflow-y:auto;margin-bottom:1rem}
+        .note-item,.finance-item{border-bottom:1px solid #eee;padding:0.75rem 0;position:relative}
+        .note-item:last-child,.finance-item:last-child{border-bottom:none}
         .note-actions{position:absolute;top:0.75rem;right:0;display:flex;gap:0.5rem}
         .edit-note,.delete-note{cursor:pointer;font-size:0.8rem}
         .edit-note{color:var(--secondary)}.edit-note:hover{color:#0277bd}
@@ -209,6 +209,7 @@
                 <div class="report-tab active" id="weeklyReportTab" data-en="Weekly" data-ne="साप्ताहिक">Weekly</div>
                 <div class="report-tab" id="monthlyReportTab" data-en="Monthly" data-ne="मासिक">Monthly</div>
                 <div class="report-tab" id="yearlyReportTab" data-en="Yearly" data-ne="वार्षिक">Yearly</div>
+                <div class="report-tab" id="recordsReportTab" data-en="Records" data-ne="रेकर्डहरू">Records</div>
             </div>
             <div class="report-content" id="reportContent"></div>
         </div>
@@ -270,10 +271,52 @@
                 { month: 11, day: 1, name: "Chaitra Navaratri", nepali: "चैत्र नवरात्री", type: "national" } // Chaitra 1
             ],
             2082: [
+                // Public Holidays on National Festivals
                 { month: 0, day: 1, name: "Nepali New Year", nepali: "नेपाली नयाँ वर्ष", type: "national" }, // Baishakh 1
-                { month: 6, day: 2, name: "Dashain", nepali: "दशैं", type: "dashain" }, // Kartik 2
-                { month: 6, day: 16, name: "Tihar", nepali: "तिहार", type: "tihar" }, // Kartik 16
-                { month: 7, day: 1, name: "Constitution Day", nepali: "संविधान दिवस", type: "national" } // Mangsir 1
+                { month: 0, day: 5, name: "Ram Navami", nepali: "राम नवमी", type: "national" }, // Baishakh 5
+                { month: 0, day: 29, name: "Ubauli Parva", nepali: "उबौली पर्व", type: "ethnic" }, // Baishakh 29 (Kirant Community)
+                { month: 0, day: 29, name: "Buddha Jayanti", nepali: "बुद्ध जयन्ती", type: "birth" }, // Baishakh 29
+                { month: 0, day: 18, name: "May Day Labour Day", nepali: "मे दिवस", type: "observed" }, // Baishakh 18
+                { month: 1, day: 15, name: "Republic Day", nepali: "गणतन्त्र दिवस", type: "observed" }, // Jestha 15
+                { month: 3, day: 24, name: "Rakshya Bandhan", nepali: "रक्षा बन्धन", type: "national" }, // Shrawan 24
+                { month: 3, day: 25, name: "Gai Jatra", nepali: "गाईजात्रा", type: "jatra" }, // Shrawan 25 (Kathmandu Valley)
+                { month: 3, day: 25, name: "Gaijatra", nepali: "गाईजात्रा", type: "ethnic" }, // Shrawan 25 (Newars)
+                { month: 3, day: 31, name: "Krishna Janmashtami", nepali: "कृष्ण जन्माष्टमी", type: "national" }, // Shrawan 31
+                { month: 4, day: 10, name: "Haritalika (Teej)", nepali: "हरितालिका (तीज)", type: "women" }, // Bhadra 10
+                { month: 4, day: 15, name: "Gaura Parva", nepali: "गौरा पर्व", type: "ethnic" }, // Bhadra 15
+                { month: 4, day: 21, name: "Indra Jatra", nepali: "इन्द्रजात्रा", type: "jatra" }, // Bhadra 21 (Kathmandu Valley)
+                { month: 4, day: 30, name: "Jitiya Festival", nepali: "जितिया पर्व", type: "women" }, // Bhadra 30
+                { month: 5, day: 3, name: "Constitution Day", nepali: "संविधान दिवस", type: "observed" }, // Ashoj 3
+                { month: 5, day: 6, name: "Ghatasthapana", nepali: "घटस्थापना", type: "national" }, // Ashoj 6
+                { month: 5, day: 13, name: "Dashain", nepali: "दशैं", type: "dashain" }, // Ashoj 13
+                { month: 5, day: 14, name: "Dashain", nepali: "दशैं", type: "dashain" }, // Ashoj 14
+                { month: 5, day: 15, name: "Dashain", nepali: "दशैं", type: "dashain" }, // Ashoj 15
+                { month: 5, day: 16, name: "Dashain", nepali: "दशैं", type: "dashain" }, // Ashoj 16
+                { month: 5, day: 17, name: "Dashain", nepali: "दशैं", type: "dashain" }, // Ashoj 17
+                { month: 5, day: 18, name: "Dashain", nepali: "दशैं", type: "dashain" }, // Ashoj 18
+                { month: 6, day: 3, name: "Tihar", nepali: "तिहार", type: "tihar" }, // Kartik 3
+                { month: 6, day: 4, name: "Tihar", nepali: "तिहार", type: "tihar" }, // Kartik 4
+                { month: 6, day: 5, name: "Tihar", nepali: "तिहार", type: "tihar" }, // Kartik 5
+                { month: 6, day: 6, name: "Tihar", nepali: "तिहार", type: "tihar" }, // Kartik 6
+                { month: 6, day: 7, name: "Tihar", nepali: "तिहार", type: "tihar" }, // Kartik 7
+                { month: 6, day: 10, name: "Chhath", nepali: "छठ", type: "national" }, // Kartik 10
+                { month: 6, day: 25, name: "Falgunanda Jayanti", nepali: "फाल्गुनन्द जयन्ती", type: "birth" }, // Kartik 25 (Kirants)
+                { month: 7, day: 17, name: "International Day of Persons with Disabilities", nepali: "अन्तर्राष्ट्रिय अपाङ्गता दिवस", type: "disability" }, // Mangsir 17
+                { month: 7, day: 18, name: "Udhauli Parva, Yomari Punhi", nepali: "उधौली पर्व, योमरी पुन्ही", type: "national" }, // Mangsir 18
+                { month: 8, day: 10, name: "Christmas", nepali: "क्रिसमस", type: "national" }, // Poush 10
+                { month: 8, day: 15, name: "Tamu Lhosar", nepali: "तमु ल्होसार", type: "national" }, // Poush 15
+                { month: 8, day: 27, name: "Prithvi Jayanti", nepali: "पृथ्वी जयन्ती", type: "birth" }, // Poush 27
+                { month: 9, day: 1, name: "Maghi Parva/Maghe Sankranti", nepali: "माघी पर्व/माघे संक्रान्ति", type: "national" }, // Magh 1
+                { month: 9, day: 5, name: "Sonam Lhosar", nepali: "सोनाम ल्होसार", type: "national" }, // Magh 5
+                { month: 9, day: 9, name: "Basanta Panchami/Saraswati Puja", nepali: "बसन्त पञ्चमी/सरस्वती पूजा", type: "education" }, // Magh 9
+                { month: 9, day: 16, name: "Martyrs Day", nepali: "शहीद दिवस", type: "observed" }, // Magh 16
+                { month: 10, day: 3, name: "Maha Shivaratri", nepali: "महाशिवरात्रि", type: "national" }, // Falgun 3
+                { month: 10, day: 6, name: "Gyalpo Lhosar", nepali: "ग्याल्पो ल्होसार", type: "national" }, // Falgun 6
+                { month: 10, day: 7, name: "Democracy Day", nepali: "प्रजातन्त्र दिवस", type: "observed" }, // Falgun 7
+                { month: 10, day: 18, name: "Fagu Purnima", nepali: "फागु पूर्णिमा", type: "national" }, // Falgun 18 (56 districts)
+                { month: 10, day: 24, name: "International Women's Day", nepali: "अन्तर्राष्ट्रिय महिला दिवस", type: "observed" }, // Falgun 24
+                { month: 11, day: 1, name: "Fagu Purnima", nepali: "फागु पूर्णिमा", type: "national" }, // Chaitra 1 (remaining districts)
+                { month: 11, day: 4, name: "Ghode Jatra", nepali: "घोडेजात्रा", type: "jatra" } // Chaitra 4 (Kathmandu Valley)
             ],
             2083: [
                 { month: 0, day: 1, name: "Nepali New Year", nepali: "नेपाली नयाँ वर्ष", type: "national" }, // Baishakh 1
@@ -326,6 +369,7 @@
         const weeklyReportTab = document.getElementById('weeklyReportTab');
         const monthlyReportTab = document.getElementById('monthlyReportTab');
         const yearlyReportTab = document.getElementById('yearlyReportTab');
+        const recordsReportTab = document.getElementById('recordsReportTab');
         const monthlySummary = document.getElementById('monthlySummary');
         const holidayList = document.getElementById('holidayList');
         const todayNepaliDate = document.getElementById('todayNepaliDate');
@@ -528,6 +572,7 @@
             renderMonthTabs();
             renderCalendar();
             renderNotesList();
+            renderFinancialRecords();
             renderReport('weekly');
         }
 
@@ -563,6 +608,7 @@
             noteForm.classList.remove('active');
             renderCalendar();
             renderNotesList();
+            renderFinancialRecords();
             renderMonthlySummary();
         }
 
@@ -619,6 +665,7 @@
             noteForm.classList.remove('active');
             renderCalendar();
             renderNotesList();
+            renderFinancialRecords();
             renderMonthlySummary();
             editingNoteIndex = null;
         }
@@ -634,21 +681,23 @@
                 }
                 renderCalendar();
                 renderNotesList();
+                renderFinancialRecords();
                 renderMonthlySummary();
             }
         }
 
         function renderNotesList() {
             notesList.innerHTML = '';
-            let filteredNotes = notes;
+            let filteredNotes = notes.filter(note => note.type === 'note');
             if (monthFilter.value !== 'all') {
-                filteredNotes = notes.filter(note => note.date.startsWith(monthFilter.value));
+                filteredNotes = filteredNotes.filter(note => note.date.startsWith(monthFilter.value));
             }
             if (filteredNotes.length === 0) {
                 notesList.innerHTML = `<p>${isNepali ? 'कुनै नोटहरू छैनन्' : 'No notes available'}</p>`;
                 return;
             }
             filteredNotes.forEach((note, index) => {
+                let globalIndex = notes.findIndex(n => n === note);
                 let noteItem = document.createElement('div');
                 noteItem.classList.add('note-item');
                 noteItem.innerHTML = `
@@ -660,10 +709,39 @@
                         <span class="delete-note" data-en="Delete" data-ne="मेटाउन">${isNepali ? 'मेटाउन' : 'Delete'}</span>
                     </div>
                 `;
-                noteItem.querySelector('.edit-note').addEventListener('click', () => editNote(index));
-                noteItem.querySelector('.delete-note').addEventListener('click', () => deleteNote(index));
+                noteItem.querySelector('.edit-note').addEventListener('click', () => editNote(globalIndex));
+                noteItem.querySelector('.delete-note').addEventListener('click', () => deleteNote(globalIndex));
                 notesList.appendChild(noteItem);
             });
+        }
+
+        function renderFinancialRecords() {
+            reportContent.innerHTML = '';
+            let filteredNotes = notes.filter(note => note.type === 'income' || note.type === 'expense');
+            if (filteredNotes.length === 0) {
+                reportContent.innerHTML = `<p>${isNepali ? 'कुनै वित्तीय रेकर्डहरू छैनन्' : 'No financial records available'}</p>`;
+                return;
+            }
+            let financeList = document.createElement('div');
+            financeList.classList.add('finance-list');
+            filteredNotes.forEach((note, index) => {
+                let globalIndex = notes.findIndex(n => n === note);
+                let financeItem = document.createElement('div');
+                financeItem.classList.add('finance-item');
+                financeItem.innerHTML = `
+                    <div><strong>${note.date}</strong> - ${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR</div>
+                    <div>${isNepali ? 'विवरण' : 'Description'}: ${note.description || ''}</div>
+                    <div>${isNepali ? 'श्रेणी' : 'Category'}: ${note.category || ''}</div>
+                    <div class="note-actions">
+                        <span class="edit-note" data-en="Edit" data-ne="सम्पादन">${isNepali ? 'सम्पादन' : 'Edit'}</span>
+                        <span class="delete-note" data-en="Delete" data-ne="मेटाउन">${isNepali ? 'मेटाउन' : 'Delete'}</span>
+                    </div>
+                `;
+                financeItem.querySelector('.edit-note').addEventListener('click', () => editNote(globalIndex));
+                financeItem.querySelector('.delete-note').addEventListener('click', () => deleteNote(globalIndex));
+                financeList.appendChild(financeItem);
+            });
+            reportContent.appendChild(financeList);
         }
 
         function renderReport(type) {
@@ -674,6 +752,11 @@
                 en: { period: 'Period', income: 'Income (NPR)', expense: 'Expense (NPR)', balance: 'Balance (NPR)', day: 'Day', dailySummary: 'Daily Summary', noData: 'No financial data available for this period' },
                 ne: { period: 'अवधि', income: 'आय (NPR)', expense: 'खर्च (NPR)', balance: 'ब्यालेन्स (NPR)', day: 'दिन', dailySummary: 'दैनिक सारांश', noData: 'यस अवधिको लागि कुनै वित्तीय डेटा उपलब्ध छैन' }
             };
+
+            if (type === 'records') {
+                renderFinancialRecords();
+                return;
+            }
 
             if (type === 'weekly') {
                 let weeks = {};
@@ -952,6 +1035,7 @@
                 }
                 renderCalendar();
                 renderNotesList();
+                renderFinancialRecords();
                 renderMonthlySummary();
             }
         });
@@ -960,6 +1044,7 @@
             weeklyReportTab.classList.add('active');
             monthlyReportTab.classList.remove('active');
             yearlyReportTab.classList.remove('active');
+            recordsReportTab.classList.remove('active');
             renderReport('weekly');
         });
 
@@ -967,6 +1052,7 @@
             weeklyReportTab.classList.remove('active');
             monthlyReportTab.classList.add('active');
             yearlyReportTab.classList.remove('active');
+            recordsReportTab.classList.remove('active');
             renderReport('monthly');
         });
 
@@ -974,7 +1060,16 @@
             weeklyReportTab.classList.remove('active');
             monthlyReportTab.classList.remove('active');
             yearlyReportTab.classList.add('active');
+            recordsReportTab.classList.remove('active');
             renderReport('yearly');
+        });
+
+        recordsReportTab.addEventListener('click', () => {
+            weeklyReportTab.classList.remove('active');
+            monthlyReportTab.classList.remove('active');
+            yearlyReportTab.classList.remove('active');
+            recordsReportTab.classList.add('active');
+            renderReport('records');
         });
 
         // Initialize
