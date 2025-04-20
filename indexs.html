@@ -1,0 +1,928 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="referrer" content="strict-origin-when-cross-origin">
+    <meta http-equiv="Content-Security-Policy" content="
+        default-src 'self';
+        script-src 'self' 'nonce-OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2' 'strict-dynamic' https://cdnjs.cloudflare.com;
+        img-src 'self' blob: data: https://assets.grok.com https://imgs.search.brave.com;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
+        font-src 'self' https://fonts.gstatic.com;
+        connect-src 'self' https://api.grok.com;
+    ">
+    <title>Nepali Calendar 2082</title>
+    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root{--primary:#d32f2f;--secondary:#0288d1;--accent:#fbc02d;--bg:#f5f5f5;--card-bg:#fff;--text:#212121;--text-light:#757575;--income:#4caf50;--expense:#d32f2f}
+        *{box-sizing:border-box;margin:0;padding:0}
+        body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
+        .header{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;text-align:center;padding:1.5rem;font-size:1.5rem;box-shadow:0 4px 12px rgba(0,0,0,0.2);position:relative}
+        .month-tabs{display:flex;overflow-x:auto;background:var(--card-bg);padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.1);margin:1rem 0}
+        .month-tab{padding:0.5rem 1rem;margin:0.5rem;cursor:pointer;border-radius:25px;background:#e3f2fd;font-weight:500;font-size:0.9rem;transition:.3s}
+        .month-tab.active{background:var(--secondary);color:#fff;transform:scale(1.05)}
+        .month-tab:hover{background:#bbdefb;transform:scale(1.03)}
+        .month-tab.nepali{font-family:'Noto Sans Devanagari',sans-serif}
+        .nav-buttons{position:absolute;top:50%;transform:translateY(-50%);display:flex;gap:0.5rem}
+        .nav-buttons.left{left:1rem}.nav-buttons.right{right:1rem}
+        .nav-buttons button{background:#fff;color:var(--secondary);border:none;padding:0.5rem 1rem;border-radius:8px;cursor:pointer;font-weight:600;transition:.3s}
+        .nav-buttons button:hover{background:var(--accent);color:var(--text)}
+        .nav-buttons button:disabled{background:#ddd;cursor:not-allowed}
+        .calendar-container{max-width:1600px;margin:2rem auto;padding:1.5rem;background:var(--card-bg);border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.1);display:grid;grid-template-columns:1fr 2fr 1fr;gap:96px}
+        .mini-calendar,.main-calendar{width:100%;max-width:300px}
+        .main-calendar{max-width:600px}
+        .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:0.5rem;text-align:center}
+        .mini-calendar .calendar-grid{gap:0.2rem}
+        .calendar-day{background:#fff;border:1px solid #e0e0e0;padding:0.75rem;cursor:pointer;min-height:100px;border-radius:8px;transition:.3s;position:relative;user-select:none}
+        .mini-calendar .calendar-day{padding:0.2rem;min-height:30px;font-size:0.5rem}
+        .calendar-day:hover{background:#f5f5f5;transform:translateY(-2px)}
+        .calendar-day.today{background:#e3f2fd;border:2px solid var(--secondary)}
+        .saturday{background:#b0bec5;color:#fff}.dashain{background:#d81b60;color:#fff}.tihar{background:#7b1fa2;color:#fff}
+        .national{background:#4caf50;color:#fff}.ethnic{background:#ff9800;color:#fff}.women{background:#f06292;color:#fff}
+        .education{background:#0288d1;color:#fff}.jatra{background:#ab47bc;color:#fff}.observed{background:#689f38;color:#fff}
+        .disability{background:#26a69a;color:#fff}.birth{background:#ef6c00;color:#fff}
+        .bs-date{font-weight:600;font-size:1rem;margin-bottom:0.2rem}.mini-calendar .bs-date{font-size:0.5rem}
+        .greg-date{font-size:0.7rem;color:var(--text-light);margin-bottom:0.2rem}.mini-calendar .greg-date{font-size:0.4rem}
+        .festival{font-size:0.65rem;margin-top:0.2rem;font-family:'Noto Sans Devanagari',sans-serif}
+        .festival-tooltip,.note-tooltip,.finance-tooltip{display:none;position:absolute;background:var(--text);color:#fff;padding:0.5rem;border-radius:6px;font-size:0.7rem;z-index:100;top:-2rem;left:50%;transform:translateX(-50%);white-space:nowrap}
+        .mini-calendar .festival-tooltip,.mini-calendar .note-tooltip,.mini-calendar .finance-tooltip{font-size:0.4rem;top:-1rem}
+        .calendar-day:hover .festival-tooltip,.calendar-day:hover .note-tooltip,.calendar-day:hover .finance-tooltip{display:block}
+        .note-indicator,.income-indicator,.expense-indicator{position:absolute;top:0.4rem;right:0.4rem;width:8px;height:8px;border-radius:50%}
+        .note-indicator{background:var(--secondary)}.income-indicator{background:var(--income)}.expense-indicator{background:var(--expense)}
+        .mini-calendar .note-indicator,.mini-calendar .income-indicator,.mini-calendar .expense-indicator{top:0.2rem;right:0.2rem;width:5px;height:5px}
+        .footnote,.summary-section{margin-top:1rem;padding:1rem;background:var(--card-bg);border-top:1px solid #e0e0e0}
+        .footnote h3,.summary-section h3{font-size:1rem;margin-bottom:0.5rem;color:var(--primary)}
+        .footnote ul{list-style:none;font-size:0.8rem}.footnote li{margin-bottom:0.2rem}
+        .footnote .nepali{font-family:'Noto Sans Devanagari',sans-serif}
+        .summary-section p{font-size:0.9rem;color:var(--text)}
+        .note-form-container{position:fixed;bottom:0;left:0;width:100%;background:var(--card-bg);box-shadow:0 -4px 12px rgba(0,0,0,0.1);padding:1.5rem;display:none;z-index:1000}
+        .note-form-container.active{display:block}
+        .note-form-container h3{margin:0 0 1rem;font-size:1.1rem;color:var(--primary)}
+        .note-form-container select,.note-form-container input,.note-form-container textarea{width:100%;margin-bottom:1rem;padding:0.75rem;border:1px solid #ddd;border-radius:8px;font-family:'Poppins',sans-serif;font-size:0.9rem}
+        .note-form-container select.nepali{font-family:'Noto Sans Devanagari',sans-serif}
+        .note-form-container .form-buttons{display:flex;gap:0.75rem;justify-content:flex-end}
+        .note-form-container button{background:var(--secondary);color:#fff;border:none;padding:0.75rem 1.5rem;border-radius:8px;cursor:pointer;font-weight:600;transition:.3s}
+        .note-form-container button:hover{background:#0277bd}
+        .note-form-container #closeEntry{background:#757575}
+        .note-form-container #closeEntry:hover{background:#616161}
+        .note-form-container #editEntry{background:#4caf50}
+        .note-form-container #editEntry:hover{background:#388e3c}
+        .note-form-container .nepali{font-family:'Noto Sans Devanagari',sans-serif}
+        .notes-modal,.report-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:2000}
+        .notes-modal-content,.report-modal-content{background:var(--card-bg);margin:5% auto;padding:1.5rem;width:90%;max-width:800px;border-radius:12px;position:relative}
+        .notes-modal-content h2,.report-modal-content h2{margin:0 0 1rem;color:var(--primary);font-size:1.3rem}
+        .notes-modal-content .nepali,.report-modal-content .nepali{font-family:'Noto Sans Devanagari',sans-serif}
+        .close-modal{position:absolute;top:1rem;right:1rem;font-size:1.5rem;cursor:pointer;color:var(--text-light)}
+        .filter-section,.report-tabs{margin-bottom:1rem}
+        .filter-section select{padding:0.75rem;border-radius:8px;border:1px solid #ddd;width:100%;max-width:200px;font-family:'Poppins',sans-serif;font-size:0.9rem}
+        .filter-section select.nepali{font-family:'Noto Sans Devanagari',sans-serif}
+        .report-tabs{display:flex;gap:1rem}
+        .report-tab{padding:0.5rem 1rem;cursor:pointer;border-radius:8px;background:#e3f2fd;font-weight:500;font-size:0.9rem;transition:.3s}
+        .report-tab.active{background:var(--secondary);color:#fff}
+        .report-tab:hover{background:#bbdefb}
+        .notes-list,.report-content{max-height:400px;overflow-y:auto;margin-bottom:1rem}
+        .note-item{border-bottom:1px solid #eee;padding:0.75rem 0;position:relative}
+        .note-item:last-child{border-bottom:none}
+        .note-actions{position:absolute;top:0.75rem;right:0;display:flex;gap:0.5rem}
+        .edit-note,.delete-note{cursor:pointer;font-size:0.8rem}
+        .edit-note{color:var(--secondary)}.edit-note:hover{color:#0277bd}
+        .delete-note{color:var(--primary)}.delete-note:hover{color:#b71c1c}
+        .action-buttons{display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:space-between}
+        .year-filter{text-align:center;margin:1rem 0;display:flex;align-items:center;justify-content:center;gap:0.5rem}
+        .year-filter select{padding:0.75rem;border-radius:8px;border:1px solid #ddd;font-family:'Poppins',sans-serif;font-size:0.9rem;background:#e3f2fd}
+        .year-filter select:focus{outline:none;border-color:var(--secondary)}
+        .year-filter button{background:var(--secondary);color:#fff;border:none;padding:0.75rem 1rem;border-radius:8px;cursor:pointer;font-family:'Poppins',sans-serif;font-size:0.9rem;transition:.3s}
+        .year-filter button:hover{background:#0277bd}
+        .year-filter .notes-btn{background:#0288d1}
+        .year-filter .notes-btn:hover{background:#0277bd}
+        .year-filter .finance-btn{background:#4caf50}
+        .year-filter .finance-btn:hover{background:#388e3c}
+        .year-filter button.nepali{font-family:'Noto Sans Devanagari',sans-serif}
+        .today-date-row{text-align:center;margin:0.5rem 0;font-size:1rem;color:var(--text);display:flex;justify-content:center;gap:2rem}
+        .blink{animation:blink 1s infinite}
+        @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+        .today-date-row .nepali{font-family:'Noto Sans Devanagari',sans-serif}
+        .footer{text-align:center;padding:1rem;background:var(--card-bg);color:var(--text-light);font-size:0.8rem;margin-top:2rem;box-shadow:0 -2px 8px rgba(0,0,0,0.1)}
+        .report-table{width:100%;border-collapse:collapse;margin-bottom:1rem}
+        .report-table th,.report-table td{border:1px solid #ddd;padding:0.5rem;text-align:left;font-size:0.9rem}
+        .report-table th{background:var(--secondary);color:#fff}
+        @media (max-width:768px){
+            .header{font-size:1.2rem}
+            .month-tab{padding:0.4rem 0.8rem;font-size:0.8rem}
+            .calendar-day{min-height:80px}
+            .nav-buttons{flex-direction:column}
+            .calendar-container{grid-template-columns:1fr;grid-template-rows:auto auto auto;gap:1rem}
+            .mini-calendar,.main-calendar{max-width:100%}
+            .notes-modal-content,.report-modal-content{margin:10% auto;width:95%}
+            .year-filter{flex-direction:column}
+            .today-date-row{flex-direction:column;gap:0.5rem}
+            .note-form-container .form-buttons{flex-direction:column}
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <span class="header-title" data-en="Nepali Calendar" data-ne="नेपाली पात्रो">Nepali Calendar</span> - <span id="currentMonth">2082 BS</span>
+        <div class="nav-buttons left">
+            <button id="prevMonth" data-en="Previous" data-ne="अघिल्लो">Previous</button>
+        </div>
+        <div class="nav-buttons right">
+            <button id="nextMonth" data-en="Next" data-ne="पछिल्लो">Next</button>
+        </div>
+    </div>
+    <div class="year-filter">
+        <select id="yearFilter">
+            <option value="2081">2081 BS</option>
+            <option value="2082" selected>2082 BS</option>
+            <option value="2083">2083 BS</option>
+        </select>
+        <button id="todayButton" data-en="Today" data-ne="आज">Today</button>
+        <button id="viewNotes" class="notes-btn" data-en="View Notes" data-ne="नोटहरू हेर्नुहोस्">View Notes</button>
+        <button id="viewFinance" class="finance-btn" data-en="View Finances" data-ne="वित्त हेर्नुहोस्">View Finances</button>
+    </div>
+    <div class="today-date-row">
+        <span id="todayNepaliDate" class="blink"></span>
+        <span id="todayEnglishDate" class="blink"></span>
+    </div>
+    <div class="month-tabs" id="monthTabs"></div>
+    <div class="language-toggle">
+        <button id="languageToggle" data-en="Toggle Language (EN/NE)" data-ne="भाषा टगल गर्नुहोस् (EN/NE)">Toggle Language (EN/NE)</button>
+    </div>
+    <div class="calendar-container">
+        <div class="mini-calendar" id="miniCalendarLeft">
+            <h3 id="miniLeftTitle"></h3>
+            <div class="calendar-grid" id="miniCalendarGridLeft"></div>
+        </div>
+        <div class="main-calendar">
+            <div class="calendar-grid" id="calendarGrid"></div>
+            <div class="summary-section">
+                <h3 data-en="Monthly Summary" data-ne="मासिक सारांश">Monthly Summary</h3>
+                <p id="monthlySummary"></p>
+            </div>
+            <div class="footnote">
+                <h3 data-en="Holidays this Month" data-ne="यस महिनाका बिदाहरू">Holidays this Month</h3>
+                <ul id="holidayList"></ul>
+            </div>
+        </div>
+        <div class="mini-calendar" id="miniCalendarRight">
+            <h3 id="miniRightTitle"></h3>
+            <div class="calendar-grid" id="miniCalendarGridRight"></div>
+        </div>
+    </div>
+    <div class="note-form-container" id="noteForm">
+        <h3><span data-en="Add Entry for" data-ne="प्रवेश थप्नुहोस्">Add Entry for</span> <span id="selectedDate">Date</span></h3>
+        <select id="entryType">
+            <option value="note" data-en="Note" data-ne="नोट">Note</option>
+            <option value="income" data-en="Income" data-ne="आय">Income</option>
+            <option value="expense" data-en="Expense" data-ne="खर्च">Expense</option>
+        </select>
+        <input type="text" id="noteTitle" placeholder="Note Title / Amount" data-en="Note Title / Amount" data-ne="नोट शीर्षक / रकम">
+        <input type="time" id="noteTime">
+        <textarea id="noteDescription" placeholder="Description" data-en="Description" data-ne="विवरण" rows="3"></textarea>
+        <select id="entryCategory" style="display:none">
+            <option value="" data-en="Select Category" data-ne="श्रेणी चयन गर्नुहोस्">Select Category</option>
+            <option value="Food" data-en="Food" data-ne="खाना">Food</option>
+            <option value="Salary" data-en="Salary" data-ne="तलब">Salary</option>
+            <option value="Rent" data-en="Rent" data-ne="भाडा">Rent</option>
+            <option value="Utilities" data-en="Utilities" data-ne="उपयोगिताहरू">Utilities</option>
+            <option value="Transport" data-en="Transport" data-ne="यातायात">Transport</option>
+            <option value="Entertainment" data-en="Entertainment" data-ne="मनोरञ्जन">Entertainment</option>
+            <option value="Freelance" data-en="Freelance" data-ne="फ्रीलान्स">Freelance</option>
+            <option value="Other" data-en="Other" data-ne="अन्य">Other</option>
+        </select>
+        <div class="form-buttons">
+            <button id="saveNote" data-en="Save Entry" data-ne="प्रवेश बचत गर्नुहोस्">Save Entry</button>
+            <button id="editEntry" data-en="Edit Entry" data-ne="प्रवेश सम्पादन गर्नुहोस्">Edit Entry</button>
+            <button id="closeEntry" data-en="Close Entry" data-ne="प्रवेश बन्द गर्नुहोस्">Close Entry</button>
+        </div>
+    </div>
+    <div class="notes-modal" id="notesModal">
+        <div class="notes-modal-content">
+            <span class="close-modal" id="closeModal">×</span>
+            <h2 data-en="Saved Notes" data-ne="बचत गरिएका नोटहरू">Saved Notes</h2>
+            <div class="filter-section">
+                <select id="monthFilter">
+                    <option value="all" data-en="All Months" data-ne="सबै महिनाहरू">All Months</option>
+                </select>
+            </div>
+            <div class="notes-list" id="notesList"></div>
+            <div class="action-buttons">
+                <button class="clear-btn" id="clearNotes" data-en="Clear All Notes" data-ne="सबै नोटहरू मेटाउनुहोस्">Clear All Notes</button>
+            </div>
+        </div>
+    </div>
+    <div class="report-modal" id="reportModal">
+        <div class="report-modal-content">
+            <span class="close-modal" id="closeReportModal">×</span>
+            <h2 data-en="Financial Reports" data-ne="वित्तीय रिपोर्टहरू">Financial Reports</h2>
+            <div class="report-tabs">
+                <div class="report-tab active" id="weeklyReportTab" data-en="Weekly" data-ne="साप्ताहिक">Weekly</div>
+                <div class="report-tab" id="monthlyReportTab" data-en="Monthly" data-ne="मासिक">Monthly</div>
+                <div class="report-tab" id="yearlyReportTab" data-en="Yearly" data-ne="वार्षिक">Yearly</div>
+            </div>
+            <div class="report-content" id="reportContent"></div>
+        </div>
+    </div>
+    <div class="footer">Calendar Concept and Design by Santosh Phuyal</div>
+    <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2">
+        // Calendar data
+        const calendarData = {
+            2081: [{name:"Baishakh",days:31,gregStart:"2024-04-13"},{name:"Jestha",days:32,gregStart:"2024-05-14"},{name:"Ashadh",days:31,gregStart:"2024-06-15"},{name:"Shrawan",days:32,gregStart:"2024-07-16"},{name:"Bhadra",days:31,gregStart:"2024-08-17"},{name:"Asoj",days:31,gregStart:"2024-09-17"},{name:"Kartik",days:30,gregStart:"2024-10-18"},{name:"Mangsir",days:29,gregStart:"2024-11-17"},{name:"Poush",days:30,gregStart:"2024-12-16"},{name:"Magh",days:29,gregStart:"2025-01-15"},{name:"Falgun",days:30,gregStart:"2025-02-13"},{name:"Chaitra",days:30,gregStart:"2025-03-15"}],
+            2082: [{name:"Baishakh",days:31,gregStart:"2025-04-14"},{name:"Jestha",days:31,gregStart:"2025-05-15"},{name:"Ashadh",days:32,gregStart:"2025-06-15"},{name:"Shrawan",days:31,gregStart:"2025-07-17"},{name:"Bhadra",days:31,gregStart:"2025-08-17"},{name:"Asoj",days:31,gregStart:"2025-09-17"},{name:"Kartik",days:30,gregStart:"2025-10-18"},{name:"Mangsir",days:29,gregStart:"2025-11-17"},{name:"Poush",days:30,gregStart:"2025-12-16"},{name:"Magh",days:29,gregStart:"2026-01-15"},{name:"Falgun",days:30,gregStart:"2026-02-13"},{name:"Chaitra",days:31,gregStart:"2026-03-16"}],
+            2083: [{name:"Baishakh",days:31,gregStart:"2026-04-16"},{name:"Jestha",days:32,gregStart:"2026-05-17"},{name:"Ashadh",days:31,gregStart:"2026-06-18"},{name:"Shrawan",days:32,gregStart:"2026-07-19"},{name:"Bhadra",days:31,gregStart:"2026-08-20"},{name:"Asoj",days:31,gregStart:"2026-09-20"},{name:"Kartik",days:30,gregStart:"2026-10-21"},{name:"Mangsir",days:29,gregStart:"2026-11-20"},{name:"Poush",days:30,gregStart:"2026-12-19"},{name:"Magh",days:30,gregStart:"2027-01-18"},{name:"Falgun",days:30,gregStart:"2027-02-17"},{name:"Chaitra",days:30,gregStart:"2027-03-19"}]
+        };
+
+        // Festival data
+        const festivals = {
+            "2082-01-06":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-01-13":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-01-20":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-01-27":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-02-03":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-02-10":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-02-17":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-02-24":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-02-31":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-03-07":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-03-14":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-03-21":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-03-28":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-04-03":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-04-10":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-04-17":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-04-24":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-04-30":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-05-07":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-05-14":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-05-21":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-05-28":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-06-04":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-06-11":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-06-18":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-06-25":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-07-01":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-07-08":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-07-15":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-07-22":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-07-29":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-08-06":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-08-13":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-08-20":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-08-27":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-09-05":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-09-12":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-09-19":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-09-26":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-10-03":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-10-10":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-10-17":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-10-24":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-11-02":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-11-09":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-11-16":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-11-23":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-11-30":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-12-07":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-12-14":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-12-21":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-12-28":{name:"Saturday (Weekly Holiday)",class:"saturday"},"2082-06-13":{name:"Dashain",class:"dashain"},"2082-06-14":{name:"Dashain",class:"dashain"},"2082-06-15":{name:"Dashain (Vijaya Dashami)",class:"dashain"},"2082-06-16":{name:"Dashain",class:"dashain"},"2082-06-17":{name:"Dashain",class:"dashain"},"2082-06-18":{name:"Dashain",class:"dashain"},"2082-07-03":{name:"Tihar",class:"tihar"},"2082-07-04":{name:"Tihar",class:"tihar"},"2082-07-05":{name:"Tihar (Deepawali)",class:"tihar"},"2082-07-06":{name:"Tihar",class:"tihar"},"2082-07-07":{name:"Tihar",class:"tihar"},"2082-01-01":{name:"New Year",class:"national"},"2082-01-05":{name:"Ram Navami",class:"national"},"2082-01-29":{name:"Ubauli Parva (Kirant Community), Buddha Jayanti",class:"national"},"2082-04-24":{name:"Rakshya Bandhan",class:"national"},"2082-04-30":{name:"Krishna Janmashtami",class:"national"},"2082-06-06":{name:"Ghatasthapana",class:"national"},"2082-07-10":{name:"Chhath",class:"national"},"2082-08-18":{name:"Udhauli Parva, Yomari Punhi",class:"national"},"2082-09-10":{name:"Christmas",class:"national"},"2082-09-15":{name:"Tamu Lhosar",class:"national"},"2082-10-01":{name:"Maghe Sankranti",class:"national"},"2082-10-05":{name:"Sonam Lhosar",class:"national"},"2082-11-03":{name:"Maha Shivaratri",class:"national"},"2082-11-06":{name:"Gyalpo Lhosar",class:"national"},"2082-11-18":{name:"Fagu Purnima (56 Districts)",class:"national"},"2082-12-01":{name:"Fagu Purnima (Remaining Districts)",class:"national"},"2082-04-25":{name:"Gai Jatra (Newars, Kathmandu Valley)",class:"jatra"},"2082-05-15":{name:"Gaura Parva",class:"ethnic"},"2082-05-10":{name:"Haritalika (Teej)",class:"women"},"2082-05-30":{name:"Jitiya Festival",class:"women"},"2082-10-09":{name:"Basanta Panchami",class:"education"},"2082-05-21":{name:"Indra Jatra",class:"jatra"},"2082-12-04":{name:"Ghode Jatra",class:"jatra"},"2082-01-18":{name:"May Day",class:"observed"},"2082-02-15":{name:"Republic Day",class:"observed"},"2082-06-03":{name:"Constitution Day",class:"observed"},"2082-10-16":{name:"Martyrs Day",class:"observed"},"2082-11-07":{name:"Democracy Day",class:"observed"},"2082-11-24":{name:"International Women's Day",class:"observed"},"2082-08-17":{name:"International Day of Persons with Disabilities",class:"disability"},"2082-07-25":{name:"Falgunanda Jayanti (Kirants)",class:"birth"},"2082-09-27":{name:"Prithvi Jayanti",class:"birth"}
+        };
+
+        // State
+        let currentYear = 2082, currentMonth = 0, language = localStorage.getItem('language') || 'en';
+        let entries = JSON.parse(localStorage.getItem('entries')) || [];
+        const todayGregorian = new Date();
+        let todayBS = '';
+
+        // Simulated data for testing
+        function initializeTestData() {
+            if (entries.length === 0) {
+                entries = [
+                    { type: 'note', date: '2082-01-05', title: 'Meeting with team', time: '14:00', description: 'Discuss project timeline' },
+                    { type: 'income', date: '2082-01-05', amount: 50000, time: '10:00', description: 'Monthly salary', category: 'Salary' },
+                    { type: 'expense', date: '2082-01-06', amount: 5000, time: '12:00', description: 'Grocery shopping', category: 'Food' }
+                ];
+                localStorage.setItem('entries', JSON.stringify(entries));
+            }
+        }
+
+        // Find today's BS date
+        function findTodayBSDate() {
+            todayBS = '';
+            for (const year in calendarData) {
+                calendarData[year].forEach((month, monthIndex) => {
+                    const gregStart = new Date(month.gregStart);
+                    for (let day = 1; day <= month.days; day++) {
+                        const currentGreg = new Date(gregStart.getTime() + (day - 1) * 86400000);
+                        if (currentGreg.toISOString().split('T')[0] === todayGregorian.toISOString().split('T')[0]) {
+                            currentYear = parseInt(year);
+                            currentMonth = monthIndex;
+                            todayBS = `${year}-${(monthIndex + 1).toString().padStart(2, '0')}-${day.toString().padStart(2, '0')}`;
+                        }
+                    }
+                });
+            }
+            if (!todayBS) {
+                todayBS = '2082-01-01'; // Fallback date if current date not found
+                currentYear = 2082;
+                currentMonth = 0;
+            }
+        }
+
+        // Language translations
+        const translations = {
+            months: {
+                Baishakh: "बैशाख", Jestha: "जेठ", Ashadh: "असार", Shrawan: "साउन", Bhadra: "भदौ", Asoj: "असोज",
+                Kartik: "कार्तिक", Mangsir: "मंसिर", Poush: "पुस", Magh: "माघ", Falgun: "फागुन", Chaitra: "चैत"
+            },
+            festivals: {
+                "Saturday (Weekly Holiday)": "शनिबार (साप्ताहिक बिदा)", "Dashain": "दशैं", "Dashain (Vijaya Dashami)": "दशैं (विजया दशमी)",
+                "Tihar": "तिहार", "Tihar (Deepawali)": "तिहार (दीपावली)", "New Year": "नयाँ वर्ष", "Ram Navami": "राम नवमी",
+                "Ubauli Parva (Kirant Community), Buddha Jayanti": "उबौली पर्व (किराँत समुदाय), बुद्ध जयन्ती",
+                "Rakshya Bandhan": "रक्षा बन्धन", "Krishna Janmashtami": "कृष्ण जन्माष्टमी", "Ghatasthapana": "घटस्थापना",
+                "Chhath": "छठ", "Udhauli Parva, Yomari Punhi": "उधौली पर्व, योमरी पूर्णिमा", "Christmas": "क्रिसमस",
+                "Tamu Lhosar": "तमु ल्होसार", "Maghe Sankranti": "माघे संक्रान्ति", "Sonam Lhosar": "सोनम ल्होसार",
+                "Maha Shivaratri": "महाशिवरात्रि", "Gyalpo Lhosar": "ग्याल्पो ल्होसार", "Fagu Purnima (56 Districts)": "फागु पूर्णिमा (५६ जिल्ला)",
+                "Fagu Purnima (Remaining Districts)": "फागु पूर्णिमा (बाँकी जिल्ला)", "Gai Jatra (Newars, Kathmandu Valley)": "गाईजात्रा (नेवार समुदाय, काठमाडौं उपत्यका)",
+                "Gaura Parva": "गौरा पर्व", "Haritalika (Teej)": "हरितालिका (तीज)", "Jitiya Festival": "जितिया पर्व",
+                "Basanta Panchami": "बसन्त पञ्चमी", "Indra Jatra": "इन्द्रजात्रा", "Ghode Jatra": "घोडेजात्रा",
+                "May Day": "मे दिवस", "Republic Day": "गणतन्त्र दिवस", "Constitution Day": "संविधान दिवस",
+                "Martyrs Day": "शहीद दिवस", "Democracy Day": "प्रजातन्त्र दिवस", "International Women's Day": "अन्तर्राष्ट्रिय महिला दिवस",
+                "International Day of Persons with Disabilities": "अन्तर्राष्ट्रिय अपाङ्गता दिवस", "Falgunanda Jayanti (Kirants)": "फाल्गुनन्द जयन्ती (किराँत समुदाय)",
+                "Prithvi Jayanti": "पृथ्वी जयन्ती"
+            },
+            weekdays: {Sun:"आइत",Mon:"सोम",Tue:"मंगल",Wed:"बुध",Thu:"बिही",Fri:"शुक्र",Sat:"शनि"}
+        };
+
+        // Initialize
+        function init() {
+            initializeTestData();
+            findTodayBSDate();
+            renderYearFilter();
+            renderMonthTabs();
+            renderCalendar();
+            renderMiniCalendars();
+            renderMonthlySummary();
+            updateMonthFilter();
+            updateLanguage();
+            renderTodayDates();
+            bindEvents();
+        }
+
+        // Bind events
+        function bindEvents() {
+            document.getElementById('languageToggle').addEventListener('click', toggleLanguage);
+            document.getElementById('prevMonth').addEventListener('click', () => changeMonth(-1));
+            document.getElementById('nextMonth').addEventListener('click', () => changeMonth(1));
+            document.getElementById('viewNotes').addEventListener('click', showNotes);
+            document.getElementById('viewFinance').addEventListener('click', showReports);
+            document.getElementById('saveNote').addEventListener('click', saveEntry);
+            document.getElementById('editEntry').addEventListener('click', editEntry);
+            document.getElementById('closeEntry').addEventListener('click', closeEntryForm);
+            document.getElementById('closeModal').addEventListener('click', closeNotesModal);
+            document.getElementById('monthFilter').addEventListener('change', filterEntries);
+            document.getElementById('clearNotes').addEventListener('click', clearAllEntries);
+            document.getElementById('yearFilter').addEventListener('change', changeYear);
+            document.getElementById('closeReportModal').addEventListener('click', closeReportModal);
+            document.getElementById('weeklyReportTab').addEventListener('click', () => renderReport('weekly'));
+            document.getElementById('monthlyReportTab').addEventListener('click', () => renderReport('monthly'));
+            document.getElementById('yearlyReportTab').addEventListener('click', () => renderReport('yearly'));
+            document.getElementById('entryType').addEventListener('change', toggleEntryFormFields);
+            document.getElementById('todayButton').addEventListener('click', goToToday);
+        }
+
+        // Render year filter
+        function renderYearFilter() {
+            const filter = document.getElementById('yearFilter');
+            filter.innerHTML = '';
+            Object.keys(calendarData).forEach(year => {
+                const opt = document.createElement('option');
+                opt.value = year;
+                opt.textContent = `${year} BS`;
+                if (year == currentYear) opt.selected = true;
+                filter.appendChild(opt);
+            });
+        }
+
+        // Change year
+        function changeYear() {
+            currentYear = parseInt(document.getElementById('yearFilter').value);
+            currentMonth = 0;
+            renderMonthTabs();
+            renderCalendar();
+            renderMiniCalendars();
+            renderMonthlySummary();
+            updateMonthFilter();
+        }
+
+        // Navigate to today
+        function goToToday() {
+            const [year, month] = todayBS.split('-').map(Number);
+            currentYear = year;
+            currentMonth = month - 1;
+            document.getElementById('yearFilter').value = currentYear;
+            renderMonthTabs();
+            renderCalendar();
+            renderMiniCalendars();
+            renderMonthlySummary();
+        }
+
+        // Render today’s Nepali and English dates
+        function renderTodayDates() {
+            const [year, month, day] = todayBS.split('-').map(Number);
+            const monthData = calendarData[year][month - 1];
+            const gregStart = new Date(monthData.gregStart);
+            const gregDate = new Date(gregStart.getTime() + (day - 1) * 86400000).toISOString().split('T')[0];
+            
+            const nepaliDate = `${language === 'en' ? monthData.name : translations.months[monthData.name]} ${day}, ${year} BS`;
+            const englishDate = gregDate;
+            
+            const nepaliElement = document.getElementById('todayNepaliDate');
+            const englishElement = document.getElementById('todayEnglishDate');
+            
+            nepaliElement.textContent = nepaliDate;
+            englishElement.textContent = englishDate;
+            
+            nepaliElement.classList.toggle('nepali', language === 'ne');
+        }
+
+        // Render month tabs
+        function renderMonthTabs() {
+            const tabs = document.getElementById('monthTabs');
+            tabs.innerHTML = '';
+            calendarData[currentYear].forEach((month, i) => {
+                const tab = document.createElement('div');
+                tab.className = `month-tab ${i === currentMonth ? 'active' : ''} ${language === 'ne' ? 'nepali' : ''}`;
+                tab.textContent = language === 'en' ? month.name : translations.months[month.name];
+                tab.addEventListener('click', () => {
+                    currentMonth = i;
+                    renderMonthTabs();
+                    renderCalendar();
+                    renderMiniCalendars();
+                    renderMonthlySummary();
+                });
+                tabs.appendChild(tab);
+            });
+        }
+
+        // Render main calendar
+        function renderCalendar() {
+            const grid = document.getElementById('calendarGrid');
+            const monthData = calendarData[currentYear][currentMonth];
+            const gregStart = new Date(monthData.gregStart);
+            document.getElementById('currentMonth').textContent = `${language === 'en' ? monthData.name : translations.months[monthData.name]} ${currentYear} BS`;
+            grid.innerHTML = '';
+
+            const weekdays = language === 'en' ? ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] : Object.values(translations.weekdays);
+            weekdays.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day';
+                header.style.backgroundColor = 'var(--secondary)';
+                header.style.color = '#fff';
+                header.textContent = day;
+                if (language === 'ne') header.classList.add('nepali');
+                grid.appendChild(header);
+            });
+
+            const firstDay = gregStart.getDay();
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                grid.appendChild(emptyDay);
+            }
+
+            let longPressTimer;
+            for (let day = 1; day <= monthData.days; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                const dateKey = `${currentYear}-${(currentMonth+1).toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
+                const gregDate = new Date(gregStart.getTime() + (day-1)*86400000).toISOString().split('T')[0];
+                if (dateKey === todayBS) dayDiv.classList.add('today');
+                dayDiv.innerHTML = `
+                    <div class="bs-date">${day}</div>
+                    <div class="greg-date">${gregDate}</div>
+                `;
+                if (festivals[dateKey]) {
+                    dayDiv.classList.add(festivals[dateKey].class);
+                    const festival = document.createElement('div');
+                    festival.className = 'festival';
+                    festival.textContent = language === 'en' ? festivals[dateKey].name : translations.festivals[festivals[dateKey].name] || festivals[dateKey].name;
+                    dayDiv.appendChild(festival);
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'festival-tooltip';
+                    tooltip.textContent = festival.textContent;
+                    dayDiv.appendChild(tooltip);
+                }
+                const dayEntries = entries.filter(e => e.date === dateKey);
+                const notes = dayEntries.filter(e => e.type === 'note');
+                const incomes = dayEntries.filter(e => e.type === 'income');
+                const expenses = dayEntries.filter(e => e.type === 'expense');
+                if (notes.length) {
+                    dayDiv.innerHTML += '<div class="note-indicator"></div><div class="note-tooltip">'+notes.map(n => n.title).join(', ')+'</div>';
+                }
+                if (incomes.length) {
+                    dayDiv.innerHTML += '<div class="income-indicator"></div><div class="finance-tooltip">Income: '+incomes.map(i => `NPR ${i.amount} (${i.category})`).join(', ')+'</div>';
+                }
+                if (expenses.length) {
+                    dayDiv.innerHTML += '<div class="expense-indicator"></div><div class="finance-tooltip">Expense: '+expenses.map(e => `NPR ${e.amount} (${e.category})`).join(', ')+'</div>';
+                }
+                dayDiv.addEventListener('click', () => openEntryForm(dateKey, day, monthData.name, 'note'));
+                dayDiv.addEventListener('mousedown', startLongPress);
+                dayDiv.addEventListener('touchstart', startLongPress);
+                dayDiv.addEventListener('mouseup', endLongPress);
+                dayDiv.addEventListener('touchend', endLongPress);
+                dayDiv.addEventListener('mouseleave', endLongPress);
+                dayDiv.addEventListener('touchcancel', endLongPress);
+                function startLongPress(e) {
+                    e.preventDefault();
+                    longPressTimer = setTimeout(() => openEntryForm(dateKey, day, monthData.name, 'income'), 500);
+                }
+                function endLongPress() {
+                    clearTimeout(longPressTimer);
+                }
+                grid.appendChild(dayDiv);
+            }
+            document.getElementById('prevMonth').disabled = currentYear === 2081 && currentMonth === 0;
+            document.getElementById('nextMonth').disabled = currentYear === 2083 && currentMonth === calendarData[2083].length - 1;
+            renderFootnote();
+            renderMonthlySummary();
+        }
+
+        // Render monthly summary
+        function renderMonthlySummary() {
+            const monthKey = `${currentYear}-${(currentMonth+1).toString().padStart(2,'0')}`;
+            const monthEntries = entries.filter(e => e.date.startsWith(monthKey));
+            const totalIncome = monthEntries.filter(e => e.type === 'income').reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
+            const totalExpense = monthEntries.filter(e => e.type === 'expense').reduce((sum, e) => sum + parseFloat(e.amount || 0), 0);
+            const balance = totalIncome - totalExpense;
+            document.getElementById('monthlySummary').innerHTML = `
+                ${language === 'en' ? 'Income' : 'आय'}: NPR ${totalIncome.toFixed(2)} | 
+                ${language === 'en' ? 'Expenses' : 'खर्च'}: NPR ${totalExpense.toFixed(2)} | 
+                ${language === 'en' ? 'Balance' : 'ब्यालेन्स'}: NPR ${balance.toFixed(2)}
+            `;
+        }
+
+        // Render mini calendars
+        function renderMiniCalendars() {
+            let prevYear = currentYear, prevMonth = currentMonth - 1;
+            if (prevMonth < 0) { prevYear--; prevMonth = calendarData[prevYear]?.length - 1; }
+            if (calendarData[prevYear] && prevMonth >= 0) {
+                renderMiniCalendar(prevYear, prevMonth, 'miniCalendarGridLeft', 'miniLeftTitle', language === 'en' ? 'Previous Month' : 'अघिल्लो महिना');
+            } else {
+                document.getElementById('miniCalendarGridLeft').innerHTML = '';
+                document.getElementById('miniLeftTitle').textContent = '';
+            }
+            let nextYear = currentYear, nextMonth = currentMonth + 1;
+            if (nextMonth >= calendarData[currentYear].length) { nextYear++; nextMonth = 0; }
+            if (calendarData[nextYear]) {
+                renderMiniCalendar(nextYear, nextMonth, 'miniCalendarGridRight', 'miniRightTitle', language === 'en' ? 'Next Month' : 'अर्को महिना');
+            } else {
+                document.getElementById('miniCalendarGridRight').innerHTML = '';
+                document.getElementById('miniRightTitle').textContent = '';
+            }
+        }
+
+        // Render mini calendar
+        function renderMiniCalendar(year, month, gridId, titleId, title) {
+            const grid = document.getElementById(gridId);
+            const monthData = calendarData[year][month];
+            const gregStart = new Date(monthData.gregStart);
+            document.getElementById(titleId).textContent = `${title}: ${language === 'en' ? monthData.name : translations.months[monthData.name]} ${year}`;
+            if (language === 'ne') document.getElementById(titleId).classList.add('nepali');
+            grid.innerHTML = '';
+
+            const weekdays = language === 'en' ? ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] : Object.values(translations.weekdays);
+            weekdays.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day';
+                header.style.backgroundColor = 'var(--secondary)';
+                header.style.color = '#fff';
+                header.textContent = day;
+                if (language === 'ne') header.classList.add('nepali');
+                grid.appendChild(header);
+            });
+
+            const firstDay = gregStart.getDay();
+            for (let i = 0; i < firstDay; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.className = 'calendar-day';
+                grid.appendChild(emptyDay);
+            }
+
+            for (let day = 1; day <= monthData.days; day++) {
+                const dayDiv = document.createElement('div');
+                dayDiv.className = 'calendar-day';
+                const dateKey = `${year}-${(month+1).toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
+                const gregDate = new Date(gregStart.getTime() + (day-1)*86400000).toISOString().split('T')[0];
+                if (dateKey === todayBS) dayDiv.classList.add('today');
+                dayDiv.innerHTML = `
+                    <div class="bs-date">${day}</div>
+                    <div class="greg-date">${gregDate}</div>
+                `;
+                if (festivals[dateKey]) {
+                    dayDiv.classList.add(festivals[dateKey].class);
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'festival-tooltip';
+                    tooltip.textContent = language === 'en' ? festivals[dateKey].name : translations.festivals[festivals[dateKey].name] || festivals[dateKey].name;
+                    dayDiv.appendChild(tooltip);
+                }
+                const dayEntries = entries.filter(e => e.date === dateKey);
+                const notes = dayEntries.filter(e => e.type === 'note');
+                const incomes = dayEntries.filter(e => e.type === 'income');
+                const expenses = dayEntries.filter(e => e.type === 'expense');
+                if (notes.length) {
+                    dayDiv.innerHTML += '<div class="note-indicator"></div><div class="note-tooltip">'+notes.map(n => n.title).join(', ')+'</div>';
+                }
+                if (incomes.length) {
+                    dayDiv.innerHTML += '<div class="income-indicator"></div><div class="finance-tooltip">Income: '+incomes.map(i => `NPR ${i.amount} (${i.category})`).join(', ')+'</div>';
+                }
+                if (expenses.length) {
+                    dayDiv.innerHTML += '<div class="expense-indicator"></div><div class="finance-tooltip">Expense: '+expenses.map(e => `NPR ${e.amount} (${e.category})`).join(', ')+'</div>';
+                }
+                grid.appendChild(dayDiv);
+            }
+        }
+
+        // Render footnote
+        function renderFootnote() {
+            const list = document.getElementById('holidayList');
+            list.innerHTML = '';
+            const monthData = calendarData[currentYear][currentMonth];
+            for (let day = 1; day <= monthData.days; day++) {
+                const dateKey = `${currentYear}-${(currentMonth+1).toString().padStart(2,'0')}-${day.toString().padStart(2,'0')}`;
+                if (festivals[dateKey]) {
+                    const li = document.createElement('li');
+                    li.textContent = `${language === 'en' ? monthData.name : translations.months[monthData.name]} ${day}: ${language === 'en' ? festivals[dateKey].name : translations.festivals[festivals[dateKey].name] || festivals[dateKey].name}`;
+                    if (language === 'ne') li.classList.add('nepali');
+                    list.appendChild(li);
+                }
+            }
+        }
+
+        // Change month
+        function changeMonth(dir) {
+            currentMonth += dir;
+            if (currentMonth < 0) { currentYear--; currentMonth = calendarData[currentYear].length - 1; }
+            else if (currentMonth >= calendarData[currentYear].length) { currentYear++; currentMonth = 0; }
+            document.getElementById('yearFilter').value = currentYear;
+            renderMonthTabs();
+            renderCalendar();
+            renderMiniCalendars();
+            renderMonthlySummary();
+        }
+
+        // Toggle language
+        function toggleLanguage() {
+            language = language === 'en' ? 'ne' : 'en';
+            localStorage.setItem('language', language);
+            updateLanguage();
+            renderMonthTabs();
+            renderCalendar();
+            renderMiniCalendars();
+            renderMonthlySummary();
+            updateMonthFilter();
+            renderTodayDates();
+            renderReport(document.querySelector('.report-tab.active')?.id.replace('ReportTab', '') || 'weekly');
+        }
+
+        // Update language
+        function updateLanguage() {
+            document.querySelectorAll('[data-en]').forEach(elem => {
+                elem.textContent = elem.dataset[language];
+                elem.classList.toggle('nepali', language === 'ne');
+            });
+        }
+
+        // Open entry form
+        function openEntryForm(dateKey, day, monthName, type, entryIndex = null) {
+            const form = document.getElementById('noteForm');
+            document.getElementById('selectedDate').textContent = `${language === 'en' ? monthName : translations.months[monthName]} ${day}, ${currentYear} BS`;
+            form.dataset.date = dateKey;
+            form.dataset.entryIndex = entryIndex !== null ? entryIndex : '';
+            document.getElementById('entryType').value = type;
+            toggleEntryFormFields();
+            if (entryIndex !== null) {
+                const entry = entries[entryIndex];
+                document.getElementById('noteTitle').value = entry.type === 'note' ? entry.title : entry.amount;
+                document.getElementById('noteTime').value = entry.time || '';
+                document.getElementById('noteDescription').value = entry.description || '';
+                document.getElementById('entryCategory').value = entry.category || '';
+            } else {
+                document.getElementById('noteTitle').value = '';
+                document.getElementById('noteTime').value = '';
+                document.getElementById('noteDescription').value = '';
+                document.getElementById('entryCategory').value = '';
+            }
+            form.classList.add('active');
+        }
+
+        // Close entry form
+        function closeEntryForm() {
+            const form = document.getElementById('noteForm');
+            form.classList.remove('active');
+            document.getElementById('noteTitle').value = '';
+            document.getElementById('noteTime').value = '';
+            document.getElementById('noteDescription').value = '';
+            document.getElementById('entryCategory').value = '';
+            form.dataset.entryIndex = '';
+        }
+
+        // Toggle entry form fields
+        function toggleEntryFormFields() {
+            const type = document.getElementById('entryType').value;
+            const titleInput = document.getElementById('noteTitle');
+            const categorySelect = document.getElementById('entryCategory');
+            if (type === 'note') {
+                titleInput.type = 'text';
+                titleInput.placeholder = language === 'en' ? 'Note Title' : 'नोट शीर्षक';
+                categorySelect.style.display = 'none';
+            } else {
+                titleInput.type = 'number';
+                titleInput.placeholder = language === 'en' ? 'Amount' : 'रकम';
+                titleInput.min = '0';
+                titleInput.step = '0.01';
+                categorySelect.style.display = 'block';
+            }
+        }
+
+        // Save entry
+        function saveEntry() {
+            const form = document.getElementById('noteForm');
+            const type = document.getElementById('entryType').value;
+            const entry = {
+                type,
+                date: form.dataset.date,
+                time: document.getElementById('noteTime').value,
+                description: document.getElementById('noteDescription').value
+            };
+            if (type === 'note') {
+                entry.title = document.getElementById('noteTitle').value;
+                if (!entry.title) return alert(language === 'en' ? 'Note title is required.' : 'नोट शीर्षक आवश्यक छ।');
+            } else {
+                entry.amount = parseFloat(document.getElementById('noteTitle').value);
+                entry.category = document.getElementById('entryCategory').value;
+                if (!entry.amount || isNaN(entry.amount)) return alert(language === 'en' ? 'Valid amount is required.' : 'मान्य रकम आवश्यक छ।');
+                if (!entry.category) return alert(language === 'en' ? 'Category is required.' : 'श्रेणी आवश्यक छ।');
+            }
+            entries.push(entry);
+            localStorage.setItem('entries', JSON.stringify(entries));
+            closeEntryForm();
+            renderCalendar();
+            renderMiniCalendars();
+            renderMonthlySummary();
+        }
+
+        // Edit entry
+        function editEntry() {
+            const form = document.getElementById('noteForm');
+            const entryIndex = form.dataset.entryIndex;
+            if (!entryIndex) return alert(language === 'en' ? 'No entry selected for editing.' : 'सम्पादनको लागि कुनै प्रवेश चयन गरिएको छैन।');
+            const type = document.getElementById('entryType').value;
+            const entry = {
+                type,
+                date: form.dataset.date,
+                time: document.getElementById('noteTime').value,
+                description: document.getElementById('noteDescription').value
+            };
+            if (type === 'note') {
+                entry.title = document.getElementById('noteTitle').value;
+                if (!entry.title) return alert(language === 'en' ? 'Note title is required.' : 'नोट शीर्षक आवश्यक छ।');
+            } else {
+                entry.amount = parseFloat(document.getElementById('noteTitle').value);
+                entry.category = document.getElementById('entryCategory').value;
+                if (!entry.amount || isNaN(entry.amount)) return alert(language === 'en' ? 'Valid amount is required.' : 'मान्य रकम आवश्यक छ।');
+                if (!entry.category) return alert(language === 'en' ? 'Category is required.' : 'श्रेणी आवश्यक छ।');
+            }
+            entries[parseInt(entryIndex)] = entry;
+            localStorage.setItem('entries', JSON.stringify(entries));
+            closeEntryForm();
+            renderCalendar();
+            renderMiniCalendars();
+            renderMonthlySummary();
+            filterEntries();
+        }
+
+        // Show notes
+        function showNotes() {
+            document.getElementById('notesModal').style.display = 'block';
+            filterEntries();
+        }
+
+        // Close notes modal
+        function closeNotesModal() {
+            document.getElementById('notesModal').style.display = 'none';
+        }
+
+        // Update month filter
+        function updateMonthFilter() {
+            const filter = document.getElementById('monthFilter');
+            filter.innerHTML = `<option value="all" data-en="All Months" data-ne="सबै महिनाहरू">${language === 'en' ? 'All Months' : 'सबै महिनाहरू'}</option>`;
+            Object.entries(calendarData).forEach(([year, months]) => {
+                months.forEach((month, i) => {
+                    const opt = document.createElement('option');
+                    opt.value = `${year}-${i}`;
+                    opt.textContent = `${language === 'en' ? month.name : translations.months[month.name]} ${year}`;
+                    if (language === 'ne') opt.classList.add('nepali');
+                    filter.appendChild(opt);
+                });
+            });
+        }
+
+        // Filter entries
+        function filterEntries() {
+            const filter = document.getElementById('monthFilter').value;
+            const list = document.getElementById('notesList');
+            list.innerHTML = '';
+            const filtered = filter === 'all' ? entries : entries.filter(e => e.date.startsWith(filter.replace('-','-')))
+            filtered.forEach((entry, i) => {
+                const item = document.createElement('div');
+                item.className = 'note-item';
+                item.innerHTML = `
+                    <div><strong>${entry.type === 'note' ? entry.title : `${entry.type.charAt(0).toUpperCase() + entry.type.slice(1)}: NPR ${entry.amount} (${entry.category})`}</strong></div>
+                    <div>${entry.date}${entry.time ? ` at ${entry.time}` : ''}</div>
+                    <div>${entry.description}</div>
+                    <div class="note-actions">
+                        <span class="edit-note" data-index="${i}">Edit</span>
+                        <span class="delete-note" data-index="${i}">Delete</span>
+                    </div>
+                `;
+                item.querySelector('.edit-note').addEventListener('click', () => {
+                    const monthData = calendarData[entry.date.split('-')[0]][parseInt(entry.date.split('-')[1])-1];
+                    openEntryForm(entry.date, parseInt(entry.date.split('-')[2]), monthData.name, entry.type, i);
+                });
+                item.querySelector('.delete-note').addEventListener('click', () => deleteEntry(i));
+                list.appendChild(item);
+            });
+        }
+
+        // Delete entry
+        function deleteEntry(index) {
+            entries.splice(index, 1);
+            localStorage.setItem('entries', JSON.stringify(entries));
+            filterEntries();
+            renderCalendar();
+            renderMiniCalendars();
+            renderMonthlySummary();
+        }
+
+        // Clear all entries
+        function clearAllEntries() {
+            if (confirm(language === 'en' ? 'Clear all entries?' : 'सबै प्रवेशहरू मेटाउनुहोस्?')) {
+                entries = [];
+                localStorage.setItem('entries', JSON.stringify(entries));
+                filterEntries();
+                renderCalendar();
+                renderMiniCalendars();
+                renderMonthlySummary();
+            }
+        }
+
+        // Show reports
+        function showReports() {
+            document.getElementById('reportModal').style.display = 'block';
+            renderReport('weekly');
+        }
+
+        // Close report modal
+        function closeReportModal() {
+            document.getElementById('reportModal').style.display = 'none';
+        }
+
+        // Render report
+        function renderReport(type) {
+            const tabs = document.querySelectorAll('.report-tab');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            document.getElementById(`${type}ReportTab`).classList.add('active');
+            const content = document.getElementById('reportContent');
+            content.innerHTML = '';
+
+            let data = [];
+            if (type === 'weekly') {
+                const monthKey = `${currentYear}-${(currentMonth+1).toString().padStart(2,'0')}`;
+                const monthEntries = entries.filter(e => e.date.startsWith(monthKey) && (e.type === 'income' || e.type === 'expense'));
+                const weeks = {};
+                monthEntries.forEach(entry => {
+                    const date = new Date(calendarData[currentYear][currentMonth].gregStart);
+                    const day = parseInt(entry.date.split('-')[2]);
+                    date.setDate(date.getDate() + day - 1);
+                    const week = Math.floor((date.getDate() - 1) / 7) + 1;
+                    if (!weeks[week]) weeks[week] = { income: 0, expense: 0 };
+                    if (entry.type === 'income') weeks[week].income += parseFloat(entry.amount);
+                    else weeks[week].expense += parseFloat(entry.amount);
+                });
+                data = Object.entries(weeks).map(([week, { income, expense }]) => ({
+                    Period: `Week ${week}`,
+                    Income: income.toFixed(2),
+                    Expense: expense.toFixed(2),
+                    Balance: (income - expense).toFixed(2)
+                }));
+            } else if (type === 'monthly') {
+                Object.entries(calendarData[currentYear]).forEach(([monthIdx, month]) => {
+                    const monthKey = `${currentYear}-${(parseInt(monthIdx)+1).toString().padStart(2,'0')}`;
+                    const monthEntries = entries.filter(e => e.date.startsWith(monthKey) && (e.type === 'income' || e.type === 'expense'));
+                    const income = monthEntries.filter(e => e.type === 'income').reduce((sum, e) => sum + parseFloat(e.amount), 0);
+                    const expense = monthEntries.filter(e => e.type === 'expense').reduce((sum, e) => sum + parseFloat(e.amount), 0);
+                    data.push({
+                        Period: `${month.name}`,
+                        Income: income.toFixed(2),
+                        Expense: expense.toFixed(2),
+                        Balance: (income - expense).toFixed(2)
+                    });
+                });
+            } else if (type === 'yearly') {
+                const yearEntries = entries.filter(e => e.date.startsWith(currentYear) && (e.type === 'income' || e.type === 'expense'));
+                const income = yearEntries.filter(e => e.type === 'income').reduce((sum, e) => sum + parseFloat(e.amount), 0);
+                const expense = yearEntries.filter(e => e.type === 'expense').reduce((sum, e) => sum + parseFloat(e.amount), 0);
+                data.push({
+                    Period: `${currentYear} BS`,
+                    Income: income.toFixed(2),
+                    Expense: expense.toFixed(2),
+                    Balance: (income - expense).toFixed(2)
+                });
+            }
+
+            if (data.length === 0) {
+                content.innerHTML = `<p>${language === 'en' ? 'No financial data available.' : 'कुनै वित्तीय डाटा उपलब्ध छैन।'}</p>`;
+                return;
+            }
+
+            const table = document.createElement('table');
+            table.className = 'report-table';
+            table.innerHTML = `
+                <tr>
+                    <th>${language === 'en' ? 'Period' : 'अवधि'}</th>
+                    <th>${language === 'en' ? 'Income (NPR)' : 'आय (NPR)'}</th>
+                    <th>${language === 'en' ? 'Expense (NPR)' : 'खर्च (NPR)'}</th>
+                    <th>${language === 'en' ? 'Balance (NPR)' : 'ब्यालेन्स (NPR)'}</th>
+                </tr>
+            `;
+            data.forEach(row => {
+                table.innerHTML += `
+                    <tr>
+                        <td>${row.Period}</td>
+                        <td>${row.Income}</td>
+                        <td>${row.Expense}</td>
+                        <td>${row.Balance}</td>
+                    </tr>
+                `;
+            });
+            content.appendChild(table);
+        }
+
+        // Initialize application
+        init();
+    </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'931ff3716ab46789',t:'MTc0NDkzNTE1MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
