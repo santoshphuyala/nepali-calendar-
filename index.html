@@ -1174,3 +1174,107 @@
     </script>
 </body>
 </html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nepali Calendar with Analytics</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.2.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+    <h1>Nepali Calendar with Analytics Dashboard</h1>
+    <!-- Dashboard Section -->
+    <div>
+        <h2>Data Analytics Dashboard</h2>
+        <canvas id="analyticsChart" style="max-width: 600px;"></canvas>
+    </div>
+    
+    <!-- Export Options -->
+    <div>
+        <h2>Export Data</h2>
+        <button onclick="exportToExcel()">Export to Excel</button>
+        <button onclick="exportToPDF()">Export to PDF</button>
+    </div>
+    
+    <!-- Import Options -->
+    <div>
+        <h2>Import Data</h2>
+        <input type="file" id="fileInput" />
+        <button onclick="importFromExcel()">Import from Excel</button>
+    </div>
+    
+    <script>
+        // Entries Data
+        let entries = JSON.parse(localStorage.getItem('entries')) || [
+            { type: 'income', date: '2082-01-05', amount: 5000, description: 'Salary' },
+            { type: 'expense', date: '2082-01-06', amount: 1000, description: 'Groceries' }
+        ];
+
+        // Render Analytics Dashboard
+        function renderAnalyticsDashboard() {
+            const income = entries.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0);
+            const expense = entries.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0);
+
+            const ctx = document.getElementById('analyticsChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Income', 'Expense'],
+                    datasets: [{
+                        label: 'Financial Overview (NPR)',
+                        data: [income, expense],
+                        backgroundColor: ['green', 'red']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: { display: true },
+                        title: { display: true, text: 'Financial Analytics' }
+                    }
+                }
+            });
+        }
+        renderAnalyticsDashboard();
+
+        // Export to Excel
+        function exportToExcel() {
+            const worksheet = XLSX.utils.json_to_sheet(entries);
+            const workbook = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(workbook, worksheet, "Entries");
+            XLSX.writeFile(workbook, "NepaliCalendarData.xlsx");
+        }
+
+        // Export to PDF
+        function exportToPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text("Nepali Calendar Data Export", 10, 10);
+            entries.forEach((entry, index) => {
+                doc.text(`${index + 1}. ${entry.type}: NPR ${entry.amount}, Date: ${entry.date}`, 10, 20 + index * 10);
+            });
+            doc.save("NepaliCalendarData.pdf");
+        }
+
+        // Import from Excel
+        function importFromExcel() {
+            const input = document.getElementById('fileInput');
+            const file = input.files[0];
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const workbook = XLSX.read(e.target.result, { type: 'binary' });
+                const sheetName = workbook.SheetNames[0];
+                const data = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                entries = [...entries, ...data];
+                localStorage.setItem('entries', JSON.stringify(entries));
+                alert('Data imported successfully!');
+                renderAnalyticsDashboard();
+            };
+            reader.readAsBinaryString(file);
+        }
+    </script>
+</body>
+</html>
