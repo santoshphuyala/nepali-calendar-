@@ -1,0 +1,254 @@
+--------------------------------------------------------------------------------
+                           Nepali Calendar 2082 - User Help File
+--------------------------------------------------------------------------------
+
+Overview
+--------
+The Nepali Calendar 2082 is a web-based application that provides a Bikram Sambat (BS) calendar with integrated note-taking and financial tracking features. It supports both English and Nepali languages, displays holidays, and allows users to manage personal notes, income, and expenses. The application is responsive, secure, and includes backup/restore functionality for data persistence.
+
+Table of Contents
+-----------------
+1. Getting Started
+2. Key Features
+3. User Interface Guide
+4. How to Use the Application
+5. Troubleshooting
+6. Security Information
+7. Developer Notes
+8. System Requirements
+
+1. Getting Started
+-----------------
+To use the Nepali Calendar 2082:
+1. Access the Application: Open the `index.html` file in a modern web browser (e.g., Chrome, Firefox, Edge).
+2. Language Preference: The application defaults to English. Toggle to Nepali using the "Toggle Language (EN/NE)" button.
+3. Initial Setup: The calendar displays the current month of 2082 BS. Use the navigation buttons or month tabs to explore other months or years.
+
+2. Key Features
+---------------
+- Bikram Sambat Calendar: Displays the Nepali calendar for 2081, 2082, and 2083 BS, with corresponding Gregorian dates.
+- Holiday Information: Highlights national, ethnic, and festival holidays with tooltips and a monthly holiday list.
+- Note-Taking: Add, edit, delete, and view personal notes for specific dates.
+- Financial Tracking: Record income and expenses with categories, and generate weekly, monthly, or yearly financial reports.
+- Language Support: Switch between English and Nepali for all text, including month names, holidays, and UI elements.
+- Data Persistence: Notes and financial entries are saved in the browser's `localStorage`.
+- Backup and Restore: Export notes as a JSON file and import them to restore data.
+- Responsive Design: Optimized for both desktop and mobile devices.
+- Security: Implements Content Security Policy (CSP) to prevent unauthorized scripts and resources.
+
+3. User Interface Guide
+-----------------------
+The application’s interface is divided into several sections:
+
+3.1. Header
+- Title: Displays "Nepali Calendar" and the current year/month (e.g., "Baishakh 2082 BS").
+- Navigation Buttons:
+  - Previous: Move to the previous month or year.
+  - Next: Move to the next month or year.
+
+3.2. Year Filter and Action Buttons
+- Year Filter: Dropdown to select 2081, 2082, or 2083 BS.
+- Today: Jumps to the current date.
+- View Notes: Opens a modal to view all saved notes.
+- View Finances: Opens a modal with financial reports.
+- Backup: Downloads notes as a JSON file.
+- Restore: Uploads a JSON file to restore notes.
+
+3.3. Today’s Date
+- Displays the current date in both Nepali (BS) and English (Gregorian) formats with a blinking animation.
+
+3.4. Month Tabs
+- Tabs for each month (e.g., Baishakh, Jestha). Click to switch months.
+- Supports both English and Nepali month names.
+
+3.5. Language Toggle
+- Button to switch between English and Nepali languages.
+
+3.6. Calendar Grid
+- Displays a 7-column grid with weekdays and days of the month.
+- Each day shows:
+  - BS date (e.g., 1, 2).
+  - Gregorian date (e.g., Apr 14).
+  - Holidays (if applicable, with tooltips).
+  - Indicators for notes, income, or expenses.
+- Click a day to open the note/finance entry form.
+
+3.7. Monthly Summary
+- Shows total income, expenses, and balance for the current month.
+
+3.8. Holidays List
+- Lists holidays for the current month with their dates and names.
+
+3.9. Note/Finance Entry Form
+- A fixed-bottom form for adding or editing entries.
+- Fields:
+  - Entry Type: Note, Income, or Expense.
+  - Title/Amount: Note title or financial amount.
+  - Time: Optional time for the entry.
+  - Description: Additional details.
+  - Category: For income/expense (e.g., Food, Salary).
+- Buttons: Save, Edit, Close.
+
+3.10. Notes Modal
+- Displays saved notes with filters by month.
+- Allows editing or deleting notes.
+- Includes a "Clear All Notes" button.
+
+3.11. Financial Reports Modal
+- Tabs for Weekly, Monthly, Yearly, and Records reports.
+- Shows income, expenses, and balance in tables.
+- Records tab lists all financial entries with edit/delete options.
+
+3.12. Footer
+- Credits the design to Santosh Phuyal.
+
+4. How to Use the Application
+-----------------------------
+4.1. Navigating the Calendar
+- Change Month: Click "Previous" or "Next", or select a month tab.
+- Change Year: Use the year filter dropdown.
+- Go to Today: Click the "Today" button to jump to the current date.
+
+4.2. Viewing Holidays
+- Holidays are highlighted in the calendar grid with colors (e.g., Dashain in pink, Tihar in purple).
+- Hover over a holiday to see its name in a tooltip.
+- Check the "Holidays this Month" section for a list.
+
+4.3. Adding a Note or Financial Entry
+1. Click a date in the calendar grid.
+2. The entry form appears at the bottom.
+3. Select Entry Type (Note, Income, or Expense).
+4. Enter a Title/Amount (e.g., "Meeting" for a note, "5000" for income).
+5. Optionally add Time, Description, and Category (for income/expense).
+6. Click "Save Entry".
+7. Indicators appear on the date (blue for notes, green for income, red for expenses).
+
+4.4. Editing or Deleting Entries
+1. Open the "Notes" or "Finances" modal using the respective buttons.
+2. In the "Notes" modal, filter by month if needed.
+3. In the "Finances" modal, go to the "Records" tab.
+4. Click "Edit" to modify an entry or "Delete" to remove it.
+
+4.5. Viewing Financial Reports
+1. Click "View Finances" to open the financial reports modal.
+2. Select a tab:
+   - Weekly: Income/expense by week with daily summaries.
+   - Monthly: Income/expense by month.
+   - Yearly: Income/expense by year.
+   - Records: List of all financial entries.
+3. Tables show period, income, expenses, and balance.
+
+4.6. Switching Languages
+- Click "Toggle Language (EN/NE)" to switch between English and Nepali.
+- All text, including month names, holidays, and UI elements, updates accordingly.
+
+4.7. Backing Up Data
+1. Click "Backup" to download a JSON file containing all notes and financial entries.
+2. Save the file in a secure location.
+
+4.8. Restoring Data
+1. Click "Restore" and select a previously saved JSON file.
+2. The application appends the imported notes to existing ones.
+3. Invalid entries are skipped, and a success message appears.
+
+4.9. Clearing All Notes
+1. Open the "Notes" modal.
+2. Click "Clear All Notes" and confirm.
+3. All notes and financial entries are deleted.
+
+5. Troubleshooting
+------------------
+5.1. Issue: Calendar Does Not Load
+- Cause: Browser compatibility or JavaScript errors.
+- Solution:
+  - Ensure you’re using a modern browser (Chrome, Firefox, Edge).
+  - Check the browser console (F12 > Console) for errors.
+  - Verify that `index.html` is served correctly (local or via a server).
+
+5.2. Issue: Notes Are Not Saved
+- Cause: `localStorage` limit exceeded or browser restrictions.
+- Solution:
+  - Clear browser storage: Open DevTools (F12) > Application > Storage > Clear site data.
+  - Export existing notes using the "Backup" feature before clearing.
+  - Check for browser privacy settings blocking storage.
+
+5.3. Issue: Restore Fails with "Invalid JSON"
+- Cause: Corrupted or incorrectly formatted JSON file.
+- Solution:
+  - Ensure the file was exported from the application.
+  - Open the file in a text editor to verify JSON structure.
+  - Try exporting a new backup and compare formats.
+
+5.4. Issue: Language Toggle Not Working
+- Cause: Missing `data-en` or `data-ne` attributes in HTML.
+- Solution:
+  - Verify that all UI elements have both `data-en` and `data-ne` attributes.
+  - Check the browser console for JavaScript errors in the `toggleLanguage` function.
+
+5.5. Issue: Financial Reports Show No Data
+- Cause: No income or expense entries for the selected period.
+- Solution:
+  - Add income or expense entries via the entry form.
+  - Ensure the correct year is selected in the year filter.
+  - Check the "Records" tab to confirm entries exist.
+
+5.6. Issue: Mobile Display Issues
+- Cause: CSS media queries not applying correctly.
+- Solution:
+  - Test on different mobile browsers (Chrome, Safari).
+  - Verify the viewport meta tag: `<meta name="viewport" content="width=device-width, initial-scale=1.0">`.
+  - Clear browser cache.
+
+6. Security Information
+-----------------------
+- Content Security Policy (CSP):
+  - The application uses a strict CSP to allow only trusted sources:
+    - Scripts: Local scripts, nonce-protected scripts, and `https://cdnjs.cloudflare.com`.
+    - Images: Local, `blob:`, `data:`, and specific external domains.
+    - Styles: Local and Google Fonts.
+    - Fonts: Local and Google Fonts.
+    - Connections: Local and `https://api.grok.com`.
+  - This prevents cross-site scripting (XSS) attacks.
+- Data Storage: All notes and financial entries are stored in the browser’s `localStorage`, not on a server.
+- Backup Files: JSON backups are stored locally by the user. Ensure they are kept secure to prevent unauthorized access.
+- No External API Calls: The application is fully client-side, except for the optional `https://api.grok.com` connection (not used in the provided code).
+
+7. Developer Notes
+------------------
+- Code Structure:
+  - HTML: Single `index.html` with semantic structure and ARIA-friendly elements.
+  - CSS: Uses CSS variables, grid layouts, and media queries for responsiveness.
+  - JavaScript: Modular functions for rendering, data management, and event handling.
+- Dependencies:
+  - jsPDF: Included via CDN for potential PDF export (not used in the provided code).
+  - Google Fonts: Poppins and Noto Sans Devanagari for typography.
+- Data:
+  - Calendar data for 2081–2083 BS is hardcoded in `calendarData`.
+  - Holidays are defined in the `holidays` object with types (e.g., national, dashain).
+  - Notes are stored in `localStorage` as a JSON array.
+- Extensibility:
+  - Add more years to `calendarData` and `holidays` for future support.
+  - Implement server-side storage by integrating with `https://api.grok.com`.
+  - Enhance jsPDF integration for PDF calendar exports.
+- Known Limitations:
+  - `localStorage` has a size limit (typically 5–10 MB). Large note volumes may cause errors.
+  - No input validation for negative financial amounts.
+  - No undo functionality for deleted notes.
+
+8. System Requirements
+----------------------
+- Browser: Chrome, Firefox, Edge, or Safari (latest versions recommended).
+- Internet: Required only for loading Google Fonts and jsPDF (optional offline support possible).
+- Storage: Minimal browser storage for `localStorage` (notes and settings).
+- Device: Desktop, tablet, or smartphone with a modern browser.
+- Screen Resolution: Optimized for 320px and above.
+
+Contact
+-------
+For feedback or issues, contact the developer:
+- Name: Santosh Phuyal
+- Note: No direct contact information is provided in the code. Users may need to check the hosting platform or documentation for support.
+
+--------------------------------------------------------------------------------
+This help file provides a complete guide to using the Nepali Calendar 2082 application. For advanced customization or development, refer to the Developer Notes section.
+--------------------------------------------------------------------------------
