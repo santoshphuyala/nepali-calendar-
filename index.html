@@ -20,7 +20,7 @@
         *{box-sizing:border-box;margin:0;padding:0}
         body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);line-height:1.6}
         .header{background:linear-gradient(135deg,var(--primary),var(--secondary));color:#fff;text-align:center;padding:1.5rem;font-size:1.5rem;box-shadow:0 4px 12px rgba(0,0,0,0.2);position:relative}
-        .month-tabs{display:flex;overflow-x:auto;background:var(--card-bg);padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.1);margin:1rem 0}
+        .month-tabs{display:flex;overflow-x:auto;background:var(--card-bg);padding:1rem;box-shadow:0 2px 8px rgba(0,0,0,0.1);margin:1rem 0;visibility:visible;height:auto;min-height:60px}
         .month-tab{padding:0.5rem 1rem;margin:0.5rem;cursor:pointer;border-radius:25px;background:#e3f2fd;font-weight:500;font-size:0.9rem;transition:.3s}
         .month-tab.active{background:var(--secondary);color:#fff;transform:scale(1.05)}
         .month-tab:hover{background:#bbdefb;transform:scale(1.03)}
@@ -30,8 +30,8 @@
         .nav-buttons button{background:#fff;color:var(--secondary);border:none;padding:0.5rem 1rem;border-radius:8px;cursor:pointer;font-weight:600;transition:.3s}
         .nav-buttons button:hover{background:var(--accent);color:var(--text)}
         .nav-buttons button:disabled{background:#ddd;cursor:not-allowed}
-        .calendar-container{max-width:800px;margin:2rem auto;padding:1.5rem;background:var(--card-bg);border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.1);display:grid;grid-template-columns:1fr;gap:1rem}
-        .main-calendar{width:100%;max-width:600px;margin:0 auto}
+        .calendar-container{max-width:800px;margin:2rem auto;padding:1.5rem;background:var(--card-bg);border-radius:12px;box-shadow:0 4px 16px rgba(0,0,0,0.1);display:grid;grid-template-columns:90% 10%;gap:1rem}
+        .main-calendar{width:100%;max-width:100%;margin:0}
         .calendar-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:0.5rem;text-align:center}
         .calendar-day{background:#fff;border:1px solid #e0e0e0;padding:0.75rem;cursor:pointer;min-height:100px;border-radius:8px;transition:.3s;position:relative;user-select:none}
         .calendar-day:hover{background:#f5f5f5;transform:translateY(-2px)}
@@ -84,7 +84,12 @@
         .edit-note,.delete-note{cursor:pointer;font-size:0.8rem}
         .edit-note{color:var(--secondary)}.edit-note:hover{color:#0277bd}
         .delete-note{color:var(--primary)}.delete-note:hover{color:#b71c1c}
-        .action-buttons{display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:space-between}
+        .action-buttons{display:flex;flex-direction:column;gap:0.75rem;justify-content:flex-start}
+        .action-buttons button{background:var(--secondary);color:#fff;border:none;padding:0.75rem 0;border-radius:8px;cursor:pointer;font-weight:600;transition:.3s;width:100%;text-align:center}
+        .action-buttons #addNote{background:#0288d1}
+        .action-buttons #addNote:hover{background:#0277bd}
+        .action-buttons #addFinance{background:#4caf50}
+        .action-buttons #addFinance:hover{background:#388e3c}
         .year-filter{text-align:center;margin:1rem 0;display:flex;align-items:center;justify-content:center;gap:0.5rem}
         .year-filter select{padding:0.75rem;border-radius:8px;border:1px solid #ddd;font-family:'Poppins',sans-serif;font-size:0.9rem;background:#e3f2fd}
         .year-filter select:focus{outline:none;border-color:var(--secondary)}
@@ -113,8 +118,10 @@
             .month-tab{padding:0.4rem 0.8rem;font-size:0.8rem}
             .calendar-day{min-height:80px}
             .nav-buttons{flex-direction:column}
-            .calendar-container{grid-template-columns:1fr;grid-template-rows:auto auto auto;gap:1rem}
+            .calendar-container{grid-template-columns:1fr;grid-template-rows:auto auto;gap:1rem}
             .main-calendar{max-width:100%}
+            .action-buttons{flex-direction:row;justify-content:space-between}
+            .action-buttons button{padding:0.5rem}
             .notes-modal-content,.report-modal-content{margin:10% auto;width:95%}
             .year-filter{flex-direction:column}
             .today-date-row{flex-direction:column;gap:0.5rem}
@@ -164,6 +171,10 @@
                 <h3 data-en="Holidays this Month" data-ne="यस महिनाका बिदाहरू">Holidays this Month</h3>
                 <ul id="holidayList"></ul>
             </div>
+        </div>
+        <div class="action-buttons">
+            <button id="addNote" data-en="Add Note" data-ne="नोट थप्नुहोस्">Add Note</button>
+            <button id="addFinance" data-en="Add Finance" data-ne="वित्त थप्नुहोस्">Add Finance</button>
         </div>
     </div>
     <div class="note-form-container" id="noteForm">
@@ -273,62 +284,61 @@
         // Holidays data (year, month index, day, name, type)
         const holidays = {
             2081: [
-                { month: 6, day: 1, name: "Dashain", nepali: "दशैं", type: "dashain" }, // Kartik 1
-                { month: 6, day: 15, name: "Tihar", nepali: "तिहार", type: "tihar" }, // Kartik 15
-                { month: 11, day: 1, name: "Chaitra Navaratri", nepali: "चैत्र नवरात्री", type: "national" } // Chaitra 1
+                { month: 6, day: 1, name: "Dashain", nepali: "दशैं", type: "dashain" },
+                { month: 6, day: 15, name: "Tihar", nepali: "तिहार", type: "tihar" },
+                { month: 11, day: 1, name: "Chaitra Navaratri", nepali: "चैत्र नवरात्री", type: "national" }
             ],
             2082: [
-                // Public Holidays on National Festivals
-                { month: 0, day: 1, name: "Nepali New Year", nepali: "नेपाली नयाँ वर्ष", type: "national" }, // Baishakh 1
-                { month: 0, day: 5, name: "Ram Navami", nepali: "राम नवमी", type: "national" }, // Baishakh 5
-                { month: 0, day: 29, name: "Ubauli Parva", nepali: "उबौली पर्व", type: "ethnic" }, // Baishakh 29 (Kirant Community)
-                { month: 0, day: 29, name: "Buddha Jayanti", nepali: "बुद्ध जयन्ती", type: "birth" }, // Baishakh 29
-                { month: 0, day: 18, name: "May Day Labour Day", nepali: "मे दिवस", type: "observed" }, // Baishakh 18
-                { month: 1, day: 15, name: "Republic Day", nepali: "गणतन्त्र दिवस", type: "observed" }, // Jestha 15
-                { month: 3, day: 24, name: "Rakshya Bandhan", nepali: "रक्षा बन्धन", type: "national" }, // Shrawan 24
-                { month: 3, day: 25, name: "Gai Jatra", nepali: "गाईजात्रा", type: "jatra" }, // Shrawan 25 (Kathmandu Valley)
-                { month: 3, day: 25, name: "Gaijatra", nepali: "गाईजात्रा", type: "ethnic" }, // Shrawan 25 (Newars)
-                { month: 3, day: 31, name: "Krishna Janmashtami", nepali: "कृष्ण जन्माष्टमी", type: "national" }, // Shrawan 31
-                { month: 4, day: 10, name: "Haritalika (Teej)", nepali: "हरितालिका (तीज)", type: "women" }, // Bhadra 10
-                { month: 4, day: 15, name: "Gaura Parva", nepali: "गौरा पर्व", type: "ethnic" }, // Bhadra 15
-                { month: 4, day: 21, name: "Indra Jatra", nepali: "इन्द्रजात्रा", type: "jatra" }, // Bhadra 21 (Kathmandu Valley)
-                { month: 4, day: 30, name: "Jitiya Festival", nepali: "जितिया पर्व", type: "women" }, // Bhadra 30
-                { month: 5, day: 3, name: "Constitution Day", nepali: "संविधान दिवस", type: "observed" }, // Ashoj 3
-                { month: 5, day: 6, name: "Ghatasthapana", nepali: "घटस्थापना", type: "national" }, // Ashoj 6
-                { month: 5, day: 13, name: "Dashain", nepali: "दशैं", type: "dashain" }, // Ashoj 13
-                { month: 5, day: 14, name: "Dashain", nepali: "दशैं", type: "dashain" }, // Ashoj 14
-                { month: 5, day: 15, name: "Dashain", nepali: "दशैं", type: "dashain" }, // Ashoj 15
-                { month: 5, day: 16, name: "Dashain", nepali: "दशैं", type: "dashain" }, // Ashoj 16
-                { month: 5, day: 17, name: "Dashain", nepali: "दशैं", type: "dashain" }, // Ashoj 17
-                { month: 5, day: 18, name: "Dashain", nepali: "दशैं", type: "dashain" }, // Ashoj 18
-                { month: 6, day: 3, name: "Tihar", nepali: "तिहार", type: "tihar" }, // Kartik 3
-                { month: 6, day: 4, name: "Tihar", nepali: "तिहार", type: "tihar" }, // Kartik 4
-                { month: 6, day: 5, name: "Tihar", nepali: "तिहार", type: "tihar" }, // Kartik 5
-                { month: 6, day: 6, name: "Tihar", nepali: "तिहार", type: "tihar" }, // Kartik 6
-                { month: 6, day: 7, name: "Tihar", nepali: "तिहार", type: "tihar" }, // Kartik 7
-                { month: 6, day: 10, name: "Chhath", nepali: "छठ", type: "national" }, // Kartik 10
-                { month: 6, day: 25, name: "Falgunanda Jayanti", nepali: "फाल्गुनन्द जयन्ती", type: "birth" }, // Kartik 25 (Kirants)
-                { month: 7, day: 17, name: "International Day of Persons with Disabilities", nepali: "अन्तर्राष्ट्रिय अपाङ्गता दिवस", type: "disability" }, // Mangsir 17
-                { month: 7, day: 18, name: "Udhauli Parva, Yomari Punhi", nepali: "उधौली पर्व, योमरी पुन्ही", type: "national" }, // Mangsir 18
-                { month: 8, day: 10, name: "Christmas", nepali: "क्रिसमस", type: "national" }, // Poush 10
-                { month: 8, day: 15, name: "Tamu Lhosar", nepali: "तमु ल्होसार", type: "national" }, // Poush 15
-                { month: 8, day: 27, name: "Prithvi Jayanti", nepali: "पृथ्वी जयन्ती", type: "birth" }, // Poush 27
-                { month: 9, day: 1, name: "Maghi Parva/Maghe Sankranti", nepali: "माघी पर्व/माघे संक्रान्ति", type: "national" }, // Magh 1
-                { month: 9, day: 5, name: "Sonam Lhosar", nepali: "सोनाम ल्होसार", type: "national" }, // Magh 5
-                { month: 9, day: 9, name: "Basanta Panchami/Saraswati Puja", nepali: "बसन्त पञ्चमी/सरस्वती पूजा", type: "education" }, // Magh 9
-                { month: 9, day: 16, name: "Martyrs Day", nepali: "शहीद दिवस", type: "observed" }, // Magh 16
-                { month: 10, day: 3, name: "Maha Shivaratri", nepali: "महाशिवरात्रि", type: "national" }, // Falgun 3
-                { month: 10, day: 6, name: "Gyalpo Lhosar", nepali: "ग्याल्पो ल्होसार", type: "national" }, // Falgun 6
-                { month: 10, day: 7, name: "Democracy Day", nepali: "प्रजातन्त्र दिवस", type: "observed" }, // Falgun 7
-                { month: 10, day: 18, name: "Fagu Purnima", nepali: "फागु पूर्णिमा", type: "national" }, // Falgun 18 (56 districts)
-                { month: 10, day: 24, name: "International Women's Day", nepali: "अन्तर्राष्ट्रिय महिला दिवस", type: "observed" }, // Falgun 24
-                { month: 11, day: 1, name: "Fagu Purnima", nepali: "फागु पूर्णिमा", type: "national" }, // Chaitra 1 (remaining districts)
-                { month: 11, day: 4, name: "Ghode Jatra", nepali: "घोडेजात्रा", type: "jatra" } // Chaitra 4 (Kathmandu Valley)
+                { month: 0, day: 1, name: "Nepali New Year", nepali: "नेपाली नयाँ वर्ष", type: "national" },
+                { month: 0, day: 5, name: "Ram Navami", nepali: "राम नवमी", type: "national" },
+                { month: 0, day: 29, name: "Ubauli Parva", nepali: "उबौली पर्व", type: "ethnic" },
+                { month: 0, day: 29, name: "Buddha Jayanti", nepali: "बुद्ध जयन्ती", type: "birth" },
+                { month: 0, day: 18, name: "May Day Labour Day", nepali: "मे दिवस", type: "observed" },
+                { month: 1, day: 15, name: "Republic Day", nepali: "गणतन्त्र दिवस", type: "observed" },
+                { month: 3, day: 24, name: "Rakshya Bandhan", nepali: "रक्षा बन्धन", type: "national" },
+                { month: 3, day: 25, name: "Gai Jatra", nepali: "गाईजात्रा", type: "jatra" },
+                { month: 3, day: 25, name: "Gaijatra", nepali: "गाईजात्रा", type: "ethnic" },
+                { month: 3, day: 31, name: "Krishna Janmashtami", nepali: "कृष्ण जन्माष्टमी", type: "national" },
+                { month: 4, day: 10, name: "Haritalika (Teej)", nepali: "हरितालिका (तीज)", type: "women" },
+                { month: 4, day: 15, name: "Gaura Parva", nepali: "गौरा पर्व", type: "ethnic" },
+                { month: 4, day: 21, name: "Indra Jatra", nepali: "इन्द्रजात्रा", type: "jatra" },
+                { month: 4, day: 30, name: "Jitiya Festival", nepali: "जितिया पर्व", type: "women" },
+                { month: 5, day: 3, name: "Constitution Day", nepali: "संविधान दिवस", type: "observed" },
+                { month: 5, day: 6, name: "Ghatasthapana", nepali: "घटस्थापना", type: "national" },
+                { month: 5, day: 13, name: "Dashain", nepali: "दशैं", type: "dashain" },
+                { month: 5, day: 14, name: "Dashain", nepali: "दशैं", type: "dashain" },
+                { month: 5, day: 15, name: "Dashain", nepali: "दशैं", type: "dashain" },
+                { month: 5, day: 16, name: "Dashain", nepali: "दशैं", type: "dashain" },
+                { month: 5, day: 17, name: "Dashain", nepali: "दशैं", type: "dashain" },
+                { month: 5, day: 18, name: "Dashain", nepali: "दशैं", type: "dashain" },
+                { month: 6, day: 3, name: "Tihar", nepali: "तिहार", type: "tihar" },
+                { month: 6, day: 4, name: "Tihar", nepali: "तिहार", type: "tihar" },
+                { month: 6, day: 5, name: "Tihar", nepali: "तिहार", type: "tihar" },
+                { month: 6, day: 6, name: "Tihar", nepali: "तिहार", type: "tihar" },
+                { month: 6, day: 7, name: "Tihar", nepali: "तिहार", type: "tihar" },
+                { month: 6, day: 10, name: "Chhath", nepali: "छठ", type: "national" },
+                { month: 6, day: 25, name: "Falgunanda Jayanti", nepali: "फाल्गुनन्द जयन्ती", type: "birth" },
+                { month: 7, day: 17, name: "International Day of Persons with Disabilities", nepali: "अन्तर्राष्ट्रिय अपाङ्गता दिवस", type: "disability" },
+                { month: 7, day: 18, name: "Udhauli Parva, Yomari Punhi", nepali: "उधौली पर्व, योमरी पुन्ही", type: "national" },
+                { month: 8, day: 10, name: "Christmas", nepali: "क्रिसमस", type: "national" },
+                { month: 8, day: 15, name: "Tamu Lhosar", nepali: "तमु ल्होसार", type: "national" },
+                { month: 8, day: 27, name: "Prithvi Jayanti", nepali: "पृथ्वी जयन्ती", type: "birth" },
+                { month: 9, day: 1, name: "Maghi Parva/Maghe Sankranti", nepali: "माघी पर्व/माघे संक्रान्ति", type: "national" },
+                { month: 9, day: 5, name: "Sonam Lhosar", nepali: "सोनाम ल्होसार", type: "national" },
+                { month: 9, day: 9, name: "Basanta Panchami/Saraswati Puja", nepali: "बसन्त पञ्चमी/सरस्वती पूजा", type: "education" },
+                { month: 9, day: 16, name: "Martyrs Day", nepali: "शहीद दिवस", type: "observed" },
+                { month: 10, day: 3, name: "Maha Shivaratri", nepali: "महाशिवरात्रि", type: "national" },
+                { month: 10, day: 6, name: "Gyalpo Lhosar", nepali: "ग्याल्पो ल्होसार", type: "national" },
+                { month: 10, day: 7, name: "Democracy Day", nepali: "प्रजातन्त्र दिवस", type: "observed" },
+                { month: 10, day: 18, name: "Fagu Purnima", nepali: "फागु पूर्णिमा", type: "national" },
+                { month: 10, day: 24, name: "International Women's Day", nepali: "अन्तर्राष्ट्रिय महिला दिवस", type: "observed" },
+                { month: 11, day: 1, name: "Fagu Purnima", nepali: "फागु पूर्णिमा", type: "national" },
+                { month: 11, day: 4, name: "Ghode Jatra", nepali: "घोडेजात्रा", type: "jatra" }
             ],
             2083: [
-                { month: 0, day: 1, name: "Nepali New Year", nepali: "नेपाली नयाँ वर्ष", type: "national" }, // Baishakh 1
-                { month: 5, day: 15, name: "Dashain", nepali: "दशैं", type: "dashain" }, // Asoj 15
-                { month: 5, day: 29, name: "Tihar", nepali: "तिहार", type: "tihar" } // Asoj 29
+                { month: 0, day: 1, name: "Nepali New Year", nepali: "नेपाली नयाँ वर्ष", type: "national" },
+                { month: 5, day: 15, name: "Dashain", nepali: "दशैं", type: "dashain" },
+                { month: 5, day: 29, name: "Tihar", nepali: "तिहार", type: "tihar" }
             ]
         };
 
@@ -384,6 +394,8 @@
         const holidayList = document.getElementById('holidayList');
         const todayNepaliDate = document.getElementById('todayNepaliDate');
         const todayEnglishDate = document.getElementById('todayEnglishDate');
+        const addNote = document.getElementById('addNote');
+        const addFinance = document.getElementById('addFinance');
 
         // Utility functions
         function getBSDateFromGregorian(date) {
@@ -436,13 +448,11 @@
 
         function renderCalendar() {
             let month = calendarData[currentYear][currentMonthIndex];
-            // Update the header to include the month name and year
             currentMonth.textContent = isNepali 
                 ? `${monthsNepali[currentMonthIndex]} ${currentYear} BS` 
                 : `${month.name} ${currentYear} BS`;
             calendarGrid.innerHTML = '';
 
-            // Add weekday headers
             const weekdays = isNepali ? daysNepali : daysEnglish;
             weekdays.forEach(day => {
                 let dayHeader = document.createElement('div');
@@ -473,7 +483,6 @@
                     dayDiv.classList.add('saturday');
                 }
 
-                // Check for holidays
                 let holiday = holidays[currentYear]?.find(h => h.month === currentMonthIndex && h.day === day);
                 if (holiday) {
                     dayDiv.classList.add(holiday.type);
@@ -819,7 +828,6 @@
                     let expense = weeks[weekKey].expense;
                     let balance = income - expense;
 
-                    // Weekly Summary Table
                     let summaryTable = document.createElement('table');
                     summaryTable.classList.add('report-table');
                     summaryTable.innerHTML = `
@@ -839,7 +847,6 @@
                     `;
                     reportContent.appendChild(summaryTable);
 
-                    // Daily Summary Table
                     let dailyTable = document.createElement('table');
                     dailyTable.classList.add('report-table');
                     dailyTable.innerHTML = `
@@ -900,13 +907,14 @@
                 `;
                 for (let monthKey in months) {
                     let [y, m] = monthKey.split('-').map(Number);
-                    let monthName = isNepali ? monthsNepali[m - 1] : calendarData[y][m - 1].name;
+                    let monthIndex = m - 1;
+                    let monthName = isNepali ? monthsNepali[monthIndex] : calendarData[y][monthIndex].name;
                     let income = months[monthKey].income;
                     let expense = months[monthKey].expense;
                     let balance = income - expense;
                     table.innerHTML += `
                         <tr>
-                            <td>${monthName}</td>
+                            <td>${monthName} ${y}</td>
                             <td>${income}</td>
                             <td>${expense}</td>
                             <td>${balance}</td>
@@ -923,14 +931,14 @@
                 }
 
                 filteredNotes.forEach(note => {
-                    let year = note.date.split('-')[0];
-                    if (!years[year]) {
-                        years[year] = { income: 0, expense: 0 };
+                    let [y] = note.date.split('-').map(Number);
+                    if (!years[y]) {
+                        years[y] = { income: 0, expense: 0 };
                     }
                     if (note.type === 'income') {
-                        years[year].income += parseFloat(note.title || 0);
+                        years[y].income += parseFloat(note.title || 0);
                     } else {
-                        years[year].expense += parseFloat(note.title || 0);
+                        years[y].expense += parseFloat(note.title || 0);
                     }
                 });
 
@@ -950,7 +958,7 @@
                     let balance = income - expense;
                     table.innerHTML += `
                         <tr>
-                            <td>${year} BS</td>
+                            <td>${year}</td>
                             <td>${income}</td>
                             <td>${expense}</td>
                             <td>${balance}</td>
@@ -961,93 +969,51 @@
             }
         }
 
-        // Backup and Restore Functions
-        function backupNotes() {
-            const dataStr = JSON.stringify(notes);
-            const blob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `nepali_calendar_notes_${new Date().toISOString().split('T')[0]}.json`;
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-        }
-
-        function restoreNotes(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const faculty = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    const importedNotes = JSON.parse(e.target.result);
-                    if (!Array.isArray(importedNotes)) {
-                        alert(isNepali ? 'अमान्य फाइल ढाँचा' : 'Invalid file format');
-                        return;
-                    }
-
-                    // Validate imported notes structure
-                    const validNotes = importedNotes.filter(note => 
-                        note.date && 
-                        ['note', 'income', 'expense'].includes(note.type) && 
-                        note.title
-                    );
-
-                    // Incrementally add new notes (append, don't overwrite)
-                    notes = [...notes, ...validNotes];
-
-                    try {
-                        localStorage.setItem('notes', JSON.stringify(notes));
-                    } catch (e) {
-                        alert(isNepali ? 'नोटहरू पुनर्स्थापना गर्न असफल: भण्डारण सीमा नाघ्यो' : 'Failed to restore notes: Storage limit exceeded');
-                        notes = JSON.parse(localStorage.getItem('notes')) || [];
-                        return;
-                    }
-
-                    renderCalendar();
-                    renderNotesList();
-                    renderFinancialRecords();
-                    renderMonthlySummary();
-                    alert(isNepali ? 'नोटहरू सफलतापूर्वक पुनर्स्थापना गरियो' : 'Notes restored successfully');
-                } catch (err) {
-                    alert(isNepali ? 'फाइल पढ्न असफल: अमान्य JSON' : 'Failed to read file: Invalid JSON');
-                }
-                restoreFileInput.value = ''; // Reset file input
-            };
-            reader.readAsText(file);
+        function updateTodayDate() {
+            let today = new Date();
+            let bsDate = getBSDateFromGregorian(today);
+            if (bsDate) {
+                todayNepaliDate.textContent = isNepali 
+                    ? `${monthsNepali[bsDate.month]} ${bsDate.day}, ${bsDate.year} BS` 
+                    : `${calendarData[bsDate.year][bsDate.month].name} ${bsDate.day}, ${bsDate.year} BS`;
+            }
+            todayEnglishDate.textContent = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         }
 
         // Event listeners
         prevMonth.addEventListener('click', () => {
-            if (currentMonthIndex === 0) {
+            currentMonthIndex--;
+            if (currentMonthIndex < 0) {
                 currentYear--;
                 currentMonthIndex = 11;
-            } else {
-                currentMonthIndex--;
             }
-            renderCalendar();
+            if (currentYear < 2081) {
+                currentYear = 2081;
+                currentMonthIndex = 0;
+            }
             renderMonthTabs();
+            renderCalendar();
         });
 
         nextMonth.addEventListener('click', () => {
-            if (currentMonthIndex === 11) {
+            currentMonthIndex++;
+            if (currentMonthIndex > 11) {
                 currentYear++;
                 currentMonthIndex = 0;
-            } else {
-                currentMonthIndex++;
             }
-            renderCalendar();
+            if (currentYear > 2083) {
+                currentYear = 2083;
+                currentMonthIndex = 11;
+            }
             renderMonthTabs();
+            renderCalendar();
         });
 
         yearFilter.addEventListener('change', () => {
             currentYear = parseInt(yearFilter.value);
             currentMonthIndex = 0;
-            renderCalendar();
             renderMonthTabs();
-            renderReport('weekly');
+            renderCalendar();
         });
 
         todayButton.addEventListener('click', () => {
@@ -1057,61 +1023,48 @@
                 currentYear = bsDate.year;
                 currentMonthIndex = bsDate.month;
                 yearFilter.value = currentYear;
-                renderCalendar();
                 renderMonthTabs();
+                renderCalendar();
             }
         });
 
-        viewNotes.addEventListener('click', () => {
-            notesModal.style.display = 'block';
-            renderNotesList();
-        });
-
-        viewFinance.addEventListener('click', () => {
-            reportModal.style.display = 'block';
-            renderReport('weekly');
-        });
-
-        backupData.addEventListener('click', backupNotes);
-
-        restoreData.addEventListener('click', () => {
-            restoreFileInput.click();
-        });
-
-        restoreFileInput.addEventListener('change', restoreNotes);
-
         languageToggle.addEventListener('click', toggleLanguage);
+
+        saveNote.addEventListener('click', saveEntry);
+        editEntry.addEventListener('click', updateNote);
+        closeEntry.addEventListener('click', () => {
+            noteForm.classList.remove('active');
+            editingNoteIndex = null;
+        });
 
         entryType.addEventListener('change', () => {
             entryCategory.style.display = entryType.value === 'note' ? 'none' : 'block';
         });
 
-        saveNote.addEventListener('click', saveEntry);
-
-        editEntry.addEventListener('click', updateNote);
-
-        closeEntry.addEventListener('click', () => {
-            noteForm.classList.remove('active');
-            editingNoteIndex = null;
+        viewNotes.addEventListener('click', () => {
+            monthFilter.innerHTML = `<option value="all" data-en="All Months" data-ne="सबै महिनाहरू">${isNepali ? 'सबै महिनाहरू' : 'All Months'}</option>`;
+            for (let year in calendarData) {
+                calendarData[year].forEach((month, index) => {
+                    let monthStr = `${year}-${String(index + 1).padStart(2, '0')}`;
+                    let option = document.createElement('option');
+                    option.value = monthStr;
+                    option.textContent = isNepali ? `${monthsNepali[index]} ${year}` : `${month.name} ${year}`;
+                    if (isNepali) option.classList.add('nepali');
+                    monthFilter.appendChild(option);
+                });
+            }
+            renderNotesList();
+            notesModal.style.display = 'block';
         });
 
         closeModal.addEventListener('click', () => {
             notesModal.style.display = 'none';
         });
 
-        closeReportModal.addEventListener('click', () => {
-            reportModal.style.display = 'none';
-        });
-
         clearNotes.addEventListener('click', () => {
             if (confirm(isNepali ? 'के तपाईं सबै नोटहरू मेटाउन चाहनुहुन्छ?' : 'Are you sure you want to clear all notes?')) {
                 notes = [];
-                try {
-                    localStorage.setItem('notes', JSON.stringify(notes));
-                } catch (e) {
-                    alert(isNepali ? 'नोटहरू मेटाउन असफल: भण्डारण समस्याहरू' : 'Failed to clear notes: Storage issues');
-                    return;
-                }
+                localStorage.setItem('notes', JSON.stringify(notes));
                 renderCalendar();
                 renderNotesList();
                 renderFinancialRecords();
@@ -1119,58 +1072,119 @@
             }
         });
 
+        viewFinance.addEventListener('click', () => {
+            renderReport('weekly');
+            reportModal.style.display = 'block';
+        });
+
+        closeReportModal.addEventListener('click', () => {
+            reportModal.style.display = 'none';
+        });
+
         weeklyReportTab.addEventListener('click', () => {
+            document.querySelectorAll('.report-tab').forEach(tab => tab.classList.remove('active'));
             weeklyReportTab.classList.add('active');
-            monthlyReportTab.classList.remove('active');
-            yearlyReportTab.classList.remove('active');
-            recordsReportTab.classList.remove('active');
             renderReport('weekly');
         });
 
         monthlyReportTab.addEventListener('click', () => {
-            weeklyReportTab.classList.remove('active');
+            document.querySelectorAll('.report-tab').forEach(tab => tab.classList.remove('active'));
             monthlyReportTab.classList.add('active');
-            yearlyReportTab.classList.remove('active');
-            recordsReportTab.classList.remove('active');
             renderReport('monthly');
         });
 
         yearlyReportTab.addEventListener('click', () => {
-            weeklyReportTab.classList.remove('active');
-            monthlyReportTab.classList.remove('active');
+            document.querySelectorAll('.report-tab').forEach(tab => tab.classList.remove('active'));
             yearlyReportTab.classList.add('active');
-            recordsReportTab.classList.remove('active');
             renderReport('yearly');
         });
 
         recordsReportTab.addEventListener('click', () => {
-            weeklyReportTab.classList.remove('active');
-            monthlyReportTab.classList.remove('active');
-            yearlyReportTab.classList.remove('active');
+            document.querySelectorAll('.report-tab').forEach(tab => tab.classList.remove('active'));
             recordsReportTab.classList.add('active');
             renderReport('records');
         });
 
-        // Initialize
-        monthFilter.innerHTML = '<option value="all" data-en="All Months" data-ne="सबै महिनाहरू">All Months</option>';
-        calendarData[currentYear].forEach((month, index) => {
-            let option = document.createElement('option');
-            option.value = `${currentYear}-${String(index + 1).padStart(2, '0')}`;
-            option.textContent = isNepali ? monthsNepali[index] : month.name;
-            monthFilter.appendChild(option);
+        backupData.addEventListener('click', () => {
+            let dataStr = JSON.stringify(notes);
+            let blob = new Blob([dataStr], { type: 'application/json' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = 'nepali_calendar_notes.json';
+            a.click();
+            URL.revokeObjectURL(url);
         });
 
-        monthFilter.addEventListener('change', renderNotesList);
+        restoreData.addEventListener('click', () => {
+            restoreFileInput.click();
+        });
 
-        let today = new Date();
-        let bsDate = getBSDateFromGregorian(today);
-        if (bsDate) {
-            todayNepaliDate.textContent = `${monthsNepali[bsDate.month]} ${bsDate.day}, ${bsDate.year} BS`;
-            todayEnglishDate.textContent = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-        }
+        restoreFileInput.addEventListener('change', (event) => {
+            let file = event.target.files[0];
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    let importedNotes = JSON.parse(e.target.result);
+                    notes = notes.concat(importedNotes);
+                    localStorage.setItem('notes', JSON.stringify(notes));
+                    renderCalendar();
+                    renderNotesList();
+                    renderFinancialRecords();
+                    renderMonthlySummary();
+                    alert(isNepali ? 'नोटहरू सफलतापूर्वक पुनर्स्थापना गरियो' : 'Notes restored successfully');
+                } catch (err) {
+                    alert(isNepali ? 'पुनर्स्थापना असफल: अवैध JSON फाइल' : 'Restore failed: Invalid JSON file');
+                }
+            };
+            reader.readAsText(file);
+        });
 
-        renderMonthTabs();
-        renderCalendar();
-    </script>
-</body>
-</html>
+        addNote.addEventListener('click', () => {
+            let today = getBSDateFromGregorian(new Date());
+            let dateStr = today ? `${today.year}-${String(today.month + 1).padStart(2, '0')}-${String(today.day).padStart(2, '0')}` : `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-01`;
+            selectedDate.textContent = dateStr;
+            noteForm.classList.add('active');
+            entryType.value = 'note';
+            noteTitle.value = '';
+            noteTime.value = '';
+            noteDescription.value = '';
+            entryCategory.style.display = 'none';
+            saveNote.style.display = 'block';
+            editEntry.style.display = 'none';
+        });
+
+     addFinance.addEventListener('click', () => {
+         let today = getBSDateFromGregorian(new Date());
+         let dateStr = today ? `${today.year}-${String(today.month + 1).padStart(2, '0')}-${String(today.day).padStart(2, '0')}` : `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-01`;
+         selectedDate.textContent = dateStr;
+         noteForm.classList.add('active');
+         entryType.value = 'income';
+         noteTitle.value = '';
+         noteTime.value = '';
+         noteDescription.value = '';
+         entryCategory.style.display = 'block';
+         saveNote.style.display = 'block';
+         editEntry.style.display = 'none';
+     });
+
+     // Initialize the calendar on load
+     document.addEventListener('DOMContentLoaded', () => {
+         updateTodayDate();
+         renderMonthTabs();
+         renderCalendar();
+     });
+
+     // Close modals when clicking outside
+     window.addEventListener('click', (event) => {
+         if (event.target === notesModal) {
+             notesModal.style.display = 'none';
+         }
+         if (event.target === reportModal) {
+             reportModal.style.display = 'none';
+         }
+     });
+
+     monthFilter.addEventListener('change', renderNotesList);
+ </script>
