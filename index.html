@@ -183,29 +183,29 @@
             <button id="backupData" class="btn btn-warning" data-en="Backup" data-ne="ब्याकअप" aria-label="Backup Data">Backup</button>
             <button id="restoreData" class="btn btn-purple" data-en="Restore" data-ne="पुनर्स्थापना" aria-label="Restore Data">Restore</button>
             <div class="dropdown">
-                <button class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" data-en="Excel Export" data-ne="एक्सेल निर्यात" aria-label="Excel Export" aria-expanded="false">Excel Export</button>
+                <button class="btn btn-success dropdown-toggle" data-en="Excel Export" data-ne="एक्सेल निर्यात" aria-label="Excel Export">Excel Export</button>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item excel-option" href="#" data-type="note" data-en="Notes" data-ne="नोटहरू">Notes</a></li>
-                    <li><a class="dropdown-item excel-option" href="#" data-type="finance" data-en="Finances" data-ne="वित्त">Finances</a></li>
-                    <li><a class="dropdown-item excel-option" href="#" data-type="calendar" data-en="Monthly Calendar" data-ne="मासिक पात्रो">Monthly Calendar</a></li>
-                    <li><a class="dropdown-item excel-option" href="#" data-type="holiday" data-en="Yearly Holiday" data-ne="वार्षिक बिदा">Yearly Holiday</a></li>
+                    <li><a class="dropdown-item excel-option" data-type="note" data-en="Notes" data-ne="नोटहरू">Notes</a></li>
+                    <li><a class="dropdown-item excel-option" data-type="finance" data-en="Finances" data-ne="वित्त">Finances</a></li>
+                    <li><a class="dropdown-item excel-option" data-type="calendar" data-en="Monthly Calendar" data-ne="मासिक पात्रो">Monthly Calendar</a></li>
+                    <li><a class="dropdown-item excel-option" data-type="holiday" data-en="Yearly Holiday" data-ne="वार्षिक बिदा">Yearly Holiday</a></li>
                 </ul>
             </div>
             <div class="dropdown">
-                <button class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" data-en="PDF Export" data-ne="PDF निर्यात" aria-label="PDF Export" aria-expanded="false">PDF Export</button>
+                <button class="btn btn-danger dropdown-toggle" data-en="PDF Export" data-ne="PDF निर्यात" aria-label="PDF Export">PDF Export</button>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item pdf-option" href="#" data-type="note" data-en="Notes" data-ne="नोटहरू">Notes</a></li>
-                    <li><a class="dropdown-item pdf-option" href="#" data-type="finance" data-en="Finances" data-ne="वित्त">Finances</a></li>
-                    <li><a class="dropdown-item pdf-option" href="#" data-type="calendar" data-en="Monthly Calendar" data-ne="मासिक पात्रो">Monthly Calendar</a></li>
+                    <li><a class="dropdown-item pdf-option" data-type="note" data-en="Notes" data-ne="नोटहरू">Notes</a></li>
+                    <li><a class="dropdown-item pdf-option" data-type="finance" data-en="Finances" data-ne="वित्त">Finances</a></li>
+                    <li><a class="dropdown-item pdf-option" data-type="calendar" data-en="Monthly Calendar" data-ne="मासिक पात्रो">Monthly Calendar</a></li>
                 </ul>
             </div>
             <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" data-en="Import" data-ne="आयात" aria-label="Import Data" aria-expanded="false">Import</button>
+                <button class="btn btn-primary dropdown-toggle" data-en="Import" data-ne="आयात" aria-label="Import Data">Import</button>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item import-option" href="#" data-type="note" data-en="Notes" data-ne="नोटहरू">Notes</a></li>
-                    <li><a class="dropdown-item import-option" href="#" data-type="finance" data-en="Finances" data-ne="वित्त">Finances</a></li>
-                    <li><a class="dropdown-item import-option" href="#" data-type="calendar" data-en="Monthly Calendar" data-ne="मासिक पात्रो">Monthly Calendar</a></li>
-                    <li><a class="dropdown-item import-option" href="#" data-type="holiday" data-en="Yearly Holiday" data-ne="वार्षिक बिदा">Yearly Holiday</a></li>
+                    <li><a class="dropdown-item import-option" data-type="note" data-en="Notes" data-ne="नोटहरू">Notes</a></li>
+                    <li><a class="dropdown-item import-option" data-type="finance" data-en="Finances" data-ne="वित्त">Finances</a></li>
+                    <li><a class="dropdown-item import-option" data-type="calendar" data-en="Monthly Calendar" data-ne="मासिक पात्रो">Monthly Calendar</a></li>
+                    <li><a class="dropdown-item import-option" data-type="holiday" data-en="Yearly Holiday" data-ne="वार्षिक बिदा">Yearly Holiday</a></li>
                 </ul>
             </div>
             <input type="file" id="restoreFileInput" style="display:none" accept=".json" aria-label="File Input for Restore">
@@ -218,10 +218,10 @@
         <div class="language-toggle text-center mb-3">
             <button id="languageToggle" class="btn btn-outline-primary" data-en="Toggle Language (EN/NE)" data-ne="भाषा टगल गर्नुहोस् (EN/NE)" aria-label="Toggle Language">Toggle Language (EN/NE)</button>
         </div>
-        <div class="month-tabs d-flex flex-wrap justify-content-center gap-2 mb-3" id="monthTabs"></div>
         <h2 id="currentMonth" class="text-center mb-3"></h2>
         <div class="row">
             <div class="col-12 col-md-9">
+                <div class="month-tabs d-flex flex-wrap justify-content-center gap-2 mb-3" id="monthTabs"></div>
                 <div class="card">
                     <div class="card-body">
                         <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Calendar"></div>
@@ -356,7 +356,7 @@
     <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script nonce="OGY1ZmVhYWEtOGRlNy00YjJhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2">
         // Calendar data
         const calendarData = {
@@ -581,7 +581,7 @@
             if (!note.recurring) return [note.date];
             let dates = [];
             let [startYear, startMonth, startDay] = note.date.split('-').map(Number);
-            startMonth--;
+            startMonth--; // Adjust for 0-based index
             for (let year = startYear; year <= 2083; year++) {
                 for (let month = (year === startYear ? startMonth : 0); month < 12; month++) {
                     if (calendarData[year][month].days >= startDay) {
@@ -785,7 +785,7 @@
                 });
             }
             holidayList.innerHTML = '';
-            holidayList.appendChild(holidayList);
+            holidayList.appendChild(fragment);
         }
 
         function toggleLanguage() {
@@ -1067,7 +1067,6 @@
         }
 
         function renderFinancialRecords() {
-            reportContent.innerHTML = '';
             const fragment = document.createDocumentFragment();
             let searchQuery = financeSearch.value.toLowerCase();
             let filteredNotes = notes.filter(note => (note.type === 'income' || note.type === 'expense') && (
@@ -1086,57 +1085,55 @@
                     let financeItem = document.createElement('div');
                     financeItem.className = 'border-bottom py-2';
                     financeItem.innerHTML = `
-    <div><strong>${note.date}</strong> - ${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR</div>
-    <div>${note.description || ''}</div>
-    <div>${note.category ? (isNepali ? `श्रेणी: ${note.category}` : `Category: ${note.category}`) : ''}</div>
-    <div>${note.recurring ? (isNepali ? 'मासिक दोहोरिने' : 'Recurring Monthly') : ''}</div>
-    <div>${note.reminder ? (isNepali ? 'रिमाइन्डर सेट' : 'Reminder Set') : ''}</div>
-    <div class="d-flex gap-2">
-        <a href="#" class="edit-note text-primary" data-en="Edit" data-ne="सम्पादन">${isNepali ? 'सम्पादन' : 'Edit'}</a>
-        <a href="#" class="delete-note text-danger" data-en="Delete" data-ne="मेटाउन">${isNepali ? 'मेटाउन' : 'Delete'}</a>
-    </div>
-`;
+                        <div><strong>${note.date}</strong> - ${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR</div>
+                        <div>${isNepali ? 'विवरण' : 'Description'}: ${note.description || ''}</div>
+                        <div>${isNepali ? 'श्रेणी' : 'Category'}: ${note.category || ''}</div>
+                        <div>${note.recurring ? (isNepali ? 'मासिक दोहोरिने' : 'Recurring Monthly') : ''}</div>
+                        <div>${note.reminder ? (isNepali ? 'रिमाइन्डर सेट' : 'Reminder Set') : ''}</div>
+                        <div class="d-flex gap-2">
+                            <a href="#" class="edit-note text-primary" data-en="Edit" data-ne="सम्पादन">${isNepali ? 'सम्पादन' : 'Edit'}</a>
+                            <a href="#" class="delete-note text-danger" data-en="Delete" data-ne="मेटाउन">${isNepali ? 'मेटाउन' : 'Delete'}</a>
+                        </div>
+                    `;
                     financeItem.querySelector('.edit-note').addEventListener('click', () => editNote(globalIndex));
                     financeItem.querySelector('.delete-note').addEventListener('click', () => deleteNote(globalIndex));
                     financeList.appendChild(financeItem);
                 });
                 fragment.appendChild(financeList);
 
-                let canvas = document.createElement('canvas');
-                canvas.id = 'financeChart';
-                canvas.className = 'my-3';
-                canvas.setAttribute('aria-label', isNepali ? 'वित्तीय रेकर्ड चार्ट' : 'Financial Records Chart');
-                fragment.appendChild(canvas);
-                reportContent.appendChild(fragment); // Append to DOM before Chart.js initialization
+                let categoryData = {};
+                filteredNotes.filter(note => note.type === 'expense').forEach(note => {
+                    let category = note.category || 'Other';
+                    if (!categoryData[category]) categoryData[category] = 0;
+                    categoryData[category] += parseFloat(note.title || 0);
+                });
 
-                let incomeData = filteredNotes.filter(n => n.type === 'income').map(n => parseFloat(n.title || 0));
-                let expenseData = filteredNotes.filter(n => n.type === 'expense').map(n => parseFloat(n.title || 0));
+                let canvas = document.createElement('canvas');
+                canvas.id = 'categoryChart';
+                canvas.className = 'my-3';
+                canvas.setAttribute('aria-label', isNepali ? 'श्रेणी अनुसार खर्च चार्ट' : 'Expense by Category Chart');
+                fragment.appendChild(canvas);
                 new Chart(canvas, {
-                    type: 'bar',
+                    type: 'pie',
                     data: {
-                        labels: filteredNotes.map(n => n.date),
-                        datasets: [
-                            {
-                                label: isNepali ? 'आय' : 'Income',
-                                data: incomeData,
-                                backgroundColor: '#4caf50'
-                            },
-                            {
-                                label: isNepali ? 'खर्च' : 'Expense',
-                                data: expenseData,
-                                backgroundColor: '#d32f2f'
-                            }
-                        ]
+                        labels: Object.keys(categoryData),
+                        datasets: [{
+                            label: isNepali ? 'खर्च' : 'Expense',
+                            data: Object.values(categoryData),
+                            backgroundColor: ['#d32f2f', '#4caf50', '#0288d1', '#ff9800', '#ab47bc', '#689f38']
+                        }]
                     },
                     options: {
                         responsive: true,
                         plugins: {
                             legend: { position: 'top' },
-                            title: { display: true, text: isNepali ? 'वित्तीय रेकर्ड अवलोकन' : 'Financial Records Overview' }
+                            title: { display: true, text: isNepali ? 'श्रेणी अनुसार खर्च' : 'Expense by Category' }
                         }
                     }
                 });
             }
+            reportContent.innerHTML = '';
+            reportContent.appendChild(fragment);
         }
 
         function renderReport(type) {
@@ -1144,15 +1141,15 @@
             let year = parseInt(yearFilter.value);
             let lang = isNepali ? 'ne' : 'en';
             let headers = {
-                en: {
-                    period: 'Period', income: 'Income (NPR)', expense: 'Expense (NPR)', balance: 'Balance (NPR)', day: 'Day',
-                    dailySummary: 'Daily Summary', noData: 'No financial data available for this period', budget: 'Budget (NPR)', variance: 'Variance (NPR)'
-                },
-                ne: {
-                    period: 'अवधि', income: 'आय (NPR)', expense: 'खर्च (NPR)', balance: 'ब्यालेन्स (NPR)', day: 'दिन',
-                    dailySummary: 'दैनिक सारांश', noData: 'यो अवधिको लागि कुनै वित्तीय डेटा उपलब्ध छैन', budget: 'बजेट (NPR)', variance: 'भिन्नता (NPR)'
-                }
-            };
+    en: {
+        period: 'Period', income: 'Income (NPR)', expense: 'Expense (NPR)', balance: 'Balance (NPR)', day: 'Day',
+        dailySummary: 'Daily Summary', noData: 'No financial data available for this period', budget: 'Budget (NPR)', variance: 'Variance (NPR)'
+    },
+    ne: {
+        period: 'अवधि', income: 'आय (NPR)', expense: 'खर्च (NPR)', balance: 'ब्यालेन्स (NPR)', day: 'दिन',
+        dailySummary: 'दैनिक सारांश', noData: 'यो अवधिको लागि कुनै वित्तीय डेटा उपलब्ध छैन', budget: 'बजेट (NPR)', variance: 'भिन्नता (NPR)'
+    }
+};
 
             let fragment = document.createDocumentFragment();
             let table = document.createElement('table');
@@ -1239,8 +1236,6 @@
                 canvas.className = 'my-3';
                 canvas.setAttribute('aria-label', isNepali ? 'साप्ताहिक वित्तीय चार्ट' : 'Weekly Financial Chart');
                 fragment.appendChild(canvas);
-                reportContent.appendChild(fragment); // Append to DOM before Chart.js initialization
-
                 new Chart(canvas, {
                     type: 'line',
                     data: {
@@ -1321,8 +1316,6 @@
                 canvas.className = 'my-3';
                 canvas.setAttribute('aria-label', isNepali ? 'मासिक वित्तीय चार्ट' : 'Monthly Financial Chart');
                 fragment.appendChild(canvas);
-                reportContent.appendChild(fragment); // Append to DOM before Chart.js initialization
-
                 new Chart(canvas, {
                     type: 'bar',
                     data: {
@@ -1387,8 +1380,6 @@
                 canvas.className = 'my-3';
                 canvas.setAttribute('aria-label', isNepali ? 'वार्षिक वित्तीय चार्ट' : 'Yearly Financial Chart');
                 fragment.appendChild(canvas);
-                reportContent.appendChild(fragment); // Append to DOM before Chart.js initialization
-
                 new Chart(canvas, {
                     type: 'pie',
                     data: {
@@ -1454,8 +1445,6 @@
                 canvas.className = 'my-3';
                 canvas.setAttribute('aria-label', isNepali ? 'दैनिक वित्तीय रेकर्ड चार्ट' : 'Daily Financial Records Chart');
                 fragment.appendChild(canvas);
-                reportContent.appendChild(fragment); // Append to DOM before Chart.js initialization
-
                 new Chart(canvas, {
                     type: 'line',
                     data: {
@@ -1484,6 +1473,7 @@
                     }
                 });
             }
+            reportContent.appendChild(fragment);
         }
 
         // Export functions
@@ -1685,11 +1675,7 @@
                         alert(isNepali ? 'आयात असफल: अमान्य फाइल ढाँचा' : 'Import failed: Invalid file format');
                     }
                 };
-                if (type === 'calendar' || type === 'holiday') {
-                    reader.readAsArrayBuffer(file);
-                } else {
-                    reader.readAsText(file);
-                }
+                reader.readAsText(file);
             };
             input.click();
         }
@@ -1833,18 +1819,16 @@
 
         undoAction.addEventListener('click', undoLastAction);
 
-        // Event delegation for dropdown options
-        document.querySelector('.year-filter').addEventListener('click', (e) => {
-            if (e.target.classList.contains('excel-option')) {
-                e.preventDefault();
-                exportToExcel(e.target.dataset.type);
-            } else if (e.target.classList.contains('pdf-option')) {
-                e.preventDefault();
-                exportToPDF(e.target.dataset.type);
-            } else if (e.target.classList.contains('import-option')) {
-                e.preventDefault();
-                importData(e.target.dataset.type);
-            }
+        document.querySelectorAll('.excel-option').forEach(option => {
+            option.addEventListener('click', () => exportToExcel(option.dataset.type));
+        });
+
+        document.querySelectorAll('.pdf-option').forEach(option => {
+            option.addEventListener('click', () => exportToPDF(option.dataset.type));
+        });
+
+        document.querySelectorAll('.import-option').forEach(option => {
+            option.addEventListener('click', () => importData(option.dataset.type));
         });
 
         weeklyReportTab.addEventListener('click', () => {
@@ -1894,5 +1878,3 @@
             }
         })();
     </script>
-</body>
-</html>
