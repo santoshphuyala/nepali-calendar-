@@ -103,6 +103,12 @@
         .year-filter .backup-btn:hover{background:#fb8c00}
         .year-filter .restore-btn{background:#ab47bc}
         .year-filter .restore-btn:hover{background:#9c27b0}
+        .year-filter .excel-btn{background:#388e3c}
+        .year-filter .excel-btn:hover{background:#2e7d32}
+        .year-filter .pdf-btn{background:#d32f2f}
+        .year-filter .pdf-btn:hover{background:#b71c1c}
+        .year-filter .import-btn{background:#0288d1}
+        .year-filter .import-btn:hover{background:#0277bd}
         .year-filter button.nepali{font-family:'Noto Sans Devanagari',sans-serif}
         .today-date-row{text-align:center;margin:0.5rem 0;font-size:1rem;color:var(--text);display:flex;justify-content:center;gap:2rem}
         .blink{animation:blink 1s infinite}
@@ -113,6 +119,12 @@
         .report-table th,.report-table td{border:1px solid #ddd;padding:0.5rem;text-align:left;font-size:0.9rem}
         .report-table th{background:var(--secondary);color:#fff}
         .weekday-header{background:var(--secondary);color:#fff;padding:0.5rem;font-weight:600}
+        .dropdown{position:relative;display:inline-block}
+        .dropdown-content{display:none;position:absolute;background-color:var(--card-bg);min-width:160px;box-shadow:0 8px 16px rgba(0,0,0,0.2);z-index:1;border-radius:8px;overflow:hidden}
+        .dropdown-content div{padding:0.75rem 1rem;cursor:pointer;font-size:0.9rem;color:var(--text);transition:.3s}
+        .dropdown-content div:hover{background-color:#e3f2fd}
+        .dropdown-content div.nepali{font-family:'Noto Sans Devanagari',sans-serif}
+        .dropdown:hover .dropdown-content{display:block}
         @media (max-width:768px){
             .header{font-size:1.2rem}
             .month-tab{padding:0.4rem 0.8rem;font-size:0.8rem}
@@ -126,6 +138,7 @@
             .year-filter{flex-direction:column}
             .today-date-row{flex-direction:column;gap:0.5rem}
             .note-form-container .form-buttons{flex-direction:column}
+            .dropdown-content{min-width:120px}
         }
     </style>
 </head>
@@ -150,6 +163,31 @@
         <button id="viewFinance" class="finance-btn" data-en="View Finances" data-ne="वित्त हेर्नुहोस्">View Finances</button>
         <button id="backupData" class="backup-btn" data-en="Backup" data-ne="ब्याकअप">Backup</button>
         <button id="restoreData" class="restore-btn" data-en="Restore" data-ne="पुनर्स्थापना">Restore</button>
+        <div class="dropdown">
+            <button class="excel-btn" data-en="Excel Export" data-ne="एक्सेल निर्यात">Excel Export</button>
+            <div class="dropdown-content">
+                <div class="excel-option" data-type="note" data-en="Notes" data-ne="नोटहरू">Notes</div>
+                <div class="excel-option" data-type="finance" data-en="Finances" data-ne="वित्त">Finances</div>
+                <div class="excel-option" data-type="calendar" data-en="Monthly Calendar" data-ne="मासिक पात्रो">Monthly Calendar</div>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="pdf-btn" data-en="PDF Export" data-ne="PDF निर्यात">PDF Export</button>
+            <div class="dropdown-content">
+                <div class="pdf-option" data-type="note" data-en="Notes" data-ne="नोटहरू">Notes</div>
+                <div class="pdf-option" data-type="finance" data-en="Finances" data-ne="वित्त">Finances</div>
+                <div class="pdf-option" data-type="calendar" data-en="Monthly Calendar" data-ne="मासिक पात्रो">Monthly Calendar</div>
+            </div>
+        </div>
+        <div class="dropdown">
+            <button class="import-btn" data-en="Import" data-ne="आयात">Import</button>
+            <div class="dropdown-content">
+                <div class="import-option" data-type="note" data-en="Notes" data-ne="नोटहरू">Notes</div>
+                <div class="import-option" data-type="finance" data-en="Finances" data-ne="वित्त">Finances</div>
+                <div class="import-option" data-type="calendar" data-en="Monthly Calendar" data-ne="मासिक पात्रो">Monthly Calendar</div>
+                <div class="import-option" data-type="holiday" data-en="Yearly Holiday" data-ne="वार्षिक बिदा">Yearly Holiday</div>
+            </div>
+        </div>
         <input type="file" id="restoreFileInput" style="display:none" accept=".json">
     </div>
     <div class="today-date-row">
@@ -234,6 +272,7 @@
     </div>
     <div class="footer">Calendar Concept and Design by Santosh Phuyal</div>
     <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2">
         // Calendar data
         const calendarData = {
@@ -980,211 +1019,147 @@
             todayEnglishDate.textContent = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
         }
 
-        // Event listeners
-        prevMonth.addEventListener('click', () => {
-            currentMonthIndex--;
-            if (currentMonthIndex < 0) {
-                currentYear--;
-                currentMonthIndex = 11;
-            }
-            if (currentYear < 2081) {
-                currentYear = 2081;
-                currentMonthIndex = 0;
-            }
-            renderMonthTabs();
-            renderCalendar();
-        });
+        // Export functions
+        function exportToExcel(type) {
+            let data = [];
+            let filename = '';
+            let headers = [];
 
-        nextMonth.addEventListener('click', () => {
-            currentMonthIndex++;
-            if (currentMonthIndex > 11) {
-                currentYear++;
-                currentMonthIndex = 0;
-            }
-            if (currentYear > 2083) {
-                currentYear = 2083;
-                currentMonthIndex = 11;
-            }
-            renderMonthTabs();
-            renderCalendar();
-        });
-
-        yearFilter.addEventListener('change', () => {
-            currentYear = parseInt(yearFilter.value);
-            currentMonthIndex = 0;
-            renderMonthTabs();
-            renderCalendar();
-        });
-
-        todayButton.addEventListener('click', () => {
-            let today = new Date();
-            let bsDate = getBSDateFromGregorian(today);
-            if (bsDate) {
-                currentYear = bsDate.year;
-                currentMonthIndex = bsDate.month;
-                yearFilter.value = currentYear;
-                renderMonthTabs();
-                renderCalendar();
-            }
-        });
-
-        languageToggle.addEventListener('click', toggleLanguage);
-
-        saveNote.addEventListener('click', saveEntry);
-        editEntry.addEventListener('click', updateNote);
-        closeEntry.addEventListener('click', () => {
-            noteForm.classList.remove('active');
-            editingNoteIndex = null;
-        });
-
-        entryType.addEventListener('change', () => {
-            entryCategory.style.display = entryType.value === 'note' ? 'none' : 'block';
-        });
-
-        viewNotes.addEventListener('click', () => {
-            monthFilter.innerHTML = `<option value="all" data-en="All Months" data-ne="सबै महिनाहरू">${isNepali ? 'सबै महिनाहरू' : 'All Months'}</option>`;
-            for (let year in calendarData) {
-                calendarData[year].forEach((month, index) => {
-                    let monthStr = `${year}-${String(index + 1).padStart(2, '0')}`;
-                    let option = document.createElement('option');
-                    option.value = monthStr;
-                    option.textContent = isNepali ? `${monthsNepali[index]} ${year}` : `${month.name} ${year}`;
-                    if (isNepali) option.classList.add('nepali');
-                    monthFilter.appendChild(option);
-                });
-            }
-            renderNotesList();
-            notesModal.style.display = 'block';
-        });
-
-        closeModal.addEventListener('click', () => {
-            notesModal.style.display = 'none';
-        });
-
-        clearNotes.addEventListener('click', () => {
-            if (confirm(isNepali ? 'के तपाईं सबै नोटहरू मेटाउन चाहनुहुन्छ?' : 'Are you sure you want to clear all notes?')) {
-                notes = [];
-                localStorage.setItem('notes', JSON.stringify(notes));
-                renderCalendar();
-                renderNotesList();
-                renderFinancialRecords();
-                renderMonthlySummary();
-            }
-        });
-
-        viewFinance.addEventListener('click', () => {
-            renderReport('weekly');
-            reportModal.style.display = 'block';
-        });
-
-        closeReportModal.addEventListener('click', () => {
-            reportModal.style.display = 'none';
-        });
-
-        weeklyReportTab.addEventListener('click', () => {
-            document.querySelectorAll('.report-tab').forEach(tab => tab.classList.remove('active'));
-            weeklyReportTab.classList.add('active');
-            renderReport('weekly');
-        });
-
-        monthlyReportTab.addEventListener('click', () => {
-            document.querySelectorAll('.report-tab').forEach(tab => tab.classList.remove('active'));
-            monthlyReportTab.classList.add('active');
-            renderReport('monthly');
-        });
-
-        yearlyReportTab.addEventListener('click', () => {
-            document.querySelectorAll('.report-tab').forEach(tab => tab.classList.remove('active'));
-            yearlyReportTab.classList.add('active');
-            renderReport('yearly');
-        });
-
-        recordsReportTab.addEventListener('click', () => {
-            document.querySelectorAll('.report-tab').forEach(tab => tab.classList.remove('active'));
-            recordsReportTab.classList.add('active');
-            renderReport('records');
-        });
-
-        backupData.addEventListener('click', () => {
-            let dataStr = JSON.stringify(notes);
-            let blob = new Blob([dataStr], { type: 'application/json' });
-            let url = URL.createObjectURL(blob);
-            let a = document.createElement('a');
-            a.href = url;
-            a.download = 'nepali_calendar_notes.json';
-            a.click();
-            URL.revokeObjectURL(url);
-        });
-
-        restoreData.addEventListener('click', () => {
-            restoreFileInput.click();
-        });
-
-        restoreFileInput.addEventListener('change', (event) => {
-            let file = event.target.files[0];
-            if (!file) return;
-            let reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    let importedNotes = JSON.parse(e.target.result);
-                    notes = notes.concat(importedNotes);
-                    localStorage.setItem('notes', JSON.stringify(notes));
-                    renderCalendar();
-                    renderNotesList();
-                    renderFinancialRecords();
-                    renderMonthlySummary();
-                    alert(isNepali ? 'नोटहरू सफलतापूर्वक पुनर्स्थापना गरियो' : 'Notes restored successfully');
-                } catch (err) {
-                    alert(isNepali ? 'पुनर्स्थापना असफल: अवैध JSON फाइल' : 'Restore failed: Invalid JSON file');
+            if (type === 'note') {
+                filename = 'notes.xlsx';
+                headers = isNepali 
+                    ? ['मिति', 'शीर्षक', 'समय', 'विवरण']
+                    : ['Date', 'Title', 'Time', 'Description'];
+                data = notes
+                    .filter(note => note.type === 'note')
+                    .map(note => ({
+                        Date: note.date,
+                        Title: note.title,
+                        Time: note.time || '',
+                        Description: note.description || ''
+                    }));
+            } else if (type === 'finance') {
+                filename = 'finances.xlsx';
+                headers = isNepali 
+                    ? ['मिति', 'प्रकार', 'रकम (NPR)', 'विवरण', 'श्रेणी']
+                    : ['Date', 'Type', 'Amount (NPR)', 'Description', 'Category'];
+                data = notes
+                    .filter(note => note.type === 'income' || note.type === 'expense')
+                    .map(note => ({
+                        Date: note.date,
+                        Type: note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense'),
+                        'Amount (NPR)': note.title,
+                        Description: note.description || '',
+                        Category: note.category || ''
+                    }));
+            } else if (type === 'calendar') {
+                filename = `calendar_${currentYear}_${calendarData[currentYear][currentMonthIndex].name}.xlsx`;
+                headers = isNepali 
+                    ? ['दिन', 'मिति (BS)', 'मिति (AD)', 'बिदा/घटना']
+                    : ['Day', 'Date (BS)', 'Date (AD)', 'Holiday/Event'];
+                let month = calendarData[currentYear][currentMonthIndex];
+                let startDate = new Date(month.gregStart);
+                for (let day = 1; day <= month.days; day++) {
+                    let gregDate = getGregorianDate(currentYear, currentMonthIndex, day);
+                    let holiday = holidays[currentYear]?.find(h => h.month === currentMonthIndex && h.day === day);
+                    data.push({
+                        Day: isNepali ? daysNepali[gregDate.getDay()] : daysEnglish[gregDate.getDay()],
+                        'Date (BS)': `${isNepali ? monthsNepali[currentMonthIndex] : month.name} ${day}, ${currentYear}`,
+                        'Date (AD)': gregDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                        'Holiday/Event': holiday ? (isNepali ? holiday.nepali : holiday.name) : ''
+                    });
                 }
-            };
-            reader.readAsText(file);
-        });
+            }
 
-        addNote.addEventListener('click', () => {
-            let today = getBSDateFromGregorian(new Date());
-            let dateStr = today ? `${today.year}-${String(today.month + 1).padStart(2, '0')}-${String(today.day).padStart(2, '0')}` : `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-01`;
-            selectedDate.textContent = dateStr;
-            noteForm.classList.add('active');
-            entryType.value = 'note';
-            noteTitle.value = '';
-            noteTime.value = '';
-            noteDescription.value = '';
-            entryCategory.style.display = 'none';
-            saveNote.style.display = 'block';
-            editEntry.style.display = 'none';
-        });
+            if (data.length === 0) {
+                alert(isNepali ? 'निर्यात गर्न डेटा छैन' : 'No data to export');
+                return;
+            }
 
-     addFinance.addEventListener('click', () => {
-         let today = getBSDateFromGregorian(new Date());
-         let dateStr = today ? `${today.year}-${String(today.month + 1).padStart(2, '0')}-${String(today.day).padStart(2, '0')}` : `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-01`;
-         selectedDate.textContent = dateStr;
-         noteForm.classList.add('active');
-         entryType.value = 'income';
-         noteTitle.value = '';
-         noteTime.value = '';
-         noteDescription.value = '';
-         entryCategory.style.display = 'block';
-         saveNote.style.display = 'block';
-         editEntry.style.display = 'none';
-     });
+            const ws = XLSX.utils.json_to_sheet(data, { header: headers });
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, type);
+            XLSX.writeFile(wb, filename);
+        }
 
-     // Initialize the calendar on load
-     document.addEventListener('DOMContentLoaded', () => {
-         updateTodayDate();
-         renderMonthTabs();
-         renderCalendar();
-     });
+        function exportToPDF(type) {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    let y = 10;
 
-     // Close modals when clicking outside
-     window.addEventListener('click', (event) => {
-         if (event.target === notesModal) {
-             notesModal.style.display = 'none';
-         }
-         if (event.target === reportModal) {
-             reportModal.style.display = 'none';
-         }
-     });
+    doc.setFontSize(16);
+    doc.text(isNepali ? 'नेपाली पात्रो निर्यात' : 'Nepali Calendar Export', 10, y);
+    y += 10;
 
-     monthFilter.addEventListener('change', renderNotesList);
- </script>
+    doc.setFontSize(12);
+    if (type === 'note') {
+        doc.text(isNepali ? 'नोटहरू' : 'Notes', 10, y);
+        y += 10;
+        let filteredNotes = notes.filter(note => note.type === 'note');
+        if (filteredNotes.length === 0) {
+            doc.text(isNepali ? 'कुनै नोटहरू छैनन्' : 'No notes available', 10, y);
+        } else {
+            filteredNotes.forEach(note => {
+                doc.text(`${note.date} - ${note.title}`, 10, y);
+                y += 5;
+                if (note.time) {
+                    doc.text(`${isNepali ? 'समय' : 'Time'}: ${note.time}`, 15, y);
+                    y += 5;
+                }
+                if (note.description) {
+                    doc.text(`${isNepali ? 'विवरण' : 'Description'}: ${note.description}`, 15, y);
+                    y += 5;
+                }
+                y += 5;
+                if (y > 280) {
+                    doc.addPage();
+                    y = 10;
+                }
+            });
+        }
+    } else if (type === 'finance') {
+        doc.text(isNepali ? 'वित्त' : 'Finances', 10, y);
+        y += 10;
+        let filteredNotes = notes.filter(note => note.type === 'income' || note.type === 'expense');
+        if (filteredNotes.length === 0) {
+            doc.text(isNepali ? 'कुनै वित्तीय रेकर्डहरू छैनन्' : 'No financial records available', 10, y);
+        } else {
+            filteredNotes.forEach(note => {
+                doc.text(`${note.date} - ${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR`, 10, y);
+                y += 5;
+                if (note.description) {
+                    doc.text(`${isNepali ? 'विवरण' : 'Description'}: ${note.description}`, 15, y);
+                    y += 5;
+                }
+                if (note.category) {
+                    doc.text(`${isNepali ? 'श्रेणी' : 'Category'}: ${note.category}`, 15, y);
+                    y += 5;
+                }
+                y += 5;
+                if (y > 280) {
+                    doc.addPage();
+                    y = 10;
+                }
+            });
+        }
+    } else if (type === 'calendar') {
+        doc.text(isNepali ? `पात्रो: ${monthsNepali[currentMonthIndex]} ${currentYear}` : `Calendar: ${calendarData[currentYear][currentMonthIndex].name} ${currentYear}`, 10, y);
+        y += 10;
+        let month = calendarData[currentYear][currentMonthIndex];
+        let startDate = new Date(month.gregStart);
+        for (let day = 1; day <= month.days; day++) {
+            let gregDate = getGregorianDate(currentYear, currentMonthIndex, day);
+            let holiday = holidays[currentYear]?.find(h => h.month === currentMonthIndex && h.day === day);
+            doc.text(`${isNepali ? monthsNepali[currentMonthIndex] : month.name} ${day} (${gregDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })})${holiday ? ' - ' + (isNepali ? holiday.nepali : holiday.name) : ''}`, 10, y);
+            y += 5;
+            if (y > 280) {
+                doc.addPage();
+                y = 10;
+            }
+        }
+    }
+
+    doc.save(`${type}_${currentYear}.pdf`);
+}
+
+// ... (followed by handleImport, importData, event listeners, etc.)
