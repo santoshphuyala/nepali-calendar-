@@ -6,164 +6,87 @@
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self';
-        script-src 'self' 'nonce-OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2' 'strict-dynamic' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net;
-        img-src 'self' blob: data: https://assets.grok.com https://imgs.search.brave.com;
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net;
+        script-src 'self' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net;
+        img-src 'self' blob: data:;
+        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
         font-src 'self' https://fonts.gstatic.com;
-        connect-src 'self' https://api.grok.com;
+        connect-src 'self'
     ">
     <title>Nepali Calendar 2082</title>
     <link rel="icon" href="data:;base64,iVBORw0KGgo=">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        :root {
-            --primary: #d32f2f;
-            --secondary: #0288d1;
-            --accent: #fbc02d;
-            --income: #4caf50;
-            --expense: #d32f2f;
+        body {
+            font-family: 'Poppins', 'Noto Sans Devanagari', sans-serif;
+            background-color: #f5f7fa;
         }
-        body { 
-            font-family: 'Poppins', sans-serif; 
-            background: #f5f5f5; 
-            margin: 0;
-        }
-        .nepali { 
-            font-family: 'Noto Sans Devanagari', sans-serif; 
-            font-size: 1.1rem; 
-            font-weight: 500;
+        .bg-gradient-primary {
+            background: linear-gradient(180deg, #007bff 0%, #0056b3 100%);
+            padding: 20px;
         }
         .header-title {
-            font-size: 2rem;
-            font-weight: 600;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        header {
-            padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        footer {
-            padding: 1rem;
-            margin-top: 2rem;
-            background: #e3f2fd;
-            border-top: 1px solid var(--secondary);
+            font-size: 2.5rem;
+            margin-bottom: 0;
         }
         .design-credit {
-            font-size: 0.85rem;
-            font-style: italic;
-            color: var(--secondary);
-            margin: 0.5rem 0;
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        .navbar-nav .nav-link {
+            font-weight: 500;
+            color: #333;
+        }
+        .navbar-nav .nav-link.active {
+            color: #007bff;
+        }
+        .year-filter {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
         }
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 0.5rem;
+            gap: 5px;
+            padding: 10px;
         }
-        .calendar-day { 
-            position: relative; 
-            min-height: 120px; 
-            cursor: pointer; 
-            transition: transform 0.3s; 
-            box-sizing: border-box; 
-            padding: 0.5rem; 
-            background: #fff; 
-            border: 1px solid #ddd; 
-            border-radius: 4px;
+        .calendar-day {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+            background-color: #fff;
+            cursor: pointer;
         }
-        .calendar-day:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        .calendar-day.holiday {
+            background-color: #ffcccc;
         }
-        .calendar-day.today { 
-            border: 2px solid var(--secondary); 
-            background: #e3f2fd; 
+        .calendar-day.today {
+            background-color: #007bff;
+            color: #fff;
         }
-        .saturday { background: #b0bec5; color: #fff; }
-        .dashain { background: #d81b60; color: #fff; }
-        .tihar { background: #7b1fa2; color: #fff; }
-        .national { background: #4caf50; color: #fff; }
-        .ethnic { background: #ff9800; color: #fff; }
-        .women { background: #f06292; color: #fff; }
-        .education { background: #0288d1; color: #fff; }
-        .jatra { background: #ab47bc; color: #fff; }
-        .observed { background: #689f38; color: #fff; }
-        .disability { background: #26a69a; color: #fff; }
-        .birth { background: #ef6c00; color: #fff; }
-        .bs-date { 
-            font-weight: 600; 
-            font-size: 1rem; 
+        .holiday-list {
+            list-style: none;
+            padding: 0;
         }
-        .greg-date { 
-            font-size: 0.75rem; 
-            color: #757575; 
+        .holiday-list li {
+            padding: 5px 0;
         }
-        .festival { 
-            font-size: 0.7rem; 
-            font-family: 'Noto Sans Devanagari', sans-serif; 
+        footer {
+            margin-top: 20px;
         }
-        .event-preview { 
-            font-size: 0.65rem; 
-            color: #757575; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            white-space: nowrap; 
+        .dark-mode {
+            background-color: #333;
+            color: #fff;
         }
-        .festival-tooltip, .note-tooltip, .finance-tooltip {
-            display: none; 
-            position: absolute; 
-            background: #212121; 
-            color: #fff; 
-            padding: 0.5rem;
-            border-radius: 6px; 
-            font-size: 0.7rem; 
-            z-index: 100; 
-            top: -2rem; 
-            left: 50%;
-            transform: translateX(-50%); 
-            white-space: nowrap;
+        .dark-mode .calendar-day {
+            background-color: #444;
+            color: #fff;
         }
-        .calendar-day:hover .festival-tooltip, 
-        .calendar-day:hover .note-tooltip, 
-        .calendar-day:hover .finance-tooltip { 
-            display: block; 
-        }
-        .note-indicator, .income-indicator, .expense-indicator {
-            position: absolute; 
-            top: 0.4rem; 
-            right: 0.4rem; 
-            width: 8px; 
-            height: 8px; 
-            border-radius: 50%;
-        }
-        .note-indicator { background: var(--secondary); }
-        .income-indicator { background: var(--income); }
-        .expense-indicator { background: var(--expense); }
-        .blink { animation: blink 1s infinite; }
-        @keyframes blink { 
-            0%, 100% { opacity: 1; } 
-            50% { opacity: 0.3; } 
-        }
-        .report-table th, .report-table td { 
-            font-size: 0.9rem; 
-        }
-        .card {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-radius: 8px;
-        }
-        @media (max-width: 768px) {
-            .calendar-day { 
-                min-height: 80px; 
-                font-size: 0.85rem; 
-            }
-            .bs-date { font-size: 0.9rem; }
-            .greg-date { font-size: 0.65rem; }
-            .festival { font-size: 0.6rem; }
-            .event-preview { font-size: 0.55rem; }
-            .header-title { font-size: 1.5rem; }
-            .design-credit { font-size: 0.75rem; }
+        .dark-mode .card {
+            background-color: #555;
+            color: #fff;
         }
     </style>
 </head>
@@ -171,81 +94,141 @@
     <header class="bg-gradient-primary text-white text-center">
         <h1 class="header-title" data-en="Nepali Calendar" data-ne="नेपाली पात्रो">Nepali Calendar</h1>
         <p class="design-credit">Calendar Concept and Design by Santosh Phuyal</p>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <div class="container-fluid">
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav mx-auto">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="index.html" data-en="Home" data-ne="होम">Home</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="calendar.html" data-en="Calendar" data-ne="पात्रो">Calendar</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="finance.html" data-en="Finance" data-ne="वित्त">Finance</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="notes.html" data-en="Notes" data-ne="नोटहरू">Notes</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="dashboard.html" data-en="Dashboard" data-ne="ड्यासबोर्ड">Dashboard</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
     </header>
     <div class="container mt-4">
         <div class="year-filter d-flex flex-wrap justify-content-center gap-2 mb-3">
-            <select id="yearFilter" class="form-select w-auto" aria-label="Select Year">
-                <option value="2081">2081 BS</option>
-                <option value="2082" selected>2082 BS</option>
-                <option value="2083">2083 BS</option>
+            <select id="yearSelect" class="form-select w-auto" aria-label="Select Year">
+                <option value="2081" data-en="2081 BS" data-ne="2081 BS">2081 BS</option>
+                <option value="2082" selected data-en="2082 BS" data-ne="2082 BS">2082 BS</option>
+                <option value="2083" data-en="2083 BS" data-ne="2083 BS">2083 BS</option>
             </select>
-            <button id="todayButton" class="btn btn-primary" data-en="Today" data-ne="आज" aria-label="Go to Today">Today</button>
-            <button id="backupData" class="btn btn-warning" data-en="Backup" data-ne="ब्याकअप" aria-label="Backup Data">Backup</button>
-            <button id="restoreData" class="btn btn-purple" data-en="Restore" data-ne="पुनर्स्थापना" aria-label="Restore Data">Restore</button>
+            <button id="addNote" class="btn btn-primary" data-en="Add Note" data-ne="नोट थप्नुहोस्" aria-label="Add Note">Add Note</button>
+            <button id="addFinance" class="btn btn-primary" data-en="Add Finance" data-ne="वित्त थप्नुहोस्" aria-label="Add Finance">Add Finance</button>
             <div class="dropdown">
                 <button class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" data-en="Excel Export" data-ne="एक्सेल निर्यात" aria-label="Excel Export" aria-expanded="false">Excel Export</button>
                 <ul class="dropdown-menu">
+                    <li><a class="dropdown-item excel-option" href="#" data-type="monthly_calendar" data-en="Monthly Calendar" data-ne="मासिक पात्रो">Monthly Calendar</a></li>
+                    <li><a class="dropdown-item excel-option" href="#" data-type="yearly_holidays" data-en="Yearly Holidays" data-ne="वार्षिक बिदाहरू">Yearly Holidays</a></li>
                     <li><a class="dropdown-item excel-option" href="#" data-type="note" data-en="Notes" data-ne="नोटहरू">Notes</a></li>
-                    <li><a class="dropdown-item excel-option" href="#" data-type="finance" data-en="Finances" data-ne="वित्त">Finances</a></li>
-                    <li><a class="dropdown-item excel-option" href="#" data-type="calendar" data-en="Monthly Calendar" data-ne="मासिक पात्रो">Monthly Calendar</a></li>
-                    <li><a class="dropdown-item excel-option" href="#" data-type="holiday" data-en="Yearly Holiday" data-ne="वार्षिक बिदा">Yearly Holiday</a></li>
+                    <li><a class="dropdown-item excel-option" href="#" data-type="finance" data-en="Finance" data-ne="वित्त">Finance</a></li>
                 </ul>
             </div>
             <div class="dropdown">
                 <button class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" data-en="PDF Export" data-ne="PDF निर्यात" aria-label="PDF Export" aria-expanded="false">PDF Export</button>
                 <ul class="dropdown-menu">
+                    <li><a class="dropdown-item pdf-option" href="#" data-type="monthly_calendar" data-en="Monthly Calendar" data-ne="मासिक पात्रो">Monthly Calendar</a></li>
+                    <li><a class="dropdown-item pdf-option" href="#" data-type="yearly_holidays" data-en="Yearly Holidays" data-ne="वार्षिक बिदाहरू">Yearly Holidays</a></li>
                     <li><a class="dropdown-item pdf-option" href="#" data-type="note" data-en="Notes" data-ne="नोटहरू">Notes</a></li>
-                    <li><a class="dropdown-item pdf-option" href="#" data-type="finance" data-en="Finances" data-ne="वित्त">Finances</a></li>
-                    <li><a class="dropdown-item pdf-option" href="#" data-type="calendar" data-en="Monthly Calendar" data-ne="मासिक पात्रो">Monthly Calendar</a></li>
+                    <li><a class="dropdown-item pdf-option" href="#" data-type="finance" data-en="Finance" data-ne="वित्त">Finance</a></li>
                 </ul>
             </div>
             <div class="dropdown">
                 <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" data-en="Import" data-ne="आयात" aria-label="Import Data" aria-expanded="false">Import</button>
                 <ul class="dropdown-menu">
+                    <li><a class="dropdown-item import-option" href="#" data-type="monthly_calendar" data-en="Monthly Calendar" data-ne="मासिक पात्रो">Monthly Calendar</a></li>
+                    <li><a class="dropdown-item import-option" href="#" data-type="yearly_holidays" data-en="Yearly Holidays" data-ne="वार्षिक बिदाहरू">Yearly Holidays</a></li>
                     <li><a class="dropdown-item import-option" href="#" data-type="note" data-en="Notes" data-ne="नोटहरू">Notes</a></li>
-                    <li><a class="dropdown-item import-option" href="#" data-type="finance" data-en="Finances" data-ne="वित्त">Finances</a></li>
-                    <li><a class="dropdown-item import-option" href="#" data-type="calendar" data-en="Monthly Calendar" data-ne="मासिक पात्रो">Monthly Calendar</a></li>
-                    <li><a class="dropdown-item import-option" href="#" data-type="holiday" data-en="Yearly Holiday" data-ne="वार्षिक बिदा">Yearly Holiday</a></li>
+                    <li><a class="dropdown-item import-option" href="#" data-type="finance" data-en="Finance" data-ne="वित्त">Finance</a></li>
                 </ul>
             </div>
-            <input type="file" id="restoreFileInput" style="display:none" accept=".json" aria-label="File Input for Restore">
-            <button id="undoAction" class="btn btn-warning" data-en="Undo" data-ne="पुर्ववत" aria-label="Undo Last Action">Undo</button>
-        </div>
-        <div class="today-date-row d-flex justify-content-center gap-3 mb-3">
-            <span id="todayNepaliDate" class="blink"></span>
-            <span id="todayEnglishDate" class="blink"></span>
+            <input type="file" id="restoreFileInput" style="display: none;" accept=".json">
         </div>
         <div class="language-toggle text-center mb-3">
             <button id="languageToggle" class="btn btn-outline-primary" data-en="Toggle Language (EN/NE)" data-ne="भाषा टगल गर्नुहोस् (EN/NE)" aria-label="Toggle Language">Toggle Language (EN/NE)</button>
+            <button id="darkModeToggle" class="btn btn-outline-primary ms-2" data-en="Dark Mode" data-ne="डार्क मोड" aria-label="Toggle Dark Mode">Dark Mode</button>
         </div>
-        <div class="month-tabs d-flex flex-wrap justify-content-center gap-2 mb-3" id="monthTabs"></div>
-        <h2 id="currentMonth" class="text-center mb-3"></h2>
         <div class="row">
-            <div class="col-12 col-md-9">
+            <div class="col-12 col-md-8">
                 <div class="card">
                     <div class="card-body">
-                        <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Calendar"></div>
-                    </div>
-                </div>
-                <div class="card mt-3">
-                    <div class="card-body">
-                        <h3 data-en="Monthly Summary" data-ne="मासिक सारांश">Monthly Summary</h3>
-                        <p id="monthlySummary"></p>
-                    </div>
-                </div>
-                <div class="card mt-3">
-                    <div class="card-body">
-                        <h3 data-en="Holidays this Month" data-ne="यस महिनाका बिदाहरू">Holidays this Month</h3>
-                        <ul id="holidayList"></ul>
+                        <h3 data-en="Calendar 2082 BS" data-ne="पात्रो 2082 BS">Calendar 2082 BS</h3>
+                        <ul class="nav nav-tabs" id="monthTabs" role="tablist">
+                            <li class="nav-item" role="presentation"><button class="nav-link active" id="baisakh-tab" data-bs-toggle="tab" data-bs-target="#baisakh" type="button" role="tab" aria-controls="baisakh" aria-selected="true" data-en="Baisakh" data-ne="बैशाख">Baisakh</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="jestha-tab" data-bs-toggle="tab" data-bs-target="#jestha" type="button" role="tab" aria-controls="jestha" aria-selected="false" data-en="Jestha" data-ne="जेठ">Jestha</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="ashadh-tab" data-bs-toggle="tab" data-bs-target="#ashadh" type="button" role="tab" aria-controls="ashadh" aria-selected="false" data-en="Ashadh" data-ne="असार">Ashadh</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="shrawan-tab" data-bs-toggle="tab" data-bs-target="#shrawan" type="button" role="tab" aria-controls="shrawan" aria-selected="false" data-en="Shrawan" data-ne="श्रावण">Shrawan</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="bhadra-tab" data-bs-toggle="tab" data-bs-target="#bhadra" type="button" role="tab" aria-controls="bhadra" aria-selected="false" data-en="Bhadra" data-ne="भदौ">Bhadra</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="asoj-tab" data-bs-toggle="tab" data-bs-target="#asoj" type="button" role="tab" aria-controls="asoj" aria-selected="false" data-en="Asoj" data-ne="आश्विन">Asoj</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="kartik-tab" data-bs-toggle="tab" data-bs-target="#kartik" type="button" role="tab" aria-controls="kartik" aria-selected="false" data-en="Kartik" data-ne="कार्तिक">Kartik</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="mangsir-tab" data-bs-toggle="tab" data-bs-target="#mangsir" type="button" role="tab" aria-controls="mangsir" aria-selected="false" data-en="Mangsir" data-ne="मंसिर">Mangsir</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="poush-tab" data-bs-toggle="tab" data-bs-target="#poush" type="button" role="tab" aria-controls="poush" aria-selected="false" data-en="Poush" data-ne="पौष">Poush</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="magh-tab" data-bs-toggle="tab" data-bs-target="#magh" type="button" role="tab" aria-controls="magh" aria-selected="false" data-en="Magh" data-ne="माघ">Magh</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="falgun-tab" data-bs-toggle="tab" data-bs-target="#falgun" type="button" role="tab" aria-controls="falgun" aria-selected="false" data-en="Falgun" data-ne="फाल्गुन">Falgun</button></li>
+                            <li class="nav-item" role="presentation"><button class="nav-link" id="chaitra-tab" data-bs-toggle="tab" data-bs-target="#chaitra" type="button" role="tab" aria-controls="chaitra" aria-selected="false" data-en="Chaitra" data-ne="चैत">Chaitra</button></li>
+                        </ul>
+                        <div class="tab-content" id="monthTabContent">
+                            <div class="tab-pane fade show active" id="baisakh" role="tabpanel" aria-labelledby="baisakh-tab">
+                                <div class="calendar-grid" id="calendarGridBaisakh"></div>
+                            </div>
+                            <div class="tab-pane fade" id="jestha" role="tabpanel" aria-labelledby="jestha-tab">
+                                <div class="calendar-grid" id="calendarGridJestha"></div>
+                            </div>
+                            <div class="tab-pane fade" id="ashadh" role="tabpanel" aria-labelledby="ashadh-tab">
+                                <div class="calendar-grid" id="calendarGridAshadh"></div>
+                            </div>
+                            <div class="tab-pane fade" id="shrawan" role="tabpanel" aria-labelledby="shrawan-tab">
+                                <div class="calendar-grid" id="calendarGridShrawan"></div>
+                            </div>
+                            <div class="tab-pane fade" id="bhadra" role="tabpanel" aria-labelledby="bhadra-tab">
+                                <div class="calendar-grid" id="calendarGridBhadra"></div>
+                            </div>
+                            <div class="tab-pane fade" id="asoj" role="tabpanel" aria-labelledby="asoj-tab">
+                                <div class="calendar-grid" id="calendarGridAsoj"></div>
+                            </div>
+                            <div class="tab-pane fade" id="kartik" role="tabpanel" aria-labelledby="kartik-tab">
+                                <div class="calendar-grid" id="calendarGridKartik"></div>
+                            </div>
+                            <div class="tab-pane fade" id="mangsir" role="tabpanel" aria-labelledby="mangsir-tab">
+                                <div class="calendar-grid" id="calendarGridMangsir"></div>
+                            </div>
+                            <div class="tab-pane fade" id="poush" role="tabpanel" aria-labelledby="poush-tab">
+                                <div class="calendar-grid" id="calendarGridPoush"></div>
+                            </div>
+                            <div class="tab-pane fade" id="magh" role="tabpanel" aria-labelledby="magh-tab">
+                                <div class="calendar-grid" id="calendarGridMagh"></div>
+                            </div>
+                            <div class="tab-pane fade" id="falgun" role="tabpanel" aria-labelledby="falgun-tab">
+                                <div class="calendar-grid" id="calendarGridFalgun"></div>
+                            </div>
+                            <div class="tab-pane fade" id="chaitra" role="tabpanel" aria-labelledby="chaitra-tab">
+                                <div class="calendar-grid" id="calendarGridChaitra"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-12 col-md-3">
-                <div class="action-buttons d-flex flex-column gap-2">
-                    <button id="addNote" class="btn btn-primary" data-en="Add Note" data-ne="नोट थप्नुहोस्" aria-label="Add Note">Add Note</button>
-                    <button id="addFinance" class="btn btn-success" data-en="Add Finance" data-ne="वित्त थप्नुहोस्" aria-label="Add Finance">Add Finance</button>
-                    <button id="viewNotes" class="btn btn-info" data-en="View Notes" data-ne="नोटहरू हेर्नुहोस्" aria-label="View Notes">View Notes</button>
-                    <button id="viewFinance" class="btn btn-success" data-en="View Finances" data-ne="वित्त हेर्नुहोस्" aria-label="View Finances">View Finances</button>
+            <div class="col-12 col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h3 data-en="Holidays in 2082 BS" data-ne="2082 BS मा बिदाहरू">Holidays in 2082 BS</h3>
+                        <ul class="holiday-list" id="holidayList"></ul>
+                    </div>
                 </div>
             </div>
         </div>
@@ -295,1604 +278,452 @@
                 </div>
                 <div class="modal-footer">
                     <button id="saveNote" class="btn btn-primary" data-en="Save Entry" data-ne="प्रवेश बचत गर्नुहोस्" aria-label="Save Entry">Save Entry</button>
-                    <button id="editEntry" class="btn btn-success" data-en="Edit Entry" data-ne="प्रवेश सम्पादन गर्नुहोस्" aria-label="Edit Entry">Edit Entry</button>
+                    <button id="editEntry" class="btn btn-success" data-en="Edit Entry" data-ne="प्रवेश सम्पादन गर्नुहोस्" aria-label="Edit Entry" style="display:none">Edit Entry</button>
                 </div>
             </div>
         </div>
     </div>
-    <div class="modal fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalTitle" role="dialog">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="notesModalTitle" data-en="Saved Notes" data-ne="बचत गरिएका नोटहरू">Saved Notes</h5>
-                    <button type="button" class="btn-close" id="closeModal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mb-3">
-                        <input type="text" id="noteSearch" class="form-control" placeholder="Search Notes" data-en="Search Notes" data-ne="नोटहरू खोज्नुहोस्" aria-label="Search Notes">
-                        <select id="monthFilter" class="form-select mt-2" aria-label="Filter by Month">
-                            <option value="all" data-en="All Months" data-ne="सबै महिनाहरू">All Months</option>
-                        </select>
-                    </div>
-                    <div class="notes-list" id="notesList"></div>
-                </div>
-                <div class="modal-footer">
-                    <button class="btn btn-danger" id="clearNotes" data-en="Clear All Notes" data-ne="सबै नोटहरू मेटाउनुहोस्" aria-label="Clear All Notes">Clear All Notes</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalTitle" role="dialog">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="reportModalTitle" data-en="Financial Reports" data-ne="वित्तीय रिपोर्टहरू">Financial Reports</h5>
-                    <button type="button" class="btn-close" id="closeReportModal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <input type="text" id="financeSearch" class="form-control mb-3" placeholder="Search Finances" data-en="Search Finances" data-ne="वित्त खोज्नुहोस्" aria-label="Search Finances">
-                    <ul class="nav nav-tabs mb-3">
-                        <li class="nav-item">
-                            <a class="nav-link active" id="weeklyReportTab" data-en="Weekly" data-ne="साप्ताहिक" role="tab" aria-selected="true">Weekly</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="monthlyReportTab" data-en="Monthly" data-ne="मासिक" role="tab" aria-selected="false">Monthly</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="yearlyReportTab" data-en="Yearly" data-ne="वार्षिक" role="tab" aria-selected="false">Yearly</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="recordsReportTab" data-en="Records" data-ne="रेकर्डहरू" role="tab" aria-selected="false">Records</a>
-                        </li>
-                    </ul>
-                    <div class="report-content" id="reportContent"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-    <footer class="bg-light text-center">
+    <footer class="bg-light text-center py-3">
         <p class="design-credit">Calendar Concept and Design by Santosh Phuyal</p>
     </footer>
-    <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script nonce="OGY1ZmVhYWEtOGRlNy00YjJhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2">
-        // Calendar data
-        const calendarData = {
-            2081: [
-                {name:"Baishakh",days:31,gregStart:"2024-04-13"},
-                {name:"Jestha",days:32,gregStart:"2024-05-14"},
-                {name:"Ashadh",days:31,gregStart:"2024-06-15"},
-                {name:"Shrawan",days:32,gregStart:"2024-07-16"},
-                {name:"Bhadra",days:31,gregStart:"2024-08-17"},
-                {name:"Asoj",days:31,gregStart:"2024-09-17"},
-                {name:"Kartik",days:30,gregStart:"2024-10-18"},
-                {name:"Mangsir",days:29,gregStart:"2024-11-17"},
-                {name:"Poush",days:30,gregStart:"2024-12-16"},
-                {name:"Magh",days:29,gregStart:"2025-01-15"},
-                {name:"Falgun",days:30,gregStart:"2025-02-13"},
-                {name:"Chaitra",days:30,gregStart:"2025-03-15"}
-            ],
-            2082: [
-                {name:"Baishakh",days:31,gregStart:"2025-04-14"},
-                {name:"Jestha",days:31,gregStart:"2025-05-15"},
-                {name:"Ashadh",days:32,gregStart:"2025-06-15"},
-                {name:"Shrawan",days:31,gregStart:"2025-07-17"},
-                {name:"Bhadra",days:31,gregStart:"2025-08-17"},
-                {name:"Asoj",days:31,gregStart:"2025-09-17"},
-                {name:"Kartik",days:30,gregStart:"2025-10-18"},
-                {name:"Mangsir",days:29,gregStart:"2025-11-17"},
-                {name:"Poush",days:30,gregStart:"2025-12-16"},
-                {name:"Magh",days:29,gregStart:"2026-01-15"},
-                {name:"Falgun",days:30,gregStart:"2026-02-13"},
-                {name:"Chaitra",days:31,gregStart:"2026-03-16"}
-            ],
-            2083: [
-                {name:"Baishakh",days:31,gregStart:"2026-04-14"},
-                {name:"Jestha",days:32,gregStart:"2026-05-15"},
-                {name:"Ashadh",days:31,gregStart:"2026-06-16"},
-                {name:"Shrawan",days:31,gregStart:"2026-07-17"},
-                {name:"Bhadra",days:31,gregStart:"2026-08-17"},
-                {name:"Asoj",days:30,gregStart:"2026-09-17"},
-                {name:"Kartik",days:30,gregStart:"2026-10-17"},
-                {name:"Mangsir",days:30,gregStart:"2026-11-16"},
-                {name:"Poush",days:29,gregStart:"2026-12-16"},
-                {name:"Magh",days:30,gregStart:"2027-01-14"},
-                {name:"Falgun",days:30,gregStart:"2027-02-13"},
-                {name:"Chaitra",days:31,gregStart:"2027-03-15"}
-            ]
-        };
-
-        // Holidays data
-        const holidays = {
-            2081: [
-                { month: 6, day: 1, name: "Dashain", nepali: "दशैं", type: "dashain" },
-                { month: 6, day: 15, name: "Tihar", nepali: "तिहार", type: "tihar" },
-                { month: 11, day: 1, name: "Chaitra Navaratri", nepali: "चैत्र नवरात्री", type: "national" }
-            ],
-            2082: [
-                { month: 0, day: 1, name: "Nepali New Year", nepali: "नेपाली नयाँ वर्ष", type: "national" },
-                { month: 0, day: 5, name: "Ram Navami", nepali: "राम नवमी", type: "national" },
-                { month: 0, day: 29, name: "Ubauli Parva", nepali: "उबौली पर्व", type: "ethnic" },
-                { month: 0, day: 29, name: "Buddha Jayanti", nepali: "बुद्ध जयन्ती", type: "birth" },
-                { month: 0, day: 18, name: "May Day Labour Day", nepali: "मे दिवस", type: "observed" },
-                { month: 1, day: 15, name: "Republic Day", nepali: "गणतन्त्र दिवस", type: "observed" },
-                { month: 3, day: 24, name: "Rakshya Bandhan", nepali: "रक्षा बन्धन", type: "national" },
-                { month: 3, day: 25, name: "Gai Jatra", nepali: "गाईजात्रा", type: "jatra" },
-                { month: 3, day: 25, name: "Gaijatra", nepali: "गाईजात्रा", type: "ethnic" },
-                { month: 3, day: 31, name: "Krishna Janmashtami", nepali: "कृष्ण जन्माष्टमी", type: "national" },
-                { month: 4, day: 10, name: "Haritalika (Teej)", nepali: "हरितालिका (तीज)", type: "women" },
-                { month: 4, day: 15, name: "Gaura Parva", nepali: "गौरा पर्व", type: "ethnic" },
-                { month: 4, day: 21, name: "Indra Jatra", nepali: "इन्द्रजात्रा", type: "jatra" },
-                { month: 4, day: 30, name: "Jitiya Festival", nepali: "जितिया पर्व", type: "women" },
-                { month: 5, day: 3, name: "Constitution Day", nepali: "संविधान दिवस", type: "observed" },
-                { month: 5, day: 6, name: "Ghatasthapana", nepali: "घटस्थापना", type: "national" },
-                { month: 5, day: 13, name: "Dashain", nepali: "दशैं", type: "dashain" },
-                { month: 5, day: 14, name: "Dashain", nepali: "दशैं", type: "dashain" },
-                { month: 5, day: 15, name: "Dashain", nepali: "दशैं", type: "dashain" },
-                { month: 5, day: 16, name: "Dashain", nepali: "दशैं", type: "dashain" },
-                { month: 5, day: 17, name: "Dashain", nepali: "दशैं", type: "dashain" },
-                { month: 5, day: 18, name: "Dashain", nepali: "दशैं", type: "dashain" },
-                { month: 6, day: 3, name: "Tihar", nepali: "तिहार", type: "tihar" },
-                { month: 6, day: 4, name: "Tihar", nepali: "तिहार", type: "tihar" },
-                { month: 6, day: 5, name: "Tihar", nepali: "तिहार", type: "tihar" },
-                { month: 6, day: 6, name: "Tihar", nepali: "तिहार", type: "tihar" },
-                { month: 6, day: 7, name: "Tihar", nepali: "तिहार", type: "tihar" },
-                { month: 6, day: 10, name: "Chhath", nepali: "छठ", type: "national" },
-                { month: 6, day: 25, name: "Falgunanda Jayanti", nepali: "फाल्गुनन्द जयन्ती", type: "birth" },
-                { month: 7, day: 17, name: "International Day of Persons with Disabilities", nepali: "अन्तर्राष्ट्रिय अपाङ्गता दिवस", type: "disability" },
-                { month: 7, day: 18, name: "Udhauli Parva, Yomari Punhi", nepali: "उधौली पर्व, योमरी पुन्ही", type: "national" },
-                { month: 8, day: 10, name: "Christmas", nepali: "क्रिसमस", type: "national" },
-                { month: 8, day: 15, name: "Tamu Lhosar", nepali: "तमु ल्होसार", type: "national" },
-                { month: 8, day: 27, name: "Prithvi Jayanti", nepali: "पृथ्वी जयन्ती", type: "birth" },
-                { month: 9, day: 1, name: "Maghi Parva/Maghe Sankranti", nepali: "माघी पर्व/माघे संक्रान्ति", type: "national" },
-                { month: 9, day: 5, name: "Sonam Lhosar", nepali: "सोनाम ल्होसार", type: "national" },
-                { month: 9, day: 9, name: "Basanta Panchami/Saraswati Puja", nepali: "बसन्त पञ्चमी/सरस्वती पूजा", type: "education" },
-                { month: 9, day: 16, name: "Martyrs Day", nepali: "शहीद दिवस", type: "observed" },
-                { month: 10, day: 3, name: "Maha Shivaratri", nepali: "महाशिवरात्रि", type: "national" },
-                { month: 10, day: 6, name: "Gyalpo Lhosar", nepali: "ग्याल्पो ल्होसार", type: "national" },
-                { month: 10, day: 7, name: "Democracy Day", nepali: "प्रजातन्त्र दिवस", type: "observed" },
-                { month: 10, day: 18, name: "Fagu Purnima", nepali: "फागु पूर्णिमा", type: "national" },
-                { month: 10, day: 24, name: "International Women's Day", nepali: "अन्तर्राष्ट्रिय महिला दिवस", type: "observed" },
-                { month: 11, day: 1, name: "Fagu Purnima", nepali: "फागु पूर्णिमा", type: "national" },
-                { month: 11, day: 4, name: "Ghode Jatra", nepali: "घोडेजात्रा", type: "jatra" }
-            ],
-            2083: [
-                { month: 0, day: 1, name: "Nepali New Year", nepali: "नेपाली नयाँ वर्ष", type: "national" },
-                { month: 5, day: 15, name: "Dashain", nepali: "दशैं", type: "dashain" },
-                { month: 5, day: 29, name: "Tihar", nepali: "तिहार", type: "tihar" }
-            ]
-        };
-
-        // Initialize state
-        let currentYear = 2082;
-        let currentMonthIndex = 0;
-        let isNepali = false;
-        let notes = JSON.parse(localStorage.getItem('notes')) || [];
-        let customCategories = JSON.parse(localStorage.getItem('customCategories')) || [];
-        let budgets = JSON.parse(localStorage.getItem('budgets')) || {};
-        let editingNoteIndex = null;
-        let undoStack = [];
-
-        // Language data
-        const monthsNepali = ['बैशाख', 'जेठ', 'असार', 'श्रावण', 'भदौ', 'आश्विन', 'कार्तिक', 'मंसिर', 'पौष', 'माघ', 'फाल्गुन', 'चैत'];
-        const daysNepali = ['आइतबार', 'सोमबार', 'मंगलबार', 'बुधबार', 'बिहीबार', 'शुक्रबार', 'शनिबार'];
-        const daysEnglish = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-        // DOM elements
-        const monthTabs = document.getElementById('monthTabs');
-        const calendarGrid = document.getElementById('calendarGrid');
-        const currentMonth = document.getElementById('currentMonth');
-        const yearFilter = document.getElementById('yearFilter');
-        const todayButton = document.getElementById('todayButton');
-        const viewNotes = document.getElementById('viewNotes');
-        const viewFinance = document.getElementById('viewFinance');
-        const backupData = document.getElementById('backupData');
-        const restoreData = document.getElementById('restoreData');
-        const restoreFileInput = document.getElementById('restoreFileInput');
-        const languageToggle = document.getElementById('languageToggle');
-        const noteFormModal = new bootstrap.Modal(document.getElementById('noteFormModal'));
-        const entryType = document.getElementById('entryType');
-        const noteTitle = document.getElementById('noteTitle');
-        const noteTime = document.getElementById('noteTime');
-        const noteDescription = document.getElementById('noteDescription');
-        const entryCategory = document.getElementById('entryCategory');
-        const newCategory = document.getElementById('newCategory');
-        const addCategory = document.getElementById('addCategory');
-        const categoryManager = document.getElementById('categoryManager');
-        const budgetSection = document.getElementById('budgetSection');
-        const monthlyBudget = document.getElementById('monthlyBudget');
-        const recurring = document.getElementById('recurring');
-        const reminder = document.getElementById('reminder');
-        const saveNote = document.getElementById('saveNote');
-        const editEntry = document.getElementById('editEntry');
-        const closeEntry = document.getElementById('closeEntry');
-        const selectedDate = document.getElementById('selectedDate');
-        const notesModal = new bootstrap.Modal(document.getElementById('notesModal'));
-        const closeModal = document.getElementById('closeModal');
-        const noteSearch = document.getElementById('noteSearch');
-        const notesList = document.getElementById('notesList');
-        const monthFilter = document.getElementById('monthFilter');
-        const clearNotes = document.getElementById('clearNotes');
-        const reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
-        const closeReportModal = document.getElementById('closeReportModal');
-        const financeSearch = document.getElementById('financeSearch');
-        const reportContent = document.getElementById('reportContent');
-        const weeklyReportTab = document.getElementById('weeklyReportTab');
-        const monthlyReportTab = document.getElementById('monthlyReportTab');
-        const yearlyReportTab = document.getElementById('yearlyReportTab');
-        const recordsReportTab = document.getElementById('recordsReportTab');
-        const monthlySummary = document.getElementById('monthlySummary');
-        const holidayList = document.getElementById('holidayList');
-        const todayNepaliDate = document.getElementById('todayNepaliDate');
-        const todayEnglishDate = document.getElementById('todayEnglishDate');
-        const addNote = document.getElementById('addNote');
-        const addFinance = document.getElementById('addFinance');
-        const undoAction = document.getElementById('undoAction');
-
-        // Utility functions
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                clearTimeout(timeout);
-                timeout = setTimeout(() => func(...args), wait);
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Calendar Data
+            const calendarData = {
+                2081: [
+                    {name:"Baisakh",days:31,gregStart:"2024-04-13"},
+                    {name:"Jestha",days:32,gregStart:"2024-05-14"},
+                    {name:"Ashadh",days:31,gregStart:"2024-06-15"},
+                    {name:"Shrawan",days:32,gregStart:"2024-07-16"},
+                    {name:"Bhadra",days:31,gregStart:"2024-08-17"},
+                    {name:"Asoj",days:31,gregStart:"2024-09-17"},
+                    {name:"Kartik",days:30,gregStart:"2024-10-18"},
+                    {name:"Mangsir",days:29,gregStart:"2024-11-17"},
+                    {name:"Poush",days:30,gregStart:"2024-12-16"},
+                    {name:"Magh",days:29,gregStart:"2025-01-15"},
+                    {name:"Falgun",days:30,gregStart:"2025-02-13"},
+                    {name:"Chaitra",days:30,gregStart:"2025-03-15"}
+                ],
+                2082: [
+                    {name:"Baisakh",days:31,gregStart:"2025-04-14"},
+                    {name:"Jestha",days:31,gregStart:"2025-05-15"},
+                    {name:"Ashadh",days:32,gregStart:"2025-06-15"},
+                    {name:"Shrawan",days:31,gregStart:"2025-07-17"},
+                    {name:"Bhadra",days:31,gregStart:"2025-08-17"},
+                    {name:"Asoj",days:31,gregStart:"2025-09-17"},
+                    {name:"Kartik",days:30,gregStart:"2025-10-18"},
+                    {name:"Mangsir",days:29,gregStart:"2025-11-17"},
+                    {name:"Poush",days:30,gregStart:"2025-12-16"},
+                    {name:"Magh",days:29,gregStart:"2026-01-15"},
+                    {name:"Falgun",days:30,gregStart:"2026-02-13"},
+                    {name:"Chaitra",days:31,gregStart:"2026-03-16"}
+                ],
+                2083: [
+                    {name:"Baisakh",days:31,gregStart:"2026-04-14"},
+                    {name:"Jestha",days:32,gregStart:"2026-05-15"},
+                    {name:"Ashadh",days:31,gregStart:"2026-06-16"},
+                    {name:"Shrawan",days:31,gregStart:"2026-07-17"},
+                    {name:"Bhadra",days:31,gregStart:"2026-08-17"},
+                    {name:"Asoj",days:30,gregStart:"2026-09-17"},
+                    {name:"Kartik",days:30,gregStart:"2026-10-17"},
+                    {name:"Mangsir",days:30,gregStart:"2026-11-16"},
+                    {name:"Poush",days:29,gregStart:"2026-12-16"},
+                    {name:"Magh",days:30,gregStart:"2027-01-14"},
+                    {name:"Falgun",days:30,gregStart:"2027-02-13"},
+                    {name:"Chaitra",days:31,gregStart:"2027-03-15"}
+                ]
             };
-        }
 
-        function getBSDateFromGregorian(date) {
-            try {
-                for (let year in calendarData) {
-                    for (let i = 0; i < calendarData[year].length; i++) {
-                        let month = calendarData[year][i];
-                        let startDate = new Date(month.gregStart);
-                        let endDate = new Date(startDate);
-                        endDate.setDate(startDate.getDate() + month.days - 1);
-                        if (date >= startDate && date <= endDate) {
-                            let dayDiff = Math.floor((date - startDate) / (1000 * 60 * 60 * 24)) + 1;
-                            return { year: parseInt(year), month: i, day: dayDiff };
-                        }
-                    }
+            // Holidays Data
+            const holidays = {
+                2081: [
+                    { month: 6, day: 1, name: "Dashain", nepali: "दशैं", type: "dashain" },
+                    { month: 6, day: 15, name: "Tihar", nepali: "तिहार", type: "tihar" },
+                    { month: 11, day: 1, name: "Chaitra Navaratri", nepali: "चैत्र नवरात्री", type: "national" }
+                ],
+                2082: [
+                    { month: 0, day: 1, name: "Nepali New Year", nepali: "नेपाली नयाँ वर्ष", type: "national" },
+                    { month: 0, day: 5, name: "Ram Navami", nepali: "राम नवमी", type: "national" },
+                    { month: 0, day: 29, name: "Ubauli Parva", nepali: "उबौली पर्व", type: "ethnic" },
+                    { month: 0, day: 29, name: "Buddha Jayanti", nepali: "बुद्ध जयन्ती", type: "birth" },
+                    { month: 0, day: 18, name: "May Day Labour Day", nepali: "मे दिवस", type: "observed" },
+                    { month: 1, day: 15, name: "Republic Day", nepali: "गणतन्त्र दिवस", type: "observed" },
+                    { month: 3, day: 24, name: "Rakshya Bandhan", nepali: "रक्षा बन्धन", type: "national" },
+                    { month: 3, day: 25, name: "Gai Jatra", nepali: "गाईजात्रा", type: "jatra" },
+                    { month: 3, day: 25, name: "Gaijatra", nepali: "गाईजात्रा", type: "ethnic" },
+                    { month: 3, day: 31, name: "Krishna Janmashtami", nepali: "कृष्ण जन्माष्टमी", type: "national" },
+                    { month: 4, day: 10, name: "Haritalika (Teej)", nepali: "हरितालिका (तीज)", type: "women" },
+                    { month: 4, day: 15, name: "Gaura Parva", nepali: "गौरा पर्व", type: "ethnic" },
+                    { month: 4, day: 21, name: "Indra Jatra", nepali: "इन्द्रजात्रा", type: "jatra" },
+                    { month: 4, day: 30, name: "Jitiya Festival", nepali: "जितिया पर्व", type: "women" },
+                    { month: 5, day: 3, name: "Constitution Day", nepali: "संविधान दिवस", type: "observed" },
+                    { month: 5, day: 6, name: "Ghatasthapana", nepali: "घटस्थापना", type: "national" },
+                    { month: 5, day: 13, name: "Dashain", nepali: "दशैं", type: "dashain" },
+                    { month: 5, day: 14, name: "Dashain", nepali: "दशैं", type: "dashain" },
+                    { month: 5, day: 15, name: "Dashain", nepali: "दशैं", type: "dashain" },
+                    { month: 5, day: 16, name: "Dashain", nepali: "दशैं", type: "dashain" },
+                    { month: 5, day: 17, name: "Dashain", nepali: "दशैं", type: "dashain" },
+                    { month: 5, day: 18, name: "Dashain", nepali: "दशैं", type: "dashain" },
+                    { month: 6, day: 3, name: "Tihar", nepali: "तिहार", type: "tihar" },
+                    { month: 6, day: 4, name: "Tihar", nepali: "तिहार", type: "tihar" },
+                    { month: 6, day: 5, name: "Tihar", nepali: "तिहार", type: "tihar" },
+                    { month: 6, day: 6, name: "Tihar", nepali: "तिहार", type: "tihar" },
+                    { month: 6, day: 7, name: "Tihar", nepali: "तिहार", type: "tihar" },
+                    { month: 6, day: 10, name: "Chhath", nepali: "छठ", type: "national" },
+                    { month: 6, day: 25, name: "Falgunanda Jayanti", nepali: "फाल्गुनन्द जयन्ती", type: "birth" },
+                    { month: 7, day: 17, name: "International Day of Persons with Disabilities", nepali: "अन्तर्राष्ट्रिय अपाङ्गता दिवस", type: "disability" },
+                    { month: 7, day: 18, name: "Udhauli Parva, Yomari Punhi", nepali: "उधौली पर्व, योमरी पुन्ही", type: "national" },
+                    { month: 8, day: 10, name: "Christmas", nepali: "क्रिसमस", type: "national" },
+                    { month: 8, day: 15, name: "Tamu Lhosar", nepali: "तमु ल्होसार", type: "national" },
+                    { month: 8, day: 27, name: "Prithvi Jayanti", nepali: "पृथ्वी जयन्ती", type: "birth" },
+                    { month: 9, day: 1, name: "Maghi Parva/Maghe Sankranti", nepali: "माघी पर्व/माघे संक्रान्ति", type: "national" },
+                    { month: 9, day: 5, name: "Sonam Lhosar", nepali: "सोनाम ल्होसार", type: "national" },
+                    { month: 9, day: 9, name: "Basanta Panchami/Saraswati Puja", nepali: "बसन्त पञ्चमी/सरस्वती पूजा", type: "education" },
+                    { month: 9, day: 16, name: "Martyrs Day", nepali: "शहीद दिवस", type: "observed" },
+                    { month: 10, day: 3, name: "Maha Shivaratri", nepali: "महाशिवरात्रि", type: "national" },
+                    { month: 10, day: 6, name: "Gyalpo Lhosar", nepali: "ग्याल्पो ल्होसार", type: "national" },
+                    { month: 10, day: 7, name: "Democracy Day", nepali: "प्रजातन्त्र दिवस", type: "observed" },
+                    { month: 10, day: 18, name: "Fagu Purnima", nepali: "फागु पूर्णिमा", type: "national" },
+                    { month: 10, day: 24, name: "International Women's Day", nepali: "अन्तर्राष्ट्रिय महिला दिवस", type: "observed" },
+                    { month: 11, day: 1, name: "Fagu Purnima", nepali: "फागु पूर्णिमा", type: "national" },
+                    { month: 11, day: 4, name: "Ghode Jatra", nepali: "घोडेजात्रा", type: "jatra" }
+                ],
+                2083: [
+                    { month: 0, day: 1, name: "Nepali New Year", nepali: "नेपाली नयाँ वर्ष", type: "national" },
+                    { month: 5, day: 15, name: "Dashain", nepali: "दशैं", type: "dashain" },
+                    { month: 5, day: 29, name: "Tihar", nepali: "तिहार", type: "tihar" }
+                ]
+            };
+
+            // Initialize State
+            let currentYear = 2082;
+            let currentMonthIndex = 0;
+            let isNepali = false;
+            let notes = JSON.parse(localStorage.getItem('notes')) || [];
+            let customCategories = JSON.parse(localStorage.getItem('customCategories')) || [];
+            let budgets = JSON.parse(localStorage.getItem('budgets')) || {};
+            let editingNoteIndex = null;
+            let undoStack = [];
+
+            // Language Data
+            const monthsNepali = ['बैशाख', 'जेठ', 'असार', 'श्रावण', 'भदौ', 'आश्विन', 'कार्तिक', 'मंसिर', 'पौष', 'माघ', 'फाल्गुन', 'चैत'];
+            const daysNepali = ['आइतबार', 'सोमबार', 'मंगलबार', 'बुधबार', 'बिहीबार', 'शुक्रबार', 'शनिबार'];
+            const daysEnglish = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+            // DOM Elements
+            const noteFormModal = new bootstrap.Modal(document.getElementById('noteFormModal'));
+            const entryType = document.getElementById('entryType');
+            const noteTitle = document.getElementById('noteTitle');
+            const noteTime = document.getElementById('noteTime');
+            const noteDescription = document.getElementById('noteDescription');
+            const entryCategory = document.getElementById('entryCategory');
+            const newCategory = document.getElementById('newCategory');
+            const addCategory = document.getElementById('addCategory');
+            const categoryManager = document.getElementById('categoryManager');
+            const budgetSection = document.getElementById('budgetSection');
+            const monthlyBudget = document.getElementById('monthlyBudget');
+            const recurring = document.getElementById('recurring');
+            const reminder = document.getElementById('reminder');
+            const saveNote = document.getElementById('saveNote');
+            const editEntry = document.getElementById('editEntry');
+            const closeEntry = document.getElementById('closeEntry');
+            const selectedDate = document.getElementById('selectedDate');
+
+            // Function to Calculate Start Day from gregStart
+            function getStartDay(gregStart) {
+                const date = new Date(gregStart);
+                return date.getDay(); // 0 (Sunday) to 6 (Saturday)
+            }
+
+            // Render Calendar Grid
+            function renderCalendar(year, monthIndex) {
+                const monthData = calendarData[year][monthIndex];
+                const monthName = monthData.name; // Now matches HTML IDs (e.g., "Baisakh")
+                const grid = document.getElementById(`calendarGrid${monthName}`);
+                if (!grid) {
+                    console.error(`Calendar grid for ${monthName} not found`);
+                    return;
                 }
-                return null;
-            } catch (err) {
-                console.error('Error in getBSDateFromGregorian:', err);
-                return null;
-            }
-        }
+                console.log(`Rendering calendar for ${monthName}, ${year}`);
+                grid.innerHTML = '';
 
-        function getGregorianDate(year, monthIndex, day) {
-            try {
-                let month = calendarData[year][monthIndex];
-                let startDate = new Date(month.gregStart);
-                startDate.setDate(startDate.getDate() + day - 1);
-                return startDate;
-            } catch (err) {
-                console.error('Error in getGregorianDate:', err);
-                return new Date();
-            }
-        }
+                // Add day labels
+                const days = isNepali ? daysNepali : daysEnglish;
+                days.forEach(day => {
+                    const dayLabel = document.createElement('div');
+                    dayLabel.className = 'calendar-day';
+                    dayLabel.textContent = day;
+                    grid.appendChild(dayLabel);
+                });
 
-        function formatDate(date) {
-            return date.toISOString().split('T')[0];
-        }
+                // Calculate start day
+                const startDay = getStartDay(monthData.gregStart);
+                console.log(`Start day for ${monthName}: ${startDay}`);
 
-        function getRecurringDates(note) {
-            if (!note.recurring) return [note.date];
-            let dates = [];
-            let [startYear, startMonth, startDay] = note.date.split('-').map(Number);
-            startMonth--;
-            for (let year = startYear; year <= 2083; year++) {
-                for (let month = (year === startYear ? startMonth : 0); month < 12; month++) {
-                    if (calendarData[year][month].days >= startDay) {
-                        dates.push(`${year}-${String(month + 1).padStart(2, '0')}-${String(startDay).padStart(2, '0')}`);
-                    }
+                // Add empty days before the start of the month
+                for (let i = 0; i < startDay; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'calendar-day';
+                    grid.appendChild(emptyDay);
                 }
-            }
-            return dates;
-        }
 
-        function checkReminders() {
-            if (!("Notification" in window) || Notification.permission !== "granted") return;
-            let today = new Date();
-            let bsDate = getBSDateFromGregorian(today);
-            if (!bsDate) return;
-            let dateStr = `${bsDate.year}-${String(bsDate.month + 1).padStart(2, '0')}-${String(bsDate.day).padStart(2, '0')}`;
-            notes.forEach(note => {
-                if (note.reminder && getRecurringDates(note).includes(dateStr)) {
-                    new Notification(note.title, {
-                        body: note.description || (isNepali ? 'आजको लागि रिमाइन्डर' : 'Reminder for today'),
-                        icon: '/path/to/icon.png'
+                // Add days of the month
+                const today = new Date();
+                const gregStartDate = new Date(monthData.gregStart);
+                const todayNepali = { year: 2082, monthIndex: 0, date: 1 }; // Simplified for demo (adjust based on actual date conversion)
+                for (let i = 1; i <= monthData.days; i++) {
+                    const day = document.createElement('div');
+                    day.className = 'calendar-day';
+                    day.textContent = isNepali ? i.toString().replace(/[0-9]/g, d => String.fromCharCode(0x0966 + parseInt(d))) : i;
+                    const dayHolidays = holidays[year]?.filter(h => h.month === monthIndex && h.day === i);
+                    if (dayHolidays && dayHolidays.length > 0) {
+                        day.classList.add('holiday');
+                        day.title = dayHolidays.map(h => isNepali ? h.nepali : h.name).join(', ');
+                    }
+                    if (year === todayNepali.year && monthIndex === todayNepali.monthIndex && i === todayNepali.date) {
+                        day.classList.add('today');
+                    }
+                    day.addEventListener('click', () => {
+                        selectedDate.textContent = `${isNepali ? monthsNepali[monthIndex] : monthData.name} ${i}, ${year}`;
+                        noteFormModal.show();
                     });
+                    grid.appendChild(day);
                 }
-            });
-            let holiday = holidays[bsDate.year]?.find(h => h.month === bsDate.month && h.day === bsDate.day);
-            if (holiday) {
-                new Notification(isNepali ? holiday.nepali : holiday.name, {
-                    body: isNepali ? 'आजको बिदा' : 'Today\'s holiday',
-                    icon: '/path/to/icon.png'
+            }
+
+            // Render Holidays
+            function renderHolidays(year) {
+                const holidayList = document.getElementById('holidayList');
+                if (!holidayList) {
+                    console.error('Holiday list element not found');
+                    return;
+                }
+                holidayList.innerHTML = '';
+                console.log(`Rendering holidays for year ${year}:`, holidays[year]);
+                if (!holidays[year] || holidays[year].length === 0) {
+                    const li = document.createElement('li');
+                    li.textContent = isNepali ? 'कुनै बिदा छैन' : 'No holidays';
+                    holidayList.appendChild(li);
+                    return;
+                }
+                holidays[year].forEach(holiday => {
+                    const monthName = isNepali ? monthsNepali[holiday.month] : calendarData[year][holiday.month].name;
+                    const li = document.createElement('li');
+                    li.textContent = `${monthName} ${holiday.day}: ${isNepali ? holiday.nepali : holiday.name}`;
+                    holidayList.appendChild(li);
                 });
             }
-        }
 
-        // Rendering functions
-        function renderMonthTabs() {
-            monthTabs.innerHTML = '';
-            const fragment = document.createDocumentFragment();
-            calendarData[currentYear].forEach((month, index) => {
-                let tab = document.createElement('button');
-                tab.className = `btn btn-outline-primary ${index === currentMonthIndex ? 'active' : ''}`;
-                tab.setAttribute('role', 'tab');
-                tab.setAttribute('aria-selected', index === currentMonthIndex);
-                tab.textContent = isNepali ? monthsNepali[index] : month.name;
-                if (isNepali) tab.classList.add('nepali');
-                fragment.appendChild(tab);
-            });
-            monthTabs.appendChild(fragment);
-        }
-
-        function renderCalendar() {
-            let month = calendarData[currentYear]?.[currentMonthIndex];
-            if (!month) {
-                console.error('Invalid month data');
-                currentMonth.textContent = isNepali ? 'त्रुटि: अमान्य महिना' : 'Error: Invalid Month';
-                return;
-            }
-            currentMonth.textContent = isNepali 
-                ? `${monthsNepali[currentMonthIndex]} ${currentYear} BS` 
-                : `${month.name} ${currentYear} BS`;
-            const fragment = document.createDocumentFragment();
-
-            const weekdays = isNepali ? daysNepali : daysEnglish;
-            weekdays.forEach(day => {
-                let dayHeader = document.createElement('div');
-                dayHeader.className = 'calendar-day bg-primary text-white text-center py-2';
-                dayHeader.textContent = day;
-                fragment.appendChild(dayHeader);
-            });
-
-            let startDate = new Date(month.gregStart);
-            let firstDay = startDate.getDay();
-            let today = new Date();
-            let todayBS = getBSDateFromGregorian(today);
-
-            for (let i = 0; i < firstDay; i++) {
-                let emptyDay = document.createElement('div');
-                emptyDay.className = 'calendar-day bg-light';
-                fragment.appendChild(emptyDay);
-            }
-
-            for (let day = 1; day <= month.days; day++) {
-                let gregDate = getGregorianDate(currentYear, currentMonthIndex, day);
-                let dayDiv = document.createElement('div');
-                dayDiv.className = `calendar-day bg-white border p-2 ${todayBS && todayBS.year === currentYear && todayBS.month === currentMonthIndex && todayBS.day === day ? 'today' : ''}`;
-                dayDiv.setAttribute('role', 'gridcell');
-                dayDiv.setAttribute('tabindex', '0');
-                if (gregDate.getDay() === 6) dayDiv.classList.add('saturday');
-
-                let holiday = holidays[currentYear]?.find(h => h.month === currentMonthIndex && h.day === day);
-                if (holiday) {
-                    dayDiv.classList.add(holiday.type);
-                    let festivalDiv = document.createElement('div');
-                    festivalDiv.className = 'festival';
-                    festivalDiv.textContent = isNepali ? holiday.nepali : holiday.name;
-                    dayDiv.appendChild(festivalDiv);
-
-                    let tooltip = document.createElement('div');
-                    tooltip.className = 'festival-tooltip';
-                    tooltip.textContent = isNepali ? holiday.nepali : holiday.name;
-                    dayDiv.appendChild(tooltip);
-                }
-
-                let bsDate = document.createElement('div');
-                bsDate.className = 'bs-date';
-                bsDate.textContent = isNepali ? (day).toString() : day;
-                dayDiv.appendChild(bsDate);
-
-                let gregDateDiv = document.createElement('div');
-                gregDateDiv.className = 'greg-date';
-                gregDateDiv.textContent = gregDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                dayDiv.appendChild(gregDateDiv);
-
-                let dateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                let dayNotes = notes.filter(note => getRecurringDates(note).includes(dateStr));
-                dayNotes.forEach(note => {
-                    let indicator = document.createElement('div');
-                    let tooltip = document.createElement('div');
-                    let preview = document.createElement('div');
-                    preview.className = 'event-preview';
-                    if (note.type === 'note') {
-                        indicator.className = 'note-indicator';
-                        tooltip.className = 'note-tooltip';
-                        tooltip.textContent = note.title;
-                        preview.textContent = note.title.substring(0, 15) + (note.title.length > 15 ? '...' : '');
-                    } else if (note.type === 'income') {
-                        indicator.className = 'income-indicator';
-                        tooltip.className = 'finance-tooltip';
-                        tooltip.textContent = `Income: ${note.title} NPR`;
-                        preview.textContent = `+${note.title} NPR`;
-                    } else if (note.type === 'expense') {
-                        indicator.className = 'expense-indicator';
-                        tooltip.className = 'finance-tooltip';
-                        tooltip.textContent = `Expense: ${note.title} NPR`;
-                        preview.textContent = `-${note.title} NPR`;
-                    }
-                    dayDiv.appendChild(indicator);
-                    dayDiv.appendChild(tooltip);
-                    dayDiv.appendChild(preview);
+            // Initialize Calendar
+            function initializeCalendar(year) {
+                console.log(`Initializing calendar for year ${year}`);
+                calendarData[year].forEach((month, index) => {
+                    console.log(`Calling renderCalendar for month ${month.name}, index ${index}`);
+                    renderCalendar(year, index);
                 });
+                renderHolidays(year);
+                document.querySelector('h3[data-en="Calendar 2082 BS"]').textContent = isNepali ? `पात्रो ${year} BS` : `Calendar ${year} BS`;
+                document.querySelector('h3[data-en="Holidays in 2082 BS"]').textContent = isNepali ? `${year} BS मा बिदाहरू` : `Holidays in ${year} BS`;
+            }
 
-                dayDiv.addEventListener('click', () => {
-                    selectedDate.textContent = dateStr;
-                    entryType.value = 'note';
-                    noteTitle.value = '';
-                    noteTime.value = '';
-                    noteDescription.value = '';
-                    recurring.checked = false;
-                    reminder.checked = false;
+            // Year Change Handler
+            document.getElementById('yearSelect').addEventListener('change', (e) => {
+                currentYear = parseInt(e.target.value);
+                initializeCalendar(currentYear);
+            });
+
+            // Language Toggle
+            document.getElementById('languageToggle').addEventListener('click', () => {
+                isNepali = !isNepali;
+                document.querySelectorAll('[data-en]').forEach(elem => {
+                    elem.textContent = isNepali ? elem.getAttribute('data-ne') : elem.getAttribute('data-en');
+                });
+                initializeCalendar(currentYear);
+            });
+
+            // Dark Mode Toggle
+            document.getElementById('darkModeToggle').addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+            });
+
+            // Add Note and Finance
+            document.getElementById('addNote').addEventListener('click', () => {
+                entryType.value = 'note';
+                selectedDate.textContent = 'Today';
+                noteFormModal.show();
+            });
+
+            document.getElementById('addFinance').addEventListener('click', () => {
+                entryType.value = 'income';
+                selectedDate.textContent = 'Today';
+                noteFormModal.show();
+            });
+
+            // Entry Type Change Handler
+            entryType.addEventListener('change', () => {
+                const type = entryType.value;
+                if (type === 'note') {
                     entryCategory.style.display = 'none';
                     categoryManager.style.display = 'none';
                     budgetSection.style.display = 'none';
-                    saveNote.style.display = 'block';
+                } else {
+                    entryCategory.style.display = 'block';
+                    categoryManager.style.display = 'block';
+                    budgetSection.style.display = 'block';
+                    // Populate custom categories
+                    customCategories.forEach(category => {
+                        const option = document.createElement('option');
+                        option.value = category;
+                        option.textContent = category;
+                        entryCategory.appendChild(option);
+                    });
+                }
+            });
+
+            // Add Category
+            addCategory.addEventListener('click', () => {
+                const category = newCategory.value.trim();
+                if (category && !customCategories.includes(category)) {
+                    customCategories.push(category);
+                    localStorage.setItem('customCategories', JSON.stringify(customCategories));
+                    const option = document.createElement('option');
+                    option.value = category;
+                    option.textContent = category;
+                    entryCategory.appendChild(option);
+                    newCategory.value = '';
+                }
+            });
+
+            // Save Note
+            saveNote.addEventListener('click', () => {
+                const entry = {
+                    type: entryType.value,
+                    title: noteTitle.value,
+                    time: noteTime.value,
+                    description: noteDescription.value,
+                    category: entryCategory.value,
+                    date: selectedDate.textContent,
+                    recurring: recurring.checked,
+                    reminder: reminder.checked,
+                    year: currentYear,
+                    month: currentMonthIndex
+                };
+                if (editingNoteIndex !== null) {
+                    notes[editingNoteIndex] = entry;
+                    editingNoteIndex = null;
                     editEntry.style.display = 'none';
-                    noteFormModal.show();
-                    noteTitle.focus();
-                });
-
-                dayDiv.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter' || e.key === ' ') {
-                        dayDiv.click();
-                    }
-                });
-
-                fragment.appendChild(dayDiv);
-            }
-
-            calendarGrid.innerHTML = '';
-            calendarGrid.appendChild(fragment);
-            renderMonthlySummary();
-            renderHolidays();
-        }
-
-        function renderMonthlySummary() {
-            let income = 0, expense = 0;
-            let dateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}`;
-            let monthNotes = notes.filter(note => getRecurringDates(note).some(d => d.startsWith(dateStr)) && (note.type === 'income' || note.type === 'expense'));
-            monthNotes.forEach(note => {
-                if (note.type === 'income') income += parseFloat(note.title || 0);
-                else expense += parseFloat(note.title || 0);
-            });
-            let budget = budgets[dateStr] || 0;
-            let variance = budget ? budget - expense : 0;
-            monthlySummary.innerHTML = isNepali
-                ? `कुल आय: ${income} NPR<br>कुल खर्च: ${expense} NPR<br>ब्यालेन्स: ${income - expense} NPR<br>बजेट: ${budget} NPR<br>भिन्नता: ${variance} NPR`
-                : `Total Income: ${income} NPR<br>Total Expense: ${expense} NPR<br>Balance: ${income - expense} NPR<br>Budget: ${budget} NPR<br>Variance: ${variance} NPR`;
-        }
-
-        function renderHolidays() {
-            const fragment = document.createDocumentFragment();
-            let monthHolidays = holidays[currentYear]?.filter(h => h.month === currentMonthIndex) || [];
-            if (monthHolidays.length === 0) {
-                let li = document.createElement('li');
-                li.textContent = isNepali ? 'यस महिनामा कुनै बिदा छैन' : 'No holidays this month';
-                fragment.appendChild(li);
-            } else {
-                monthHolidays.forEach(holiday => {
-                    let li = document.createElement('li');
-                    li.textContent = `${isNepali ? holiday.nepali : holiday.name} - ${holiday.day} ${isNepali ? monthsNepali[currentMonthIndex] : calendarData[currentYear][currentMonthIndex].name}`;
-                    if (isNepali) li.classList.add('nepali');
-                    fragment.appendChild(li);
-                });
-            }
-            holidayList.innerHTML = '';
-            holidayList.appendChild(holidayList);
-        }
-
-        function toggleLanguage() {
-            isNepali = !isNepali;
-            document.querySelectorAll('[data-en]').forEach(elem => {
-                elem.textContent = isNepali ? elem.dataset.ne : elem.dataset.en;
-            });
-            renderMonthTabs();
-            renderCalendar();
-            renderNotesList();
-            renderFinancialRecords();
-            renderReport('weekly');
-        }
-
-        function saveEntry() {
-            let date = selectedDate.textContent;
-            let type = entryType.value;
-            let title = noteTitle.value.trim();
-            let time = noteTime.value;
-            let description = noteDescription.value.trim();
-            let category = entryCategory.value;
-            let isRecurring = recurring.checked;
-            let hasReminder = reminder.checked;
-            let budget = monthlyBudget.value.trim();
-
-            if (!title) {
-                alert(isNepali ? 'शीर्षक / रकम आवश्यक छ' : 'Title / Amount is required');
-                return;
-            }
-
-            if (type !== 'note' && (isNaN(parseFloat(title)) || parseFloat(title) <= 0)) {
-                alert(isNepali ? 'रकम सकारात्मक संख्या हुनुपर्छ' : 'Amount must be a positive number');
-                return;
-            }
-
-            if (type === 'expense' && budget && (isNaN(parseFloat(budget)) || parseFloat(budget) < 0)) {
-                alert(isNepali ? 'बजेट गैर-नकारात्मक संख्या हुनुपर्छ' : 'Budget must be a non-negative number');
-                return;
-            }
-
-            let note = { date, type, title, time, description, category, recurring: isRecurring, reminder: hasReminder };
-            notes.push(note);
-
-            if (type === 'expense' && budget) {
-                let monthKey = date.slice(0, 7);
-                budgets[monthKey] = parseFloat(budget);
-                try {
-                    localStorage.setItem('budgets', JSON.stringify(budgets));
-                } catch (e) {
-                    alert(isNepali ? 'बजेट बचत गर्न असफल' : 'Failed to save budget');
-                }
-            }
-
-            try {
-                localStorage.setItem('notes', JSON.stringify(notes));
-            } catch (e) {
-                alert(isNepali ? 'नोट बचत गर्न असफल: भण्डारण सीमा नाघ्यो' : 'Failed to save note: Storage limit exceeded');
-                notes.pop();
-                return;
-            }
-
-            noteFormModal.hide();
-            renderCalendar();
-            renderNotesList();
-            renderFinancialRecords();
-            renderMonthlySummary();
-        }
-
-        function editNote(index) {
-            let note = notes[index];
-            if (!note) {
-                alert(isNepali ? 'नोट फेला परेन' : 'Note not found');
-                return;
-            }
-            selectedDate.textContent = note.date;
-            entryType.value = note.type;
-            noteTitle.value = note.title || '';
-            noteTime.value = note.time || '';
-            noteDescription.value = note.description || '';
-            entryCategory.value = note.category || '';
-            recurring.checked = note.recurring || false;
-            reminder.checked = note.reminder || false;
-            monthlyBudget.value = budgets[note.date.slice(0, 7)] || '';
-            entryCategory.style.display = note.type === 'note' ? 'none' : 'block';
-            categoryManager.style.display = note.type === 'note' ? 'none' : 'block';
-            budgetSection.style.display = note.type === 'expense' ? 'block' : 'none';
-            saveNote.style.display = 'none';
-            editEntry.style.display = 'block';
-            noteFormModal.show();
-            editingNoteIndex = index;
-            noteTitle.focus();
-        }
-
-        function updateNote() {
-            if (editingNoteIndex === null || !notes[editingNoteIndex]) {
-                alert(isNepali ? 'सम्पादन गर्न नोट चयन गरिएको छैन' : 'No note selected for editing');
-                return;
-            }
-
-            let title = noteTitle.value.trim();
-            if (!title) {
-                alert(isNepali ? 'शीर्षक / रकम आवश्यक छ' : 'Title / Amount is required');
-                return;
-            }
-
-            if (entryType.value !== 'note' && (isNaN(parseFloat(title)) || parseFloat(title) <= 0)) {
-                alert(isNepali ? 'रकम सकारात्मक संख्या हुनुपर्छ' : 'Amount must be a positive number');
-                return;
-            }
-
-            let budget = monthlyBudget.value.trim();
-            if (entryType.value === 'expense' && budget && (isNaN(parseFloat(budget)) || parseFloat(budget) < 0)) {
-                alert(isNepali ? 'बजेट गैर-नकारात्मक संख्या हुनुपर्छ' : 'Budget must be a non-negative number');
-                return;
-            }
-
-            let note = notes[editingNoteIndex];
-            note.type = entryType.value;
-            note.title = title;
-            note.time = noteTime.value;
-            note.description = noteDescription.value.trim();
-            note.category = entryCategory.value;
-            note.recurring = recurring.checked;
-            note.reminder = reminder.checked;
-
-            if (note.type === 'expense' && budget) {
-                let monthKey = note.date.slice(0, 7);
-                budgets[monthKey] = parseFloat(budget);
-                try {
-                    localStorage.setItem('budgets', JSON.stringify(budgets));
-                } catch (e) {
-                    alert(isNepali ? 'बजेट अपडेट गर्न असफल' : 'Failed to update budget');
-                }
-            }
-
-            try {
-                localStorage.setItem('notes', JSON.stringify(notes));
-            } catch (e) {
-                alert(isNepali ? 'नोट अपडेट गर्न असफल: भण्डारण सीमा नाघ्यो' : 'Failed to update note: Storage limit exceeded');
-                return;
-            }
-
-            noteFormModal.hide();
-            renderCalendar();
-            renderNotesList();
-            renderFinancialRecords();
-            renderMonthlySummary();
-            editingNoteIndex = null;
-        }
-
-        function deleteNote(index) {
-            if (confirm(isNepali ? 'के तपाईं यो नोट मेटाउन चाहनुहुन्छ?' : 'Are you sure you want to delete this note?')) {
-                undoStack.push({ action: 'delete', note: { ...notes[index] }, index });
-                notes.splice(index, 1);
-                try {
-                    localStorage.setItem('notes', JSON.stringify(notes));
-                } catch (e) {
-                    alert(isNepali ? 'नोट मेटाउन असफल: भण्डारण समस्याहरू' : 'Failed to delete note: Storage issues');
-                    return;
-                }
-                renderCalendar();
-                renderNotesList();
-                renderFinancialRecords();
-                renderMonthlySummary();
-            }
-        }
-
-        function undoLastAction() {
-            if (undoStack.length === 0) {
-                alert(isNepali ? 'पुर्ववत गर्न कुनै कार्य छैन' : 'No actions to undo');
-                return;
-            }
-            let lastAction = undoStack.pop();
-            if (lastAction.action === 'delete') {
-                notes.splice(lastAction.index, 0, lastAction.note);
-                try {
-                    localStorage.setItem('notes', JSON.stringify(notes));
-                } catch (e) {
-                    alert(isNepali ? 'पुर्ववत असफल: भण्डारण समस्याहरू' : 'Undo failed: Storage issues');
-                    return;
-                }
-                renderCalendar();
-                renderNotesList();
-                renderFinancialRecords();
-                renderMonthlySummary();
-            } else if (lastAction.action === 'clear') {
-                notes = [...lastAction.notes];
-                try {
-                    localStorage.setItem('notes', JSON.stringify(notes));
-                } catch (e) {
-                    alert(isNepali ? 'पुर्ववत असफल: भण्डारण समस्याहरू' : 'Undo failed: Storage issues');
-                    return;
-                }
-                renderCalendar();
-                renderNotesList();
-                renderFinancialRecords();
-                renderMonthlySummary();
-            }
-        }
-
-        function populateCategories() {
-            entryCategory.innerHTML = `
-                <option value="" data-en="Select Category" data-ne="श्रेणी चयन गर्नुहोस्">${isNepali ? 'श्रेणी चयन गर्नुहोस्' : 'Select Category'}</option>
-                <option value="Food" data-en="Food" data-ne="खाना">${isNepali ? 'खाना' : 'Food'}</option>
-                <option value="Salary" data-en="Salary" data-ne="तलब">${isNepali ? 'तलब' : 'Salary'}</option>
-                <option value="Rent" data-en="Rent" data-ne="भाडा">${isNepali ? 'भाडा' : 'Rent'}</option>
-                <option value="Utilities" data-en="Utilities" data-ne="उपयोगिताहरू">${isNepali ? 'उपयोगिताहरू' : 'Utilities'}</option>
-                <option value="Transport" data-en="Transport" data-ne="यातायात">${isNepali ? 'यातायात' : 'Transport'}</option>
-                <option value="Entertainment" data-en="Entertainment" data-ne="मनोरञ्जन">${isNepali ? 'मनोरञ्जन' : 'Entertainment'}</option>
-                <option value="Freelance" data-en="Freelance" data-ne="फ्रीलान्स">${isNepali ? 'फ्रीलान्स' : 'Freelance'}</option>
-                <option value="Other" data-en="Other" data-ne="अन्य">${isNepali ? 'अन्य' : 'Other'}</option>
-            `;
-            customCategories.forEach(cat => {
-                let option = document.createElement('option');
-                option.value = cat;
-                option.textContent = cat;
-                entryCategory.appendChild(option);
-            });
-        }
-
-        function addCustomCategory() {
-            let category = newCategory.value.trim();
-            if (!category) {
-                alert(isNepali ? 'श्रेणी नाम आवश्यक छ' : 'Category name is required');
-                return;
-            }
-            if (customCategories.includes(category)) {
-                alert(isNepali ? 'श्रेणी पहिले नै अवस्थित छ' : 'Category already exists');
-                return;
-            }
-            customCategories.push(category);
-            try {
-                localStorage.setItem('customCategories', JSON.stringify(customCategories));
-            } catch (e) {
-                alert(isNepali ? 'श्रेणी बचत गर्न असफल' : 'Failed to save category');
-                return;
-            }
-            populateCategories();
-            entryCategory.value = category;
-            newCategory.value = '';
-        }
-
-        function renderNotesList() {
-            const fragment = document.createDocumentFragment();
-            let searchQuery = noteSearch.value.toLowerCase();
-            let filteredNotes = notes.filter(note => note.type === 'note' && (
-                note.title.toLowerCase().includes(searchQuery) ||
-                note.description.toLowerCase().includes(searchQuery)
-            ));
-            if (monthFilter.value !== 'all') {
-                filteredNotes = filteredNotes.filter(note => getRecurringDates(note).some(d => d.startsWith(monthFilter.value)));
-            }
-            if (filteredNotes.length === 0) {
-                let p = document.createElement('p');
-                p.textContent = isNepali ? 'कुनै नोटहरू छैनन्' : 'No notes available';
-                fragment.appendChild(p);
-            } else {
-                filteredNotes.forEach((note, index) => {
-                    let globalIndex = notes.findIndex(n => n === note);
-                    let noteItem = document.createElement('div');
-                    noteItem.className = 'border-bottom py-2';
-                    noteItem.innerHTML = `
-                        <div><strong>${note.date}</strong> - ${note.type === 'note' ? 'Note' : note.type === 'income' ? 'Income' : 'Expense'}: ${note.title} ${note.type !== 'note' ? 'NPR' : ''}</div>
-                        <div>${note.description || ''}</div>
-                        <div>${note.recurring ? (isNepali ? 'मासिक दोहोरिने' : 'Recurring Monthly') : ''}</div>
-                        <div>${note.reminder ? (isNepali ? 'रिमाइन्डर सेट' : 'Reminder Set') : ''}</div>
-                        <div class="d-flex gap-2">
-                            <a href="#" class="edit-note text-primary" data-en="Edit" data-ne="सम्पादन">${isNepali ? 'सम्पादन' : 'Edit'}</a>
-                            <a href="#" class="delete-note text-danger" data-en="Delete" data-ne="मेटाउन">${isNepali ? 'मेटाउन' : 'Delete'}</a>
-                        </div>
-                    `;
-                    noteItem.querySelector('.edit-note').addEventListener('click', () => editNote(globalIndex));
-                    noteItem.querySelector('.delete-note').addEventListener('click', () => deleteNote(globalIndex));
-                    fragment.appendChild(noteItem);
-                });
-            }
-            notesList.innerHTML = '';
-            notesList.appendChild(fragment);
-        }
-
-        function renderFinancialRecords() {
-            reportContent.innerHTML = '';
-            const fragment = document.createDocumentFragment();
-            let searchQuery = financeSearch.value.toLowerCase();
-            let filteredNotes = notes.filter(note => (note.type === 'income' || note.type === 'expense') && (
-                note.title.toLowerCase().includes(searchQuery) ||
-                note.description.toLowerCase().includes(searchQuery) ||
-                note.category.toLowerCase().includes(searchQuery)
-            ));
-            if (filteredNotes.length === 0) {
-                let p = document.createElement('p');
-                p.textContent = isNepali ? 'कुनै वित्तीय रेकर्डहरू छैनन्' : 'No financial records available';
-                fragment.appendChild(p);
-            } else {
-                let financeList = document.createElement('div');
-                filteredNotes.forEach((note, index) => {
-                    let globalIndex = notes.findIndex(n => n === note);
-                    let financeItem = document.createElement('div');
-                    financeItem.className = 'border-bottom py-2';
-                    financeItem.innerHTML = `
-    <div><strong>${note.date}</strong> - ${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR</div>
-    <div>${note.description || ''}</div>
-    <div>${note.category ? (isNepali ? `श्रेणी: ${note.category}` : `Category: ${note.category}`) : ''}</div>
-    <div>${note.recurring ? (isNepali ? 'मासिक दोहोरिने' : 'Recurring Monthly') : ''}</div>
-    <div>${note.reminder ? (isNepali ? 'रिमाइन्डर सेट' : 'Reminder Set') : ''}</div>
-    <div class="d-flex gap-2">
-        <a href="#" class="edit-note text-primary" data-en="Edit" data-ne="सम्पादन">${isNepali ? 'सम्पादन' : 'Edit'}</a>
-        <a href="#" class="delete-note text-danger" data-en="Delete" data-ne="मेटाउन">${isNepali ? 'मेटाउन' : 'Delete'}</a>
-    </div>
-`;
-                    financeItem.querySelector('.edit-note').addEventListener('click', () => editNote(globalIndex));
-                    financeItem.querySelector('.delete-note').addEventListener('click', () => deleteNote(globalIndex));
-                    financeList.appendChild(financeItem);
-                });
-                fragment.appendChild(financeList);
-
-                let canvas = document.createElement('canvas');
-                canvas.id = 'financeChart';
-                canvas.className = 'my-3';
-                canvas.setAttribute('aria-label', isNepali ? 'वित्तीय रेकर्ड चार्ट' : 'Financial Records Chart');
-                fragment.appendChild(canvas);
-                reportContent.appendChild(fragment); // Append to DOM before Chart.js initialization
-
-                let incomeData = filteredNotes.filter(n => n.type === 'income').map(n => parseFloat(n.title || 0));
-                let expenseData = filteredNotes.filter(n => n.type === 'expense').map(n => parseFloat(n.title || 0));
-                new Chart(canvas, {
-                    type: 'bar',
-                    data: {
-                        labels: filteredNotes.map(n => n.date),
-                        datasets: [
-                            {
-                                label: isNepali ? 'आय' : 'Income',
-                                data: incomeData,
-                                backgroundColor: '#4caf50'
-                            },
-                            {
-                                label: isNepali ? 'खर्च' : 'Expense',
-                                data: expenseData,
-                                backgroundColor: '#d32f2f'
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { position: 'top' },
-                            title: { display: true, text: isNepali ? 'वित्तीय रेकर्ड अवलोकन' : 'Financial Records Overview' }
-                        }
-                    }
-                });
-            }
-        }
-
-        function renderReport(type) {
-            reportContent.innerHTML = '';
-            let year = parseInt(yearFilter.value);
-            let lang = isNepali ? 'ne' : 'en';
-            let headers = {
-                en: {
-                    period: 'Period', income: 'Income (NPR)', expense: 'Expense (NPR)', balance: 'Balance (NPR)', day: 'Day',
-                    dailySummary: 'Daily Summary', noData: 'No financial data available for this period', budget: 'Budget (NPR)', variance: 'Variance (NPR)'
-                },
-                ne: {
-                    period: 'अवधि', income: 'आय (NPR)', expense: 'खर्च (NPR)', balance: 'ब्यालेन्स (NPR)', day: 'दिन',
-                    dailySummary: 'दैनिक सारांश', noData: 'यो अवधिको लागि कुनै वित्तीय डेटा उपलब्ध छैन', budget: 'बजेट (NPR)', variance: 'भिन्नता (NPR)'
-                }
-            };
-
-            let fragment = document.createDocumentFragment();
-            let table = document.createElement('table');
-            table.className = 'table report-table table-striped';
-            let thead = document.createElement('thead');
-            let tbody = document.createElement('tbody');
-
-            if (type === 'weekly') {
-                let weeks = [];
-                let month = calendarData[year][0];
-                let startDate = new Date(month.gregStart);
-                let endDate = new Date(calendarData[year][11].gregStart);
-                endDate.setDate(endDate.getDate() + calendarData[year][11].days - 1);
-                let currentDate = new Date(startDate);
-
-                while (currentDate <= endDate) {
-                    let weekStart = new Date(currentDate);
-                    let weekEnd = new Date(currentDate);
-                    weekEnd.setDate(weekEnd.getDate() + 6);
-                    if (weekEnd > endDate) weekEnd = endDate;
-
-                    let bsStart = getBSDateFromGregorian(weekStart);
-                    let bsEnd = getBSDateFromGregorian(weekEnd);
-                    if (!bsStart || !bsEnd) {
-                        currentDate.setDate(currentDate.getDate() + 7);
-                        continue;
-                    }
-
-                    let income = 0, expense = 0;
-                    notes.forEach(note => {
-                        if (note.type === 'income' || note.type === 'expense') {
-                            getRecurringDates(note).forEach(date => {
-                                let [noteYear, noteMonth, noteDay] = date.split('-').map(Number);
-                                noteMonth--;
-                                if (noteYear === year) {
-                                    let noteGregDate = getGregorianDate(noteYear, noteMonth, noteDay);
-                                    if (noteGregDate >= weekStart && noteGregDate <= weekEnd) {
-                                        if (note.type === 'income') income += parseFloat(note.title || 0);
-                                        else expense += parseFloat(note.title || 0);
-                                    }
-                                }
-                            });
-                        }
-                    });
-
-                    weeks.push({
-                        period: `${bsStart.day}/${bsStart.month + 1}/${bsStart.year} - ${bsEnd.day}/${bsEnd.month + 1}/${bsEnd.year}`,
-                        income,
-                        expense,
-                        balance: income - expense
-                    });
-
-                    currentDate.setDate(currentDate.getDate() + 7);
-                }
-
-                thead.innerHTML = `
-                    <tr>
-                        <th>${headers[lang].period}</th>
-                        <th>${headers[lang].income}</th>
-                        <th>${headers[lang].expense}</th>
-                        <th>${headers[lang].balance}</th>
-                    </tr>
-                `;
-                if (weeks.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="4">${headers[lang].noData}</td></tr>`;
                 } else {
-                    weeks.forEach(week => {
-                        tbody.innerHTML += `
-                            <tr>
-                                <td>${week.period}</td>
-                                <td>${week.income}</td>
-                                <td>${week.expense}</td>
-                                <td>${week.balance}</td>
-                            </tr>
-                        `;
-                    });
+                    notes.push(entry);
+                    undoStack.push({ action: 'add', note: entry });
                 }
-                table.appendChild(thead);
-                table.appendChild(tbody);
-                fragment.appendChild(table);
-
-                let canvas = document.createElement('canvas');
-                canvas.id = 'weeklyChart';
-                canvas.className = 'my-3';
-                canvas.setAttribute('aria-label', isNepali ? 'साप्ताहिक वित्तीय चार्ट' : 'Weekly Financial Chart');
-                fragment.appendChild(canvas);
-                reportContent.appendChild(fragment); // Append to DOM before Chart.js initialization
-
-                new Chart(canvas, {
-                    type: 'line',
-                    data: {
-                        labels: weeks.map(w => w.period.split('-')[0].trim()),
-                        datasets: [
-                            {
-                                label: isNepali ? 'आय' : 'Income',
-                                data: weeks.map(w => w.income),
-                                borderColor: '#4caf50',
-                                fill: false
-                            },
-                            {
-                                label: isNepali ? 'खर्च' : 'Expense',
-                                data: weeks.map(w => w.expense),
-                                borderColor: '#d32f2f',
-                                fill: false
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { position: 'top' },
-                            title: { display: true, text: isNepali ? 'साप्ताहिक वित्तीय अवलोकन' : 'Weekly Financial Overview' }
-                        }
-                    }
-                });
-            } else if (type === 'monthly') {
-                let months = calendarData[year].map((month, index) => {
-                    let income = 0, expense = 0, budget = budgets[`${year}-${String(index + 1).padStart(2, '0')}`] || 0;
-                    let monthNotes = notes.filter(note => getRecurringDates(note).some(d => d.startsWith(`${year}-${String(index + 1).padStart(2, '0')}`)) && (note.type === 'income' || note.type === 'expense'));
-                    monthNotes.forEach(note => {
-                        if (note.type === 'income') income += parseFloat(note.title || 0);
-                        else expense += parseFloat(note.title || 0);
-                    });
-                    return {
-                        period: isNepali ? monthsNepali[index] : month.name,
-                        income,
-                        expense,
-                        balance: income - expense,
-                        budget,
-                        variance: budget ? budget - expense : 0
-                    };
-                });
-
-                thead.innerHTML = `
-                    <tr>
-                        <th>${headers[lang].period}</th>
-                        <th>${headers[lang].income}</th>
-                        <th>${headers[lang].expense}</th>
-                        <th>${headers[lang].balance}</th>
-                        <th>${headers[lang].budget}</th>
-                        <th>${headers[lang].variance}</th>
-                    </tr>
-                `;
-                if (months.every(m => m.income === 0 && m.expense === 0)) {
-                    tbody.innerHTML = `<tr><td colspan="6">${headers[lang].noData}</td></tr>`;
-                } else {
-                    months.forEach(month => {
-                        tbody.innerHTML += `
-                            <tr>
-                                <td>${month.period}</td>
-                                <td>${month.income}</td>
-                                <td>${month.expense}</td>
-                                <td>${month.balance}</td>
-                                <td>${month.budget}</td>
-                                <td>${month.variance}</td>
-                            </tr>
-                        `;
-                    });
+                localStorage.setItem('notes', JSON.stringify(notes));
+                if (entry.type !== 'note') {
+                    const budget = parseFloat(monthlyBudget.value) || 0;
+                    budgets[`${currentYear}-${currentMonthIndex}`] = budget;
+                    localStorage.setItem('budgets', JSON.stringify(budgets));
                 }
-                table.appendChild(thead);
-                table.appendChild(tbody);
-                fragment.appendChild(table);
+                noteFormModal.hide();
+                noteTitle.value = '';
+                noteTime.value = '';
+                noteDescription.value = '';
+                recurring.checked = false;
+                reminder.checked = false;
+                monthlyBudget.value = '';
+            });
 
-                let canvas = document.createElement('canvas');
-                canvas.id = 'monthlyChart';
-                canvas.className = 'my-3';
-                canvas.setAttribute('aria-label', isNepali ? 'मासिक वित्तीय चार्ट' : 'Monthly Financial Chart');
-                fragment.appendChild(canvas);
-                reportContent.appendChild(fragment); // Append to DOM before Chart.js initialization
+            // Close Modal
+            closeEntry.addEventListener('click', () => {
+                noteFormModal.hide();
+            });
 
-                new Chart(canvas, {
-                    type: 'bar',
-                    data: {
-                        labels: months.map(m => m.period),
-                        datasets: [
-                            {
-                                label: isNepali ? 'आय' : 'Income',
-                                data: months.map(m => m.income),
-                                backgroundColor: '#4caf50'
-                            },
-                            {
-                                label: isNepali ? 'खर्च' : 'Expense',
-                                data: months.map(m => m.expense),
-                                backgroundColor: '#d32f2f'
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { position: 'top' },
-                            title: { display: true, text: isNepali ? 'मासिक वित्तीय अवलोकन' : 'Monthly Financial Overview' }
-                        }
+            // Export Functionality
+            document.querySelectorAll('.excel-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const type = e.target.getAttribute('data-type');
+                    let data = [];
+                    if (type === 'monthly_calendar') {
+                        data = calendarData[currentYear].map((month, index) => ({
+                            Month: isNepali ? monthsNepali[index] : month.name,
+                            Days: month.days,
+                            StartDate: month.gregStart
+                        }));
+                    } else if (type === 'yearly_holidays') {
+                        data = holidays[currentYear]?.map(h => ({
+                            Month: isNepali ? monthsNepali[h.month] : calendarData[currentYear][h.month].name,
+                            Day: h.day,
+                            Name: isNepali ? h.nepali : h.name
+                        })) || [];
+                    } else if (type === 'note' || type === 'finance') {
+                        data = notes.filter(n => type === 'note' ? n.type === 'note' : (n.type === 'income' || n.type === 'expense')).map(n => ({
+                            Date: n.date,
+                            Type: n.type,
+                            Title: n.title,
+                            Description: n.description,
+                            Category: n.category || ''
+                        }));
                     }
+                    const ws = XLSX.utils.json_to_sheet(data);
+                    const wb = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, type);
+                    XLSX.writeFile(wb, `${type}.xlsx`);
                 });
-            } else if (type === 'yearly') {
-                let income = 0, expense = 0, budget = 0;
-                Object.keys(budgets).forEach(key => {
-                    if (key.startsWith(`${year}`)) budget += parseFloat(budgets[key] || 0);
-                });
-                notes.forEach(note => {
-                    if (getRecurringDates(note).some(d => d.startsWith(`${year}`)) && (note.type === 'income' || note.type === 'expense')) {
-                        if (note.type === 'income') income += parseFloat(note.title || 0);
-                        else expense += parseFloat(note.title || 0);
-                    }
-                });
+            });
 
-                thead.innerHTML = `
-                    <tr>
-                        <th>${headers[lang].income}</th>
-                        <th>${headers[lang].expense}</th>
-                        <th>${headers[lang].balance}</th>
-                        <th>${headers[lang].budget}</th>
-                        <th>${headers[lang].variance}</th>
-                    </tr>
-                `;
-                tbody.innerHTML = `
-                    <tr>
-                        <td>${income}</td>
-                        <td>${expense}</td>
-                        <td>${income - expense}</td>
-                        <td>${budget}</td>
-                        <td>${budget ? budget - expense : 0}</td>
-                    </tr>
-                `;
-                table.appendChild(thead);
-                table.appendChild(tbody);
-                fragment.appendChild(table);
-
-                let canvas = document.createElement('canvas');
-                canvas.id = 'yearlyChart';
-                canvas.className = 'my-3';
-                canvas.setAttribute('aria-label', isNepali ? 'वार्षिक वित्तीय चार्ट' : 'Yearly Financial Chart');
-                fragment.appendChild(canvas);
-                reportContent.appendChild(fragment); // Append to DOM before Chart.js initialization
-
-                new Chart(canvas, {
-                    type: 'pie',
-                    data: {
-                        labels: [isNepali ? 'आय' : 'Income', isNepali ? 'खर्च' : 'Expense'],
-                        datasets: [{
-                            label: isNepali ? 'वित्त' : 'Finance',
-                            data: [income, expense],
-                            backgroundColor: ['#4caf50', '#d32f2f']
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { position: 'top' },
-                            title: { display: true, text: isNepali ? 'वार्षिक वित्तीय अवलोकन' : 'Yearly Financial Overview' }
-                        }
-                    }
-                });
-            } else if (type === 'records') {
-                let dailyData = {};
-                notes.forEach(note => {
-                    if (note.type === 'income' || note.type === 'expense') {
-                        getRecurringDates(note).forEach(date => {
-                            if (date.startsWith(`${year}`)) {
-                                if (!dailyData[date]) dailyData[date] = { income: 0, expense: 0 };
-                                if (note.type === 'income') dailyData[date].income += parseFloat(note.title || 0);
-                                else dailyData[date].expense += parseFloat(note.title || 0);
-                            }
+            document.querySelectorAll('.pdf-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const { jsPDF } = window.jspdf;
+                    const doc = new jsPDF();
+                    const type = e.target.getAttribute('data-type');
+                    doc.text(`Export: ${type}`, 10, 10);
+                    if (type === 'monthly_calendar') {
+                        calendarData[currentYear].forEach((month, index) => {
+                            doc.text(`${isNepali ? monthsNepali[index] : month.name}: ${month.days} days, Starts: ${month.gregStart}`, 10, 20 + index * 10);
+                        });
+                    } else if (type === 'yearly_holidays') {
+                        holidays[currentYear]?.forEach((h, index) => {
+                            doc.text(`${isNepali ? monthsNepali[h.month] : calendarData[currentYear][h.month].name} ${h.day}: ${isNepali ? h.nepali : h.name}`, 10, 20 + index * 10);
                         });
                     }
+                    doc.save(`${type}.pdf`);
                 });
-
-                let sortedDates = Object.keys(dailyData).sort();
-                thead.innerHTML = `
-                    <tr>
-                        <th>${headers[lang].day}</th>
-                        <th>${headers[lang].income}</th>
-                        <th>${headers[lang].expense}</th>
-                        <th>${headers[lang].balance}</th>
-                    </tr>
-                `;
-                if (sortedDates.length === 0) {
-                    tbody.innerHTML = `<tr><td colspan="4">${headers[lang].noData}</td></tr>`;
-                } else {
-                    sortedDates.forEach(date => {
-                        let data = dailyData[date];
-                        tbody.innerHTML += `
-                            <tr>
-                                <td>${date}</td>
-                                <td>${data.income}</td>
-                                <td>${data.expense}</td>
-                                <td>${data.income - data.expense}</td>
-                            </tr>
-                        `;
-                    });
-                }
-                table.appendChild(thead);
-                table.appendChild(tbody);
-                fragment.appendChild(table);
-
-                let canvas = document.createElement('canvas');
-                canvas.id = 'recordsChart';
-                canvas.className = 'my-3';
-                canvas.setAttribute('aria-label', isNepali ? 'दैनिक वित्तीय रेकर्ड चार्ट' : 'Daily Financial Records Chart');
-                fragment.appendChild(canvas);
-                reportContent.appendChild(fragment); // Append to DOM before Chart.js initialization
-
-                new Chart(canvas, {
-                    type: 'line',
-                    data: {
-                        labels: sortedDates,
-                        datasets: [
-                            {
-                                label: isNepali ? 'आय' : 'Income',
-                                data: sortedDates.map(d => dailyData[d].income),
-                                borderColor: '#4caf50',
-                                fill: false
-                            },
-                            {
-                                label: isNepali ? 'खर्च' : 'Expense',
-                                data: sortedDates.map(d => dailyData[d].expense),
-                                borderColor: '#d32f2f',
-                                fill: false
-                            }
-                        ]
-                    },
-                    options: {
-                        responsive: true,
-                        plugins: {
-                            legend: { position: 'top' },
-                            title: { display: true, text: isNepali ? 'दैनिक वित्तीय रेकर्डहरू' : 'Daily Financial Records' }
-                        }
-                    }
-                });
-            }
-        }
-
-        // Export functions
-        function exportToExcel(type) {
-            let data = [], headers = [], wsName = '';
-            let year = parseInt(yearFilter.value);
-
-            if (type === 'note') {
-                headers = isNepali 
-                    ? ['मिति', 'शीर्षक', 'विवरण', 'समय', 'दोहोरिने', 'रिमाइन्डर']
-                    : ['Date', 'Title', 'Description', 'Time', 'Recurring', 'Reminder'];
-                data = notes.filter(note => note.type === 'note').map(note => [
-                    note.date,
-                    note.title,
-                    note.description || '',
-                    note.time || '',
-                    note.recurring ? (isNepali ? 'हो' : 'Yes') : (isNepali ? 'होइन' : 'No'),
-                    note.reminder ? (isNepali ? 'हो' : 'Yes') : (isNepali ? 'होइन' : 'No')
-                ]);
-                wsName = isNepali ? 'नोटहरू' : 'Notes';
-            } else if (type === 'finance') {
-                headers = isNepali 
-                    ? ['मिति', 'प्रकार', 'रकम (NPR)', 'विवरण', 'श्रेणी', 'दोहोरिने', 'रिमाइन्डर']
-                    : ['Date', 'Type', 'Amount (NPR)', 'Description', 'Category', 'Recurring', 'Reminder'];
-                data = notes.filter(note => note.type === 'income' || note.type === 'expense').map(note => [
-                    note.date,
-                    note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense'),
-                    note.title,
-                    note.description || '',
-                    note.category || '',
-                    note.recurring ? (isNepali ? 'हो' : 'Yes') : (isNepali ? 'होइन' : 'No'),
-                    note.reminder ? (isNepali ? 'हो' : 'Yes') : (isNepali ? 'होइन' : 'No')
-                ]);
-                wsName = isNepali ? 'वित्त' : 'Finances';
-            } else if (type === 'calendar') {
-                headers = isNepali ? ['महिना', 'दिनहरू', 'ग्रेगोरियन सुरु'] : ['Month', 'Days', 'Gregorian Start'];
-                data = calendarData[year].map(month => [
-                    isNepali ? monthsNepali[calendarData[year].indexOf(month)] : month.name,
-                    month.days,
-                    month.gregStart
-                ]);
-                wsName = isNepali ? 'पात्रो' : 'Calendar';
-            } else if (type === 'holiday') {
-                headers = isNepali ? ['महिना', 'दिन', 'नाम', 'नेपाली', 'प्रकार'] : ['Month', 'Day', 'Name', 'Nepali', 'Type'];
-                data = (holidays[year] || []).map(holiday => [
-                    isNepali ? monthsNepali[holiday.month] : calendarData[year][holiday.month].name,
-                    holiday.day,
-                    holiday.name,
-                    holiday.nepali,
-                    holiday.type
-                ]);
-                wsName = isNepali ? 'बिदाहरू' : 'Holidays';
-            }
-
-            let ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
-            let wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, wsName);
-            XLSX.writeFile(wb, `${wsName}_${year}.xlsx`);
-        }
-
-        function exportToPDF(type) {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            let year = parseInt(yearFilter.value);
-            let title = '', headers = [], data = [];
-
-            if (type === 'note') {
-                title = isNepali ? `नोटहरू ${year}` : `Notes ${year}`;
-                headers = isNepali 
-                    ? ['मिति', 'शीर्षक', 'विवरण']
-                    : ['Date', 'Title', 'Description'];
-                data = notes.filter(note => note.type === 'note').map(note => [
-                    note.date,
-                    note.title,
-                    note.description || ''
-                ]);
-            } else if (type === 'finance') {
-                title = isNepali ? `वित्त ${year}` : `Finances ${year}`;
-                headers = isNepali 
-                    ? ['मिति', 'प्रकार', 'रकम (NPR)', 'श्रेणी']
-                    : ['Date', 'Type', 'Amount (NPR)', 'Category'];
-                data = notes.filter(note => note.type === 'income' || note.type === 'expense').map(note => [
-                    note.date,
-                    note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense'),
-                    note.title,
-                    note.category || ''
-                ]);
-            } else if (type === 'calendar') {
-                title = isNepali ? `पात्रो ${year}` : `Calendar ${year}`;
-                headers = isNepali ? ['महिना', 'दिनहरू', 'ग्रेगोरियन सुरु'] : ['Month', 'Days', 'Gregorian Start'];
-                data = calendarData[year].map(month => [
-                    isNepali ? monthsNepali[calendarData[year].indexOf(month)] : month.name,
-                    month.days,
-                    month.gregStart
-                ]);
-            }
-
-            doc.text(title, 14, 20);
-            doc.autoTable({
-                startY: 30,
-                head: [headers],
-                body: data,
-                styles: { fontSize: 8, cellPadding: 2 },
-                headStyles: { fillColor: [2, 136, 209] },
-                alternateRowStyles: { fillColor: [240, 240, 240] }
             });
-            doc.save(`${title}.pdf`);
-        }
 
-        function backup() {
-            let data = {
-                notes,
-                customCategories,
-                budgets
-            };
-            let blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-            let url = URL.createObjectURL(blob);
-            let a = document.createElement('a');
-            a.href = url;
-            a.download = `calendar_backup_${new Date().toISOString().split('T')[0]}.json`;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
+            // Import Functionality
+            document.querySelectorAll('.import-option').forEach(option => {
+                option.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const type = e.target.getAttribute('data-type');
+                    const fileInput = document.getElementById('restoreFileInput');
+                    fileInput.setAttribute('data-import-type', type);
+                    fileInput.click();
+                });
+            });
 
-        function restore(e) {
-            let file = e.target.files[0];
-            if (!file) return;
-            let reader = new FileReader();
-            reader.onload = function(e) {
-                try {
-                    let data = JSON.parse(e.target.result);
-                    if (data.notes) notes = data.notes;
-                    if (data.customCategories) customCategories = data.customCategories;
-                    if (data.budgets) budgets = data.budgets;
-                    localStorage.setItem('notes', JSON.stringify(notes));
-                    localStorage.setItem('customCategories', JSON.stringify(customCategories));
-                    localStorage.setItem('budgets', JSON.stringify(budgets));
-                    renderCalendar();
-                    renderNotesList();
-                    renderFinancialRecords();
-                    renderMonthlySummary();
-                    populateCategories();
-                    alert(isNepali ? 'डेटा सफलतापूर्वक पुनर्स्थापना गरियो' : 'Data restored successfully');
-                } catch (err) {
-                    alert(isNepali ? 'पुनर्स्थापना असफल: अमान्य फाइल ढाँचा' : 'Restore failed: Invalid file format');
-                }
-            };
-            reader.readAsText(file);
-        }
-
-        function importData(type) {
-            let input = document.createElement('input');
-            input.type = 'file';
-            input.accept = type === 'calendar' || type === 'holiday' ? '.xlsx' : '.json';
-            input.onchange = function(e) {
-                let file = e.target.files[0];
-                if (!file) return;
-                let reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
+            document.getElementById('restoreFileInput').addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = (event) => {
+                        const data = JSON.parse(event.target.result);
+                        const type = e.target.getAttribute('data-import-type');
                         if (type === 'note' || type === 'finance') {
-                            let importedNotes = JSON.parse(e.target.result);
-                            importedNotes.forEach(note => {
-                                if ((type === 'note' && note.type === 'note') || 
-                                    (type === 'finance' && (note.type === 'income' || note.type === 'expense'))) {
-                                    notes.push(note);
-                                }
-                            });
+                            notes = notes.concat(data);
                             localStorage.setItem('notes', JSON.stringify(notes));
-                        } else if (type === 'calendar' || type === 'holiday') {
-                            let data = new Uint8Array(e.target.result);
-                            let workbook = XLSX.read(data, { type: 'array' });
-                            let sheet = workbook.Sheets[workbook.SheetNames[0]];
-                            let importedData = XLSX.utils.sheet_to_json(sheet);
-                            if (type === 'calendar') {
-                                let year = parseInt(yearFilter.value);
-                                calendarData[year] = importedData.map(row => ({
-                                    name: row.Month || row['महिना'],
-                                    days: row.Days || row['दिनहरू'],
-                                    gregStart: row['Gregorian Start'] || row['ग्रेगोरियन सुरु']
-                                }));
-                            } else if (type === 'holiday') {
-                                let year = parseInt(yearFilter.value);
-                                holidays[year] = importedData.map(row => ({
-                                    month: monthsNepali.indexOf(row['महिना']) !== -1 ? monthsNepali.indexOf(row['महिना']) : calendarData[year].findIndex(m => m.name === row.Month),
-                                    day: row.Day || row['दिन'],
-                                    name: row.Name || row['नाम'],
-                                    nepali: row.Nepali || row['नेपाली'],
-                                    type: row.Type || row['प्रकार']
-                                }));
-                            }
                         }
-                        renderCalendar();
-                        renderNotesList();
-                        renderFinancialRecords();
-                        renderMonthlySummary();
-                        alert(isNepali ? 'डेटा सफलतापूर्वक आयात गरियो' : 'Data imported successfully');
-                    } catch (err) {
-                        alert(isNepali ? 'आयात असफल: अमान्य फाइल ढाँचा' : 'Import failed: Invalid file format');
-                    }
-                };
-                if (type === 'calendar' || type === 'holiday') {
-                    reader.readAsArrayBuffer(file);
-                } else {
+                        console.log(`Imported ${type}:`, data);
+                    };
                     reader.readAsText(file);
                 }
-            };
-            input.click();
-        }
+            });
 
-        function setToday() {
-            let today = new Date();
-            let bsDate = getBSDateFromGregorian(today);
-            if (bsDate) {
-                currentYear = bsDate.year;
-                currentMonthIndex = bsDate.month;
-                yearFilter.value = currentYear;
-                renderMonthTabs();
-                renderCalendar();
-            } else {
-                console.error('Could not set today: Invalid BS date');
-                currentYear = 2082;
-                currentMonthIndex = 0;
-                yearFilter.value = currentYear;
-                renderMonthTabs();
-                renderCalendar();
-            }
-            todayNepaliDate.textContent = bsDate 
-                ? `${bsDate.day} ${monthsNepali[bsDate.month]} ${bsDate.year} BS`
-                : (isNepali ? 'अमान्य मिति' : 'Invalid Date');
-            todayEnglishDate.textContent = today.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-        }
-
-        // Event listeners
-        yearFilter.addEventListener('change', () => {
-            currentYear = parseInt(yearFilter.value);
-            currentMonthIndex = 0;
-            renderMonthTabs();
-            renderCalendar();
+            // Initialize
+            initializeCalendar(currentYear);
         });
-
-        todayButton.addEventListener('click', setToday);
-
-        monthTabs.addEventListener('click', (e) => {
-            if (e.target.classList.contains('btn')) {
-                currentMonthIndex = Array.from(monthTabs.children).indexOf(e.target);
-                renderMonthTabs();
-                renderCalendar();
-            }
-        });
-
-        languageToggle.addEventListener('click', toggleLanguage);
-
-        addNote.addEventListener('click', () => {
-            let today = new Date();
-            let bsDate = getBSDateFromGregorian(today) || { year: 2082, month: 0, day: 1 };
-            selectedDate.textContent = `${bsDate.year}-${String(bsDate.month + 1).padStart(2, '0')}-${String(bsDate.day).padStart(2, '0')}`;
-            entryType.value = 'note';
-            noteTitle.value = '';
-            noteTime.value = '';
-            noteDescription.value = '';
-            recurring.checked = false;
-            reminder.checked = false;
-            entryCategory.style.display = 'none';
-            categoryManager.style.display = 'none';
-            budgetSection.style.display = 'none';
-            saveNote.style.display = 'block';
-            editEntry.style.display = 'none';
-            noteFormModal.show();
-            noteTitle.focus();
-        });
-
-        addFinance.addEventListener('click', () => {
-            let today = new Date();
-            let bsDate = getBSDateFromGregorian(today) || { year: 2082, month: 0, day: 1 };
-            selectedDate.textContent = `${bsDate.year}-${String(bsDate.month + 1).padStart(2, '0')}-${String(bsDate.day).padStart(2, '0')}`;
-            entryType.value = 'income';
-            noteTitle.value = '';
-            noteTime.value = '';
-            noteDescription.value = '';
-            recurring.checked = false;
-            reminder.checked = false;
-            entryCategory.style.display = 'block';
-            categoryManager.style.display = 'block';
-            budgetSection.style.display = 'none';
-            saveNote.style.display = 'block';
-            editEntry.style.display = 'none';
-            noteFormModal.show();
-            noteTitle.focus();
-        });
-
-        viewNotes.addEventListener('click', () => {
-            renderNotesList();
-            notesModal.show();
-        });
-
-        viewFinance.addEventListener('click', () => {
-            reportModal.show();
-            renderReport('weekly');
-        });
-
-        entryType.addEventListener('change', () => {
-            let type = entryType.value;
-            entryCategory.style.display = type === 'note' ? 'none' : 'block';
-            categoryManager.style.display = type === 'note' ? 'none' : 'block';
-            budgetSection.style.display = type === 'expense' ? 'block' : 'none';
-            noteTitle.placeholder = type === 'note' 
-                ? (isNepali ? 'नोट शीर्षक' : 'Note Title') 
-                : (isNepali ? 'रकम (NPR)' : 'Amount (NPR)');
-        });
-
-        saveNote.addEventListener('click', saveEntry);
-
-        editEntry.addEventListener('click', updateNote);
-
-        closeEntry.addEventListener('click', () => noteFormModal.hide());
-
-        closeModal.addEventListener('click', () => notesModal.hide());
-
-        closeReportModal.addEventListener('click', () => reportModal.hide());
-
-        noteSearch.addEventListener('input', debounce(renderNotesList, 300));
-
-        financeSearch.addEventListener('input', debounce(renderFinancialRecords, 300));
-
-        monthFilter.addEventListener('change', renderNotesList);
-
-        clearNotes.addEventListener('click', () => {
-            if (confirm(isNepali ? 'के तपाईं सबै नोटहरू मेटाउन चाहनुहुन्छ?' : 'Are you sure you want to clear all notes?')) {
-                undoStack.push({ action: 'clear', notes: [...notes] });
-                notes = [];
-                localStorage.setItem('notes', JSON.stringify(notes));
-                renderCalendar();
-                renderNotesList();
-                renderFinancialRecords();
-                renderMonthlySummary();
-            }
-        });
-
-        addCategory.addEventListener('click', addCustomCategory);
-
-        backupData.addEventListener('click', backup);
-
-        restoreData.addEventListener('click', () => restoreFileInput.click());
-
-        restoreFileInput.addEventListener('change', restore);
-
-        undoAction.addEventListener('click', undoLastAction);
-
-        // Event delegation for dropdown options
-        document.querySelector('.year-filter').addEventListener('click', (e) => {
-            if (e.target.classList.contains('excel-option')) {
-                e.preventDefault();
-                exportToExcel(e.target.dataset.type);
-            } else if (e.target.classList.contains('pdf-option')) {
-                e.preventDefault();
-                exportToPDF(e.target.dataset.type);
-            } else if (e.target.classList.contains('import-option')) {
-                e.preventDefault();
-                importData(e.target.dataset.type);
-            }
-        });
-
-        weeklyReportTab.addEventListener('click', () => {
-            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
-            weeklyReportTab.classList.add('active');
-            renderReport('weekly');
-        });
-
-        monthlyReportTab.addEventListener('click', () => {
-            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
-            monthlyReportTab.classList.add('active');
-            renderReport('monthly');
-        });
-
-        yearlyReportTab.addEventListener('click', () => {
-            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
-            yearlyReportTab.classList.add('active');
-            renderReport('yearly');
-        });
-
-        recordsReportTab.addEventListener('click', () => {
-            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
-            recordsReportTab.classList.add('active');
-            renderReport('records');
-        });
-
-        // Initialize
-        (function init() {
-            if (!calendarData[currentYear]) {
-                currentYear = 2082;
-                yearFilter.value = currentYear;
-            }
-            for (let i = 0; i < 12; i++) {
-                let option = document.createElement('option');
-                option.value = `${currentYear}-${String(i + 1).padStart(2, '0')}`;
-                option.textContent = isNepali ? monthsNepali[i] : calendarData[currentYear][i].name;
-                monthFilter.appendChild(option);
-            }
-            setToday();
-            renderMonthTabs();
-            renderCalendar();
-            populateCategories();
-            if ("Notification" in window && Notification.permission !== "denied") {
-                Notification.requestPermission().then(permission => {
-                    if (permission === "granted") checkReminders();
-                });
-            }
-        })();
     </script>
 </body>
 </html>
