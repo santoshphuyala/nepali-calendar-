@@ -3,403 +3,376 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="referrer" content="strict-origin-when-cross-origin">
-    <meta http-equiv="Content-Security-Policy" content="
-        default-src 'self';
-        script-src 'self' 'nonce-OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2' 'strict-dynamic' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net;
-        img-src 'self' blob: data: https://assets.grok.com https://imgs.search.brave.com;
-        style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net;
-        font-src 'self' https://fonts.gstatic.com;
-        connect-src 'self' https://api.grok.com;
-    ">
-    <title>Nepali Calendar 2082</title>
-    <link rel="icon" href="data:;base64,iVBORw0KGgo=">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap" rel="stylesheet">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Nepali Calendar</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
     <style>
-        :root {
-            --primary: #d32f2f;
-            --secondary: #0288d1;
-            --accent: #fbc02d;
-            --income: #4caf50;
-            --expense: #d32f2f;
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8f9fa;
         }
-        body { 
-            font-family: 'Poppins', sans-serif; 
-            background: #f5f5f5; 
-            margin: 0;
-        }
-        .nepali { 
-            font-family: 'Noto Sans Devanagari', sans-serif; 
-            font-size: 1.1rem; 
-            font-weight: 500;
-        }
-        .header-title {
-            font-size: 2rem;
-            font-weight: 600;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        header {
-            padding: 1.5rem;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        footer {
-            padding: 1rem;
-            margin-top: 2rem;
-            background: #e3f2fd;
-            border-top: 1px solid var(--secondary);
-        }
-        .design-credit {
-            font-size: 0.85rem;
-            font-style: italic;
-            color: var(--secondary);
-            margin: 0.5rem 0;
+        .calendar-container {
+            max-width: 1200px;
+            margin: 20px auto;
         }
         .calendar-grid {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 0.5rem;
+            gap: 1px;
+            background-color: #ddd;
         }
-        .calendar-day { 
-            position: relative; 
-            min-height: 120px; 
-            cursor: pointer; 
-            transition: transform 0.3s; 
-            box-sizing: border-box; 
-            padding: 0.5rem; 
-            background: #fff; 
-            border: 1px solid #ddd; 
-            border-radius: 4px;
+        .calendar-day {
+            padding: 10px;
+            background-color: #fff;
+            border: 1px solid #ddd;
+            min-height: 100px;
+            position: relative;
+            cursor: pointer;
         }
-        .calendar-day:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        .calendar-day:hover {
+            background-color: #f1f1f1;
         }
-        .calendar-day.today { 
-            border: 2px solid var(--secondary); 
-            background: #e3f2fd; 
+        .calendar-day:focus {
+            outline: 2px solid #007bff;
         }
-        .saturday { background: #b0bec5; color: #fff; }
-        .holiday { background: #d32f2f; color: #fff; }
-        .custom-holiday { background: #0288d1; color: #fff; }
-        .bs-date { 
-            font-weight: 600; 
-            font-size: 1rem; 
+        .calendar-day.today {
+            background-color: #e7f3ff;
+            border: 2px solid #007bff;
         }
-        .greg-date { 
-            font-size: 0.75rem; 
-            color: #757575; 
+        .calendar-day.saturday {
+            background-color: #fff3e0;
         }
-        .festival { 
-            font-size: 0.7rem; 
-            font-family: 'Noto Sans Devanagari', sans-serif; 
+        .calendar-day.holiday, .calendar-day.custom-holiday {
+            background-color: #ffe6e6;
         }
-        .event-preview { 
-            font-size: 0.65rem; 
-            color: #757575; 
-            overflow: hidden; 
-            text-overflow: ellipsis; 
-            white-space: nowrap; 
+        .bs-date {
+            font-size: 1.2em;
+            font-weight: bold;
+        }
+        .greg-date {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .festival {
+            font-size: 0.8em;
+            color: #d32f2f;
+            margin-top: 5px;
         }
         .festival-tooltip, .note-tooltip, .finance-tooltip {
-            display: none; 
-            position: absolute; 
-            background: #212121; 
-            color: #fff; 
-            padding: 0.5rem;
-            border-radius: 6px; 
-            font-size: 0.7rem; 
-            z-index: 100; 
-            top: -2rem; 
+            display: none;
+            position: absolute;
+            background-color: #333;
+            color: #fff;
+            padding: 5px;
+            border-radius: 3px;
+            font-size: 0.8em;
+            z-index: 1000;
+            top: -30px;
             left: 50%;
-            transform: translateX(-50%); 
+            transform: translateX(-50%);
             white-space: nowrap;
         }
-        .calendar-day:hover .festival-tooltip, 
-        .calendar-day:hover .note-tooltip, 
-        .calendar-day:hover .finance-tooltip { 
-            display: block; 
+        .calendar-day:hover .festival-tooltip,
+        .calendar-day:hover .note-tooltip,
+        .calendar-day:hover .finance-tooltip {
+            display: block;
         }
         .note-indicator, .income-indicator, .expense-indicator {
-            position: absolute; 
-            top: 0.4rem; 
-            right: 0.4rem; 
-            width: 8px; 
-            height: 8px; 
+            width: 10px;
+            height: 10px;
             border-radius: 50%;
+            position: absolute;
+            top: 5px;
+            right: 5px;
         }
-        .note-indicator { background: var(--secondary); }
-        .income-indicator { background: var(--income); }
-        .expense-indicator { background: var(--expense); }
-        .blink { animation: blink 1s infinite; }
-        @keyframes blink { 
-            0%, 100% { opacity: 1; } 
-            50% { opacity: 0.3; } 
+        .note-indicator {
+            background-color: #007bff;
         }
-        .report-table th, .report-table td { 
-            font-size: 0.9rem; 
+        .income-indicator {
+            background-color: #28a745;
         }
-        .card {
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-radius: 8px;
+        .expense-indicator {
+            background-color: #dc3545;
         }
-        .action-buttons .btn {
-            margin-bottom: 0.5rem;
+        .event-preview {
+            font-size: 0.8em;
+            margin-top: 5px;
+            color: #333;
         }
-        @media (max-width: 768px) {
-            .calendar-day { 
-                min-height: 80px; 
-                font-size: 0.85rem; 
-            }
-            .bs-date { font-size: 0.9rem; }
-            .greg-date { font-size: 0.65rem; }
-            .festival { font-size: 0.6rem; }
-            .event-preview { font-size: 0.55rem; }
-            .header-title { font-size: 1.5rem; }
-            .design-credit { font-size: 0.75rem; }
+        .month-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+        .month-tabs .btn {
+            flex: 1 1 auto;
+        }
+        .nepali {
+            font-family: 'Preeti', 'Kalimati', sans-serif;
+        }
+        #holidayList {
+            max-height: 200px;
+            overflow-y: auto;
         }
     </style>
 </head>
 <body>
-    <header class="bg-gradient-primary text-white text-center">
-        <h1 class="header-title" data-en="Nepali Calendar" data-ne="नेपाली पात्रो">Nepali Calendar</h1>
-        <p class="design-credit">Calendar Concept and Design by Santosh Phuyal</p>
-    </header>
-    <div class="container mt-4">
-        <div class="year-filter d-flex flex-wrap justify-content-center gap-2 mb-3">
-            <select id="yearFilter" class="form-select w-auto" aria-label="Select Year">
-                <option value="2081">2081 BS</option>
-                <option value="2082" selected>2082 BS</option>
-                <option value="2083">2083 BS</option>
-            </select>
-            <button id="todayButton" class="btn btn-primary" data-en="Today" data-ne="आज" aria-label="Go to Today">Today</button>
-            <button id="backupData" class="btn btn-warning" data-en="Backup" data-ne="ब्याकअप" aria-label="Backup Data">Backup</button>
-            <button id="restoreData" class="btn btn-purple" data-en="Restore" data-ne="पुनर्स्थापना" aria-label="Restore Data">Restore</button>
-            <div class="dropdown">
-                <button class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown" data-en="Excel Export" data-ne="एक्सेल निर्यात" aria-label="Excel Export" aria-expanded="false">Excel Export</button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item excel-option" href="#" data-type="note" data-en="Notes" data-ne="नोटहरू">Notes</a></li>
-                    <li><a class="dropdown-item excel-option" href="#" data-type="finance" data-en="Finances" data-ne="वित्त">Finances</a></li>
-                    <li><a class="dropdown-item excel-option" href="#" data-type="calendar" data-en="Monthly Calendar" data-ne="मासिक पात्रो">Monthly Calendar</a></li>
-                    <li><a class="dropdown-item excel-option" href="#" data-type="holiday" data-en="Yearly Holiday" data-ne="वार्षिक बिदा">Yearly Holiday</a></li>
-                </ul>
+    <div class="calendar-container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h1 data-en="Nepali Calendar" data-ne="नेपाली पात्रो">Nepali Calendar</h1>
+            <div>
+                <select id="yearFilter" class="form-select d-inline-block w-auto">
+                    <option value="2081">2081 BS</option>
+                    <option value="2082">2082 BS</option>
+                    <option value="2083">2083 BS</option>
+                </select>
+                <button id="todayButton" class="btn btn-primary ms-2" data-en="Today" data-ne="आज">Today</button>
+                <button id="languageToggle" class="btn btn-secondary ms-2" data-en="Switch to Nepali" data-ne="Switch to English">Switch to Nepali</button>
+            </div>
+        </div>
+        <div class="d-flex justify-content-between mb-3">
+            <div>
+                <button id="addNote" class="btn btn-success me-2" data-en="Add Note" data-ne="नोट थप्नुहोस्">Add Note</button>
+                <button id="addFinance" class="btn btn-info me-2" data-en="Add Finance" data-ne="वित्त थप्नुहोस्">Add Finance</button>
+                <button id="viewNotes" class="btn btn-primary me-2" data-en="View Notes" data-ne="नोटहरू हेर्नुहोस्">View Notes</button>
+                <button id="viewFinance" class="btn btn-warning me-2" data-en="View Finance" data-ne="वित्त हेर्नुहोस्">View Finance</button>
+                <button id="undoAction" class="btn btn-secondary me-2" data-en="Undo" data-ne="पूर्ववत् गर्नुहोस्">Undo</button>
+                <button id="addCustomHoliday" class="btn btn-danger me-2" data-en="Add Custom Holiday" data-ne="कस्टम बिदा थप्नुहोस्">Add Custom Holiday</button>
+                <button id="manageShoppingList" class="btn btn-info" data-en="Manage Shopping List" data-ne="किनमेल सूची व्यवस्थापन गर्नुहोस्">Manage Shopping List</button>
             </div>
             <div class="dropdown">
-                <button class="btn btn-danger dropdown-toggle" data-bs-toggle="dropdown" data-en="PDF Export" data-ne="PDF निर्यात" aria-label="PDF Export" aria-expanded="false">PDF Export</button>
+                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-en="Export Data" data-ne="डाटा निर्यात गर्नुहोस्">Export Data</button>
                 <ul class="dropdown-menu">
-                    <li><a class="dropdown-item pdf-option" href="#" data-type="note" data-en="Notes" data-ne="नोटहरू">Notes</a></li>
-                    <li><a class="dropdown-item pdf-option" href="#" data-type="finance" data-en="Finances" data-ne="वित्त">Finances</a></li>
-                    <li><a class="dropdown-item pdf-option" href="#" data-type="calendar" data-en="Monthly Calendar" data-ne="मासिक पात्रो">Monthly Calendar</a></li>
+                    <li><a class="dropdown-item excel-option" href="#" data-type="note" data-en="Export Notes (Excel)" data-ne="नोटहरू निर्यात गर्नुहोस् (Excel)">Export Notes (Excel)</a></li>
+                    <li><a class="dropdown-item excel-option" href="#" data-type="finance" data-en="Export Finances (Excel)" data-ne="वित्त निर्यात गर्नुहोस् (Excel)">Export Finances (Excel)</a></li>
+                    <li><a class="dropdown-item excel-option" href="#" data-type="calendar" data-en="Export Calendar (Excel)" data-ne="पात्रो निर्यात गर्नुहोस् (Excel)">Export Calendar (Excel)</a></li>
+                    <li><a class="dropdown-item excel-option" href="#" data-type="holiday" data-en="Export Holidays (Excel)" data-ne="बिदाहरू निर्यात गर्नुहोस् (Excel)">Export Holidays (Excel)</a></li>
+                    <li><a class="dropdown-item pdf-option" href="#" data-type="note" data-en="Export Notes (PDF)" data-ne="नोटहरू निर्यात गर्नुहोस् (PDF)">Export Notes (PDF)</a></li>
+                    <li><a class="dropdown-item pdf-option" href="#" data-type="finance" data-en="Export Finances (PDF)" data-ne="वित्त निर्यात गर्नुहोस् (PDF)">Export Finances (PDF)</a></li>
+                    <li><a class="dropdown-item pdf-option" href="#" data-type="calendar" data-en="Export Calendar (PDF)" data-ne="पात्रो निर्यात गर्नुहोस् (PDF)">Export Calendar (PDF)</a></li>
+                    <li><a class="dropdown-item" id="backupData" href="#" data-en="Backup Data" data-ne="डाटा ब्याकअप गर्नुहोस्">Backup Data</a></li>
+                    <li><a class="dropdown-item" id="restoreData" href="#" data-en="Restore Data" data-ne="डाटा पुनर्स्थापना गर्नुहोस्">Restore Data</a></li>
                 </ul>
+                <input type="file" id="restoreFileInput" style="display: none;" accept=".json">
             </div>
-            <div class="dropdown">
-                <button class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown" data-en="Import" data-ne="आयात" aria-label="Import Data" aria-expanded="false">Import</button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item import-option" href="#" data-type="note" data-en="Notes" data-ne="नोटहरू">Notes</a></li>
-                    <li><a class="dropdown-item import-option" href="#" data-type="finance" data-en="Finances" data-ne="वित्त">Finances</a></li>
-                    <li><a class="dropdown-item import-option" href="#" data-type="calendar" data-en="Monthly Calendar" data-ne="मासिक पात्रो">Monthly Calendar</a></li>
-                    <li><a class="dropdown-item import-option" href="#" data-type="holiday" data-en="Yearly Holiday" data-ne="वार्षिक बिदा">Yearly Holiday</a></li>
-                </ul>
-            </div>
-            <input type="file" id="restoreFileInput" class="d-none" accept=".json" aria-label="File Input for Restore">
-            <button id="undoAction" class="btn btn-warning" data-en="Undo" data-ne="पुर्ववत" aria-label="Undo Last Action">Undo</button>
-            <button id="addCustomHoliday" class="btn btn-info" data-en="Add Custom Holiday" data-ne="कस्टम बिदा थप्नुहोस्" aria-label="Add Custom Holiday">Add Custom Holiday</button>
-            <button id="manageShoppingList" class="btn btn-secondary" data-en="Shopping List" data-ne="किनमेल सूची" aria-label="Manage Shopping List">Shopping List</button>
         </div>
-        <div class="today-date-row d-flex justify-content-center gap-3 mb-3">
-            <span id="todayNepaliDate" class="blink"></span>
-            <span id="todayEnglishDate" class="blink"></span>
-        </div>
-        <div class="language-toggle text-center mb-3">
-            <button id="languageToggle" class="btn btn-outline-primary" data-en="Toggle Language (EN/NE)" data-ne="भाषा टगल गर्नुहोस् (EN/NE)" aria-label="Toggle Language">Toggle Language (EN/NE)</button>
-        </div>
-        <div class="month-tabs d-flex flex-wrap justify-content-center gap-2 mb-3" id="monthTabs"></div>
+        <div class="month-tabs" id="monthTabs" role="tablist"></div>
         <h2 id="currentMonth" class="text-center mb-3"></h2>
-        <div class="row">
-            <div class="col-12 col-md-9">
-                <div class="card">
-                    <div class="card-body">
-                        <div class="calendar-grid" id="calendarGrid" role="grid" aria-label="Calendar"></div>
-                    </div>
-                </div>
-                <div class="card mt-3">
-                    <div class="card-body">
-                        <h3 data-en="Holidays this Month" data-ne="यस महिनाका बिदाहरू">Holidays this Month</h3>
-                        <ul id="holidayList"></ul>
-                    </div>
-                </div>
+        <div class="calendar-grid" id="calendarGrid" role="grid"></div>
+        <div class="row mt-3">
+            <div class="col-md-4">
+                <h4 data-en="Today's Date" data-ne="आजको मिति">Today's Date</h4>
+                <p><strong data-en="Nepali:" data-ne="नेपाली:">Nepali:</strong> <span id="todayNepaliDate"></span></p>
+                <p><strong data-en="English:" data-ne="अंग्रेजी:">English:</strong> <span id="todayEnglishDate"></span></p>
             </div>
-            <div class="col-12 col-md-3">
-                <div class="action-buttons d-flex flex-column gap-2">
-                    <button id="addNote" class="btn btn-primary" data-en="Add Note" data-ne="नोट थप्नुहोस्" aria-label="Add Note">Add Note</button>
-                    <button id="addFinance" class="btn btn-success" data-en="Add Finance" data-ne="वित्त थप्नुहोस्" aria-label="Add Finance">Add Finance</button>
-                    <button id="viewNotes" class="btn btn-info" data-en="View Notes" data-ne="नोटहरू हेर्नुहोस्" aria-label="View Notes">View Notes</button>
-                    <button id="viewFinance" class="btn btn-success" data-en="View Finances" data-ne="वित्त हेर्नुहोस्" aria-label="View Finances">View Finances</button>
-                    <div class="card mt-3">
-                        <div class="card-body">
-                            <h3 data-en="Monthly Summary" data-ne="मासिक सारांश">Monthly Summary</h3>
-                            <p id="monthlySummary"></p>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-md-4">
+                <h4 data-en="Monthly Summary" data-ne="मासिक सारांश">Monthly Summary</h4>
+                <div id="monthlySummary"></div>
+            </div>
+            <div class="col-md-4">
+                <h4 data-en="Holidays This Month" data-ne="यस महिनाका बिदाहरू">Holidays This Month</h4>
+                <ul id="holidayList" class="list-group"></ul>
             </div>
         </div>
     </div>
-    <div class="modal fade" id="noteFormModal" tabindex="-1" aria-labelledby="noteFormTitle" role="dialog">
+
+    <!-- Note/Finance Modal -->
+    <div class="modal fade" id="noteFormModal" tabindex="-1" aria-labelledby="noteFormModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="noteFormTitle"><span data-en="Add Entry for" data-ne="प्रवेश थप्नुहोस्">Add Entry for</span> <span id="selectedDate">Date</span></h5>
-                    <button type="button" class="btn-close" id="closeEntry" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <select id="entryType" class="form-select mb-3" aria-label="Entry Type">
-                        <option value="note" data-en="Note" data-ne="नोट">Note</option>
-                        <option value="income" data-en="Income" data-ne="आय">Income</option>
-                        <option value="expense" data-en="Expense" data-ne="खर्च">Expense</option>
-                    </select>
-                    <input type="text" id="noteTitle" class="form-control mb-3" placeholder="Note Title / Amount" data-en="Note Title / Amount" data-ne="नोट शीर्षक / रकम" aria-label="Note Title or Amount">
-                    <input type="time" id="noteTime" class="form-control mb-3" aria-label="Note Time">
-                    <textarea id="noteDescription" class="form-control mb-3" placeholder="Description" data-en="Description" data-ne="विवरण" rows="3" aria-label="Description"></textarea>
-                    <select id="entryCategory" class="form-select mb-3" style="display:none" aria-label="Category">
-                        <option value="" data-en="Select Category" data-ne="श्रेणी चयन गर्नुहोस्">Select Category</option>
-                        <option value="Food" data-en="Food" data-ne="खाना">Food</option>
-                        <option value="Salary" data-en="Salary" data-ne="तलब">Salary</option>
-                        <option value="Rent" data-en="Rent" data-ne="भाडा">Rent</option>
-                        <option value="Utilities" data-en="Utilities" data-ne="उपयोगिताहरू">Utilities</option>
-                        <option value="Transport" data-en="Transport" data-ne="यातायात">Transport</option>
-                        <option value="Entertainment" data-en="Entertainment" data-ne="मनोरञ्जन">Entertainment</option>
-                        <option value="Freelance" data-en="Freelance" data-ne="फ्रीलान्स">Freelance</option>
-                        <option value="Other" data-en="Other" data-ne="अन्य">Other</option>
-                    </select>
-                    <div class="category-manager mb-3" id="categoryManager" style="display:none">
-                        <input type="text" id="newCategory" class="form-control d-inline-block w-75" placeholder="New Category" data-en="New Category" data-ne="नयाँ श्रेणी" aria-label="New Category">
-                        <button id="addCategory" class="btn btn-success" data-en="Add Category" data-ne="श्रेणी थप्नुहोस्" aria-label="Add Category">Add Category</button>
-                    </div>
-                    <div class="mb-3" id="budgetSection" style="display:none">
-                        <input type="number" id="monthlyBudget" class="form-control" placeholder="Monthly Budget (NPR)" data-en="Monthly Budget (NPR)" data-ne="मासिक बजेट (NPR)" aria-label="Monthly Budget">
-                    </div>
-                    <div class="form-check mb-3">
-                        <input type="checkbox" id="recurring" class="form-check-input" aria-label="Recurring Monthly">
-                        <label class="form-check-label" data-en="Recurring Monthly" data-ne="मासिक दोहोरिने">Recurring Monthly</label>
-                    </div>
-                    <div class="form-check mb-3">
-                        <input type="checkbox" id="reminder" class="form-check-input" aria-label="Set Reminder">
-                        <label class="form-check-label" data-en="Set Reminder" data-ne="रिमाइन्डर सेट गर्नुहोस्">Set Reminder</label>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button id="saveNote" class="btn btn-primary" data-en="Save Entry" data-ne="प्रवेश बचत गर्नुहोस्" aria-label="Save Entry">Save Entry</button>
-                    <button id="editEntry" class="btn btn-success" data-en="Edit Entry" data-ne="प्रवेश सम्पादन गर्नुहोस्" aria-label="Edit Entry">Edit Entry</button>
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="modal fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalTitle" role="dialog">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="notesModalTitle" data-en="Saved Notes" data-ne="बचत गरिएका नोटहरू">Saved Notes</h5>
-                    <button type="button" class="btn-close" id="closeModal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="noteFormModalLabel" data-en="Add Entry" data-ne="प्रविष्टि थप्नुहोस्">Add Entry</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <input type="text" id="noteSearch" class="form-control" placeholder="Search Notes" data-en="Search Notes" data-ne="नोटहरू खोज्नुहोस्" aria-label="Search Notes">
-                        <select id="monthFilter" class="form-select mt-2" aria-label="Filter by Month">
-                            <option value="all" data-en="All Months" data-ne="सबै महिनाहरू">All Months</option>
+                        <label for="selectedDate" class="form-label" data-en="Date" data-ne="मिति">Date</label>
+                        <input type="text" class="form-control" id="selectedDate" readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="entryType" class="form-label" data-en="Type" data-ne="प्रकार">Type</label>
+                        <select id="entryType" class="form-select">
+                            <option value="note" data-en="Note" data-ne="नोट">Note</option>
+                            <option value="income" data-en="Income" data-ne="आय">Income</option>
+                            <option value="expense" data-en="Expense" data-ne="खर्च">Expense</option>
+                            <option value="budget" data-en="Budget" data-ne="बजेट">Budget</option>
                         </select>
                     </div>
-                    <div class="notes-list" id="notesList"></div>
+                    <div class="mb-3">
+                        <label for="noteTitle" class="form-label" data-en="Amount / Title" data-ne="रकम / शीर्षक">Amount / Title</label>
+                        <input type="text" class="form-control" id="noteTitle">
+                    </div>
+                    <div class="mb-3">
+                        <label for="noteTime" class="form-label" data-en="Time (Optional)" data-ne="समय (वैकल्पिक)">Time (Optional)</label>
+                        <input type="time" class="form-control" id="noteTime">
+                    </div>
+                    <div class="mb-3">
+                        <label for="noteDescription" class="form-label" data-en="Description (Optional)" data-ne="विवरण (वैकल्पिक)">Description (Optional)</label>
+                        <textarea class="form-control" id="noteDescription" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3" id="entryCategory" style="display: none;">
+                        <label for="category" class="form-label" data-en="Category" data-ne="श्रेणी">Category</label>
+                        <select class="form-select" id="category">
+                            <option value="Food" data-en="Food" data-ne="खाना">Food</option>
+                            <option value="Transport" data-en="Transport" data-ne="यातायात">Transport</option>
+                            <option value="Entertainment" data-en="Entertainment" data-ne="मनोरञ्जन">Entertainment</option>
+                            <option value="Health" data-en="Health" data-ne="स्वास्थ्य">Health</option>
+                            <option value="Other" data-en="Other" data-ne="अन्य">Other</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="categoryManager" style="display: none;">
+                        <label for="newCategory" class="form-label" data-en="Add New Category" data-ne="नयाँ श्रेणी थप्नुहोस्">Add New Category</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="newCategory">
+                            <button class="btn btn-outline-secondary" id="addCategory" data-en="Add" data-ne="थप्नुहोस्">Add</button>
+                        </div>
+                    </div>
+                    <div class="mb-3" id="budgetSection" style="display: none;">
+                        <label for="monthlyBudget" class="form-label" data-en="Monthly Budget" data-ne="मासिक बजेट">Monthly Budget</label>
+                        <input type="number" class="form-control" id="monthlyBudget">
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="recurring">
+                        <label class="form-check-label" for="recurring" data-en="Recurring" data-ne="मासिक">Recurring</label>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="reminder">
+                        <label class="form-check-label" for="reminder" data-en="Set Reminder" data-ne="रिमाइन्डर सेट गर्नुहोस्">Set Reminder</label>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <button class="btn btn-danger" id="clearNotes" data-en="Clear All Notes" data-ne="सबै नोटहरू मेटाउनुहोस्" aria-label="Clear All Notes">Clear All Notes</button>
+                    <button type="button" class="btn btn-secondary" id="closeEntry" data-bs-dismiss="modal" data-en="Close" data-ne="बन्द गर्नुहोस्">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveNote" data-en="Save" data-ne="सुरक्षित गर्नुहोस्">Save</button>
+                    <button type="button" class="btn btn-primary" id="editEntry" style="display: none;" data-en="Update" data-ne="अपडेट गर्नुहोस्">Update</button>
                 </div>
             </div>
         </div>
     </div>
-    <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalTitle" role="dialog">
+
+    <!-- Notes Modal -->
+    <div class="modal fade" id="notesModal" tabindex="-1" aria-labelledby="notesModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="reportModalTitle" data-en="Financial Reports" data-ne="वित्तीय रिपोर्टहरू">Financial Reports</h5>
-                    <button type="button" class="btn-close" id="closeReportModal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="notesModalLabel" data-en="Notes" data-ne="नोटहरू">Notes</h5>
+                    <button type="button" class="btn-close" id="closeModal" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="text" id="financeSearch" class="form-control mb-3" placeholder="Search Finances" data-en="Search Finances" data-ne="वित्त खोज्नुहोस्" aria-label="Search Finances">
-                    <ul class="nav nav-tabs mb-3">
-                        <li class="nav-item">
-                            <a class="nav-link active" id="weeklyReportTab" data-en="Weekly" data-ne="साप्ताहिक" role="tab" aria-selected="true">Weekly</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="monthlyReportTab" data-en="Monthly" data-ne="मासिक" role="tab" aria-selected="false">Monthly</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="yearlyReportTab" data-en="Yearly" data-ne="वार्षिक" role="tab" aria-selected="false">Yearly</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" id="recordsReportTab" data-en="Records" data-ne="रेकर्डहरू" role="tab" aria-selected="false">Records</a>
-                        </li>
-                    </ul>
-                    <div class="report-content" id="reportContent"></div>
+                    <div class="mb-3">
+                        <label for="noteSearch" class="form-label" data-en="Search Notes" data-ne="नोटहरू खोज्नुहोस्">Search Notes</label>
+                        <input type="text" class="form-control" id="noteSearch" placeholder="Search by title">
+                    </div>
+                    <div class="mb-3">
+                        <label for="monthFilter" class="form-label" data-en="Filter by Month" data-ne="महिनाद्वारा फिल्टर गर्नुहोस्">Filter by Month</label>
+                        <select id="monthFilter" class="form-select">
+                            <option value="">All Months</option>
+                        </select>
+                    </div>
+                    <ul id="notesList" class="list-group"></ul>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-danger" id="clearNotes" data-en="Clear All Notes" data-ne="सबै नोटहरू खाली गर्नुहोस्">Clear All Notes</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-en="Close" data-ne="बन्द गर्नुहोस्">Close</button>
                 </div>
             </div>
         </div>
     </div>
-    <div class="modal fade" id="customHolidayModal" tabindex="-1" aria-labelledby="customHolidayModalTitle" role="dialog">
+
+    <!-- Report Modal -->
+    <div class="modal fade" id="reportModal" tabindex="-1" aria-labelledby="reportModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="reportModalLabel" data-en="Financial Reports" data-ne="वित्तीय रिपोर्टहरू">Financial Reports</h5>
+                    <button type="button" class="btn-close" id="closeReportModal" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs mb-3">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="weeklyReportTab" href="#" data-en="Weekly" data-ne="साप्ताहिक">Weekly</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="monthlyReportTab" href="#" data-en="Monthly" data-ne="मासिक">Monthly</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="yearlyReportTab" href="#" data-en="Yearly" data-ne="वार्षिक">Yearly</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="recordsReportTab" href="#" data-en="Records" data-ne="रेकर्डहरू">Records</a>
+                        </li>
+                    </ul>
+                    <div class="mb-3">
+                        <label for="financeSearch" class="form-label" data-en="Search Finances" data-ne="वित्त खोज्नुहोस्">Search Finances</label>
+                        <input type="text" class="form-control" id="financeSearch" placeholder="Search by title or category">
+                    </div>
+                    <div id="reportContent"></div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-en="Close" data-ne="बन्द गर्नुहोस्">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Custom Holiday Modal -->
+    <div class="modal fade" id="customHolidayModal" tabindex="-1" aria-labelledby="customHolidayModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="customHolidayModalTitle" data-en="Add Custom Holiday" data-ne="कस्टम बिदा थप्नुहोस्">Add Custom Holiday</h5>
-                    <button type="button" class="btn-close" id="closeCustomHolidayModal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="customHolidayModalLabel" data-en="Add Custom Holiday" data-ne="कस्टम बिदा थप्नुहोस्">Add Custom Holiday</h5>
+                    <button type="button" class="btn-close" id="closeCustomHolidayModal" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <label for="holidayDate" class="form-label" data-en="Select Date" data-ne="मिति चयन गर्नुहोस्">Select Date</label>
-                        <input type="text" id="holidayDate" class="form-control" placeholder="YYYY-MM-DD" data-en="YYYY-MM-DD" data-ne="YYYY-MM-DD" aria-label="Holiday Date">
+                        <label for="holidayDate" class="form-label" data-en="Date" data-ne="मिति">Date</label>
+                        <input type="date" class="form-control" id="holidayDate">
                     </div>
                     <div class="mb-3">
-                        <label for="holidayName" class="form-label" data-en="Holiday Name" data-ne="बिदाको नाम">Holiday Name</label>
-                        <input type="text" id="holidayName" class="form-control" placeholder="Holiday Name" data-en="Holiday Name" data-ne="बिदाको नाम" aria-label="Holiday Name">
+                        <label for="holidayName" class="form-label" data-en="Holiday Name (English)" data-ne="बिदाको नाम (अंग्रेजी)">Holiday Name (English)</label>
+                        <input type="text" class="form-control" id="holidayName">
                     </div>
                     <div class="mb-3">
                         <label for="holidayNepaliName" class="form-label" data-en="Holiday Name (Nepali)" data-ne="बिदाको नाम (नेपाली)">Holiday Name (Nepali)</label>
-                        <input type="text" id="holidayNepaliName" class="form-control" placeholder="Holiday Name ( Nepali)" data-en="Holiday Name (Nepali)" data-ne="बिदाको नाम (नेपाली)" aria-label="Holiday Nepali Name">
+                        <input type="text" class="form-control" id="holidayNepaliName">
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button id="saveCustomHoliday" class="btn btn-primary" data-en="Save Holiday" data-ne="बिदा बचत गर्नुहोस्" aria-label="Save Holiday">Save Holiday</button>
+                    <button type="button" class="btn btn-secondary" id="closeCustomHolidayModal" data-bs-dismiss="modal" data-en="Close" data-ne="बन्द गर्नुहोस्">Close</button>
+                    <button type="button" class="btn btn-primary" id="saveCustomHoliday" data-en="Save" data-ne="सुरक्षित गर्नुहोस्">Save</button>
                 </div>
             </div>
         </div>
     </div>
-    <div class="modal fade" id="shoppingListModal" tabindex="-1" aria-labelledby="shoppingListModalTitle" role="dialog">
+
+    <!-- Shopping List Modal -->
+    <div class="modal fade" id="shoppingListModal" tabindex="-1" aria-labelledby="shoppingListModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="shoppingListModalTitle" data-en="Shopping List" data-ne="किनमेल सूची">Shopping List</h5>
-                    <button type="button" class="btn-close" id="closeShoppingListModal" aria-label="Close"></button>
+                    <h5 class="modal-title" id="shoppingListModalLabel" data-en="Shopping List" data-ne="किनमेल सूची">Shopping List</h5>
+                    <button type="button" class="btn-close" id="closeShoppingListModal" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <div class="mb-3">
-                        <input type="text" id="newShoppingItem" class="form-control d-inline-block w-75" placeholder="Add Item" data-en="Add Item" data-ne="वस्तु थप्नुहोस्" aria-label="New Shopping Item">
-                        <button id="addShoppingItem" class="btn btn-success" data-en="Add" data-ne="थप्नुहोस्" aria-label="Add Shopping Item">Add</button>
+                        <label for="newShoppingItem" class="form-label" data-en="New Item" data-ne="नयाँ सामान">New Item</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" id="newShoppingItem">
+                            <button class="btn btn-outline-secondary" id="addShoppingItem" data-en="Add" data-ne="थप्नुहोस्">Add</button>
+                        </div>
                     </div>
                     <ul id="shoppingItemsList" class="list-group"></ul>
                 </div>
                 <div class="modal-footer">
-                    <button id="clearShoppingList" class="btn btn-danger" data-en="Clear List" data-ne="सूची खाली गर्नुहोस्" aria-label="Clear Shopping List">Clear List</button>
+                    <button type="button" class="btn btn-danger" id="clearShoppingList" data-en="Clear List" data-ne="सूची खाली गर्नुहोस्">Clear List</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" data-en="Close" data-ne="बन्द गर्नुहोस्">Close</button>
                 </div>
             </div>
         </div>
     </div>
-    <footer class="bg-light text-center">
-        <p class="design-credit">Calendar Concept and Design by Santosh Phuyal</p>
-    </footer>
-    <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-    <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
     <script nonce="OGY1ZmVhYWEtOGRlNy00YjRhLTk4NzEtNjY2OWU2MGNiN2Y2">
         // Calendar data
         const calendarData = {
@@ -429,7 +402,7 @@
                 {name:"Poush",days:30,gregStart:"2025-12-16"},
                 {name:"Magh",days:29,gregStart:"2026-01-15"},
                 {name:"Falgun",days:30,gregStart:"2026-02-13"},
-                {name:"Chaitra",days:31,gregStart:"2026-03-16"}
+                {name:"Chaitra",days:31,gregStart:"2026-03-15"}
             ],
             2083: [
                 {name:"Baishakh",days:31,gregStart:"2026-04-14"},
@@ -590,6 +563,14 @@
         const clearShoppingList = document.getElementById('clearShoppingList');
         const closeShoppingListModal = document.getElementById('closeShoppingListModal');
 
+        // Populate month filter
+        calendarData[currentYear].forEach((month, index) => {
+            let option = document.createElement('option');
+            option.value = index;
+            option.textContent = isNepali ? monthsNepali[index] : month.name;
+            monthFilter.appendChild(option);
+        });
+
         // Utility functions
         function debounce(func, wait) {
             let timeout;
@@ -633,7 +614,7 @@
         }
 
         function formatDate(date) {
-            return date.toISOString * split('T')[0];
+            return date.toISOString().split('T')[0];
         }
 
         function getRecurringDates(note) {
@@ -685,6 +666,12 @@
                 tab.setAttribute('aria-selected', index === currentMonthIndex);
                 tab.textContent = isNepali ? monthsNepali[index] : month.name;
                 if (isNepali) tab.classList.add('nepali');
+                tab.addEventListener('click', () => {
+                    currentMonthIndex = index;
+                    monthTabs.querySelectorAll('.btn').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    renderCalendar();
+                });
                 fragment.appendChild(tab);
             });
             monthTabs.appendChild(fragment);
@@ -832,7 +819,7 @@
             let monthNotes = notes.filter(note => getRecurringDates(note).some(d => d.startsWith(dateStr)) && (note.type === 'income' || note.type === 'expense'));
             monthNotes.forEach(note => {
                 if (note.type === 'income') income += parseFloat(note.title || 0);
-                else expense += parseFloat(note.title || 0);
+                else if (note.type === 'expense') expense += parseFloat(note.title || 0);
             });
             let budget = budgets[dateStr] || 0;
             let variance = budget ? budget - expense : 0;
@@ -870,236 +857,364 @@
             holidayList.innerHTML = '';
             holidayList.appendChild(fragment);
         }
-    const calendarGrid = document.getElementById('calendarGrid');
-    const currentMonth = document.getElementById('currentMonth');
-    const yearFilter = document.getElementById('yearFilter');
-    const todayNepaliDate = document.getElementById('todayNepaliDate');
-    const todayEnglishDate = document.getElementById('todayEnglishDate');
-    const notesList = document.getElementById('notesList');
-    const monthlySummary = document.getElementById('monthlySummary');
-    const holidayList = document.getElementById('holidayList');
-    const notesModal = new bootstrap.Modal(document.getElementById('notesModal'));
-    const reportModal = new bootstrap.Modal(document.getElementById('reportModal'));
-    const shoppingListModal = new bootstrap.Modal(document.getElementById('shoppingListModal'));
-    const noteFormModal = new bootstrap.Modal(document.getElementById('noteFormModal'));
-    const selectedDate = document.getElementById('selectedDate');
-    const noteTitle = document.getElementById('noteTitle');
-    const noteTime = document.getElementById('noteTime');
-    const noteDescription = document.getElementById('noteDescription');
-    const recurring = document.getElementById('recurring');
-    const reminder = document.getElementById('reminder');
-    const entryType = document.getElementById('entryType');
-    const entryCategory = document.getElementById('entryCategory');
-    const categoryManager = document.getElementById('categoryManager');
-    const budgetSection = document.getElementById('budgetSection');
-    const saveNote = document.getElementById('saveNote');
-    const editEntry = document.getElementById('editEntry');
-    const reportContent = document.getElementById('reportContent');
-    const shoppingListContent = document.getElementById('shoppingListContent');
-    const shoppingListInput = document.getElementById('shoppingListInput');
-    const addShoppingItemBtn = document.getElementById('addShoppingItemBtn');
-    const languageToggle = document.getElementById('languageToggle');
-    const monthTabs = document.getElementById('monthTabs');
-    let currentYear = 2082;
-    let currentMonthIndex = 0;
-    let isNepali = false;
-    let notes = [];
-    let shoppingList = [];
-    let customHolidays = [];
-    let categories = ['Food', 'Transport', 'Entertainment', 'Bills', 'Other'];
 
-    function getGregorianDate(year, month, day) {
-        let monthData = calendarData[year][month];
-        let startDate = new Date(monthData.gregStart);
-        let gregDate = new Date(startDate);
-        gregDate.setDate(startDate.getDate() + day - 1);
-        return gregDate;
-    }
+        function renderNotesList() {
+            notesList.innerHTML = '';
+            let filteredNotes = notes.filter(note => getRecurringDates(note).includes(selectedDate.textContent));
+            filteredNotes.forEach((note, index) => {
+                let li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                let noteText = note.type === 'note' 
+                    ? `${note.title}${note.time ? ` (${note.time})` : ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}${note.reminder ? (isNepali ? ' (रिमाइन्डर)' : ' (Reminder)') : ''}`
+                    : `${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR${note.category ? ` (${note.category})` : ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}`;
+                li.textContent = noteText;
 
-    function getBSDateFromGregorian(gregDate) {
-        let gregStr = gregDate.toISOString().split('T')[0];
-        for (let year in calendarData) {
-            for (let month = 0; month < 12; month++) {
-                let monthData = calendarData[year][month];
-                let startDate = new Date(monthData.gregStart);
-                let endDate = new Date(startDate);
-                endDate.setDate(startDate.getDate() + monthData.days - 1);
-                let startStr = startDate.toISOString().split('T')[0];
-                let endStr = endDate.toISOString().split('T')[0];
-                if (gregStr >= startStr && gregStr <= endStr) {
-                    let day = Math.floor((gregDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
-                    return { year: parseInt(year), month: month, day: day };
-                }
+                let btnGroup = document.createElement('div');
+                let editBtn = document.createElement('button');
+                editBtn.className = 'btn btn-sm btn-outline-primary me-2';
+                editBtn.textContent = isNepali ? 'सम्पादन' : 'Edit';
+                editBtn.addEventListener('click', () => {
+                    editingNoteIndex = index;
+                    selectedDate.textContent = note.date;
+                    entryType.value = note.type;
+                    noteTitle.value = note.title;
+                    noteTime.value = note.time || '';
+                    noteDescription.value = note.description || '';
+                    recurring.checked = note.recurring || false;
+                    reminder.checked = note.reminder || false;
+                    entryCategory.style.display = note.type === 'note' ? 'none' : 'block';
+                    categoryManager.style.display = note.type === 'note' ? 'none' : 'block';
+                    budgetSection.style.display = 'none';
+                    saveNote.style.display = 'none';
+                    editEntry.style.display = 'block';
+                    noteFormModal.show();
+                    noteTitle.focus();
+                });
+
+                let deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn btn-sm btn-outline-danger';
+                deleteBtn.textContent = isNepali ? 'हटाउनुहोस्' : 'Delete';
+                deleteBtn.addEventListener('click', () => {
+                    undoStack.push({ action: 'delete', note: notes[index], index });
+                    notes.splice(index, 1);
+                    localStorage.setItem('notes', JSON.stringify(notes));
+                    renderNotesList();
+                    renderCalendar();
+                });
+
+                btnGroup.appendChild(editBtn);
+                btnGroup.appendChild(deleteBtn);
+                li.appendChild(btnGroup);
+                notesList.appendChild(li);
+            });
+
+            if (filteredNotes.length === 0) {
+                let li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.textContent = isNepali ? 'कुनै नोटहरू छैनन्' : 'No notes available';
+                notesList.appendChild(li);
             }
         }
-        return null;
-    }
 
-    function getRecurringDates(note) {
-        let dates = [note.date];
-        if (note.recurring) {
-            let [year, month, day] = note.date.split('-').map(Number);
-            for (let y = year; y <= 2082; y++) {
-                for (let m = (y === year ? month : 1); m <= 12; m++) {
-                    if (y === year && m === month) continue;
-                    let daysInMonth = calendarData[y]?.[m - 1]?.days || 30;
-                    if (day <= daysInMonth) {
-                        dates.push(`${y}-${String(m).padStart(2, '0')}-${String(day).padStart(2, '0')}`);
+        function renderReport(type) {
+            reportContent.innerHTML = '';
+            let reportData = [];
+            if (type === 'weekly') {
+                let weeks = {};
+                notes.forEach(note => {
+                    let [year, month, day] = note.date.split('-').map(Number);
+                    if (year === currentYear && month - 1 === currentMonthIndex) {
+                        let gregDate = getGregorianDate(year, month - 1, day);
+                        let weekNumber = Math.ceil((gregDate.getDate() + (new Date(gregDate.getFullYear(), gregDate.getMonth(), 1).getDay())) / 7);
+                        if (!weeks[weekNumber]) weeks[weekNumber] = { income: 0, expense: 0 };
+                        if (note.type === 'income') weeks[weekNumber].income += parseFloat(note.title);
+                        else if (note.type === 'expense') weeks[weekNumber].expense += parseFloat(note.title);
                     }
+                });
+                for (let week in weeks) {
+                    reportData.push(`${isNepali ? `हप्ता ${week}` : `Week ${week}`}: ${isNepali ? 'आय' : 'Income'}: ${weeks[week].income} NPR, ${isNepali ? 'खर्च' : 'Expense'}: ${weeks[week].expense} NPR`);
+                }
+            } else if (type === 'monthly') {
+                let months = {};
+                notes.forEach(note => {
+                    let [year, month] = note.date.split('-').map(Number);
+                    if (year === currentYear) {
+                        if (!months[month]) months[month] = { income: 0, expense: 0 };
+                        if (note.type === 'income') months[month].income += parseFloat(note.title);
+                        else if (note.type === 'expense') months[month].expense += parseFloat(note.title);
+                    }
+                });
+                for (let month in months) {
+                    reportData.push(`${isNepali ? monthsNepali[month - 1] : calendarData[currentYear][month - 1].name}: ${isNepali ? 'आय' : 'Income'}: ${months[month].income} NPR, ${isNepali ? 'खर्च' : 'Expense'}: ${months[month].expense} NPR`);
+                }
+            } else if (type === 'yearly') {
+                let years = {};
+                notes.forEach(note => {
+                    let [year] = note.date.split('-').map(Number);
+                    if (!years[year]) years[year] = { income: 0, expense: 0 };
+                    if (note.type === 'income') years[year].income += parseFloat(note.title);
+                    else if (note.type === 'expense') years[year].expense += parseFloat(note.title);
+                });
+                for (let year in years) {
+                    reportData.push(`${year} BS: ${isNepali ? 'आय' : 'Income'}: ${years[year].income} NPR, ${isNepali ? 'खर्च' : 'Expense'}: ${years[year].expense} NPR`);
                 }
             }
-        }
-        return dates;
-    }
 
-    function renderMonthTabs() {
-        monthTabs.innerHTML = '';
-        const fragment = document.createDocumentFragment();
-        calendarData[currentYear].forEach((month, index) => {
-            let tab = document.createElement('button');
-            tab.className = `nav-link ${index === currentMonthIndex ? 'active' : ''}`;
-            tab.textContent = isNepali ? monthsNepali[index] : month.name;
-            tab.addEventListener('click', () => {
-                currentMonthIndex = index;
-                monthTabs.querySelectorAll('.nav-link').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
+            if (reportData.length === 0) {
+                reportContent.textContent = isNepali ? 'कुनै डाटा छैन' : 'No data available';
+            } else {
+                reportData.forEach(line => {
+                    let p = document.createElement('p');
+                    p.textContent = line;
+                    reportContent.appendChild(p);
+                });
+            }
+        }
+
+        function renderFinancialRecords() {
+            reportContent.innerHTML = '';
+            let finances = notes.filter(note => note.type === 'income' || note.type === 'expense');
+            if (finances.length === 0) {
+                reportContent.textContent = isNepali ? 'कुनै वित्तीय रेकर्ड छैन' : 'No financial records available';
+            } else {
+                finances.forEach(note => {
+                    let p = document.createElement('p');
+                    p.textContent = `${note.date}: ${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR${note.category ? ` (${note.category})` : ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}`;
+                    reportContent.appendChild(p);
+                });
+            }
+        }
+
+        function renderShoppingList() {
+            shoppingItemsList.innerHTML = '';
+            shoppingList.forEach((item, index) => {
+                let li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                let textSpan = document.createElement('span');
+                textSpan.textContent = item.text || item;
+                textSpan.style.textDecoration = item.completed ? 'line-through' : 'none';
+
+                let btnGroup = document.createElement('div');
+                let toggleBtn = document.createElement('button');
+                toggleBtn.className = 'btn btn-sm btn-outline-success me-2';
+                toggleBtn.textContent = item.completed ? (isNepali ? 'अनडु' : 'Undo') : (isNepali ? 'पूरा' : 'Done');
+                toggleBtn.addEventListener('click', () => {
+                    shoppingList[index].completed = !shoppingList[index].completed;
+                    localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+                    renderShoppingList();
+                });
+
+                let deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn btn-sm btn-outline-danger';
+                deleteBtn.textContent = isNepali ? 'हटाउनुहोस्' : 'Delete';
+                deleteBtn.addEventListener('click', () => {
+                    shoppingList.splice(index, 1);
+                    localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+                    renderShoppingList();
+                });
+
+                btnGroup.appendChild(toggleBtn);
+                btnGroup.appendChild(deleteBtn);
+                li.appendChild(textSpan);
+                li.appendChild(btnGroup);
+                shoppingItemsList.appendChild(li);
+            });
+
+            if (shoppingList.length === 0) {
+                let li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.textContent = isNepali ? 'कुनै सामानहरू छैनन्' : 'No items in the shopping list';
+                shoppingItemsList.appendChild(li);
+            }
+        }
+
+        function exportToExcel(type) {
+            if (typeof XLSX === 'undefined') {
+                alert(isNepali ? 'Excel निर्यात असफल: XLSX पुस्तकालय लोड भएन' : 'Excel export failed: XLSX library not loaded');
+                return;
+            }
+            let data = [];
+            let filename = '';
+            if (type === 'note') {
+                filename = 'notes.xlsx';
+                data = notes.filter(note => note.type === 'note').map(note => ({
+                    Date: note.date,
+                    Title: note.title,
+                    Description: note.description,
+                    Time: note.time || '',
+                    Recurring: note.recurring ? 'Yes' : 'No',
+                    Reminder: note.reminder ? 'Yes' : 'No'
+                }));
+            } else if (type === 'finance') {
+                filename = 'finances.xlsx';
+                data = notes.filter(note => note.type === 'income' || note.type === 'expense').map(note => ({
+                    Date: note.date,
+                    Type: note.type,
+                    Amount: note.title,
+                    Category: note.category || '',
+                    Description: note.description || '',
+                    Time: note.time || '',
+                    Recurring: note.recurring ? 'Yes' : 'No'
+                }));
+            } else if (type === 'calendar') {
+                filename = 'calendar.xlsx';
+                let days = [];
+                let month = calendarData[currentYear][currentMonthIndex];
+                for (let day = 1; day <= month.days; day++) {
+                    let dateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    let gregDate = getGregorianDate(currentYear, currentMonthIndex, day);
+                    let dayNotes = notes.filter(note => getRecurringDates(note).includes(dateStr));
+                    let holiday = holidays[currentYear]?.find(h => h.month === currentMonthIndex && h.day === day);
+                    let customHoliday = customHolidays.find(ch => ch.date === dateStr);
+                    days.push({
+                        Date: dateStr,
+                        Gregorian: gregDate.toISOString().split('T')[0],
+                        Notes: dayNotes.filter(n => n.type === 'note').map(n => n.title).join('; ') || '',
+                        Income: dayNotes.filter(n => n.type === 'income').map(n => n.title).join('; ') || '',
+                        Expense: dayNotes.filter(n => n.type === 'expense').map(n => n.title).join('; ') || '',
+                        Holiday: holiday ? (isNepali ? holiday.nepali : holiday.name) : (customHoliday ? (isNepali ? customHoliday.nepali : customHoliday.name) : '')
+                    });
+                }
+                data = days;
+            } else if (type === 'holiday') {
+                filename = 'holidays.xlsx';
+                let allHolidays = [];
+                Object.keys(holidays).forEach(year => {
+                    holidays[year].forEach(h => {
+                        allHolidays.push({
+                            Year: year,
+                            Month: calendarData[year][h.month].name,
+                            Day: h.day,
+                            Name: h.name,
+                            NepaliName: h.nepali
+                        });
+                    });
+                });
+                customHolidays.forEach(ch => {
+                    let [year, month] = ch.date.split('-').map(Number);
+                    allHolidays.push({
+                        Year: year,
+                        Month: calendarData[year][month - 1].name,
+                        Day: parseInt(ch.date.split('-')[2]),
+                        Name: ch.name,
+                        NepaliName: ch.nepali
+                    });
+                });
+                data = allHolidays;
+            }
+            if (data.length === 0) {
+                alert(isNepali ? 'निर्यात गर्न डाटा छैन' : 'No data to export');
+                return;
+            }
+            let ws = XLSX.utils.json_to_sheet(data);
+            let wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+            XLSX.writeFile(wb, filename);
+        }
+
+        function exportToPDF(type) {
+            if (typeof window.jspdf === 'undefined') {
+                alert(isNepali ? 'PDF निर्यात असफल: jsPDF पुस्तकालय लोड भएन' : 'PDF export failed: jsPDF library not loaded');
+                return;
+            }
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            let content = '';
+            if (type === 'note') {
+                content = (isNepali ? 'नोटहरू\n\n' : 'Notes\n\n') + notes.filter(note => note.type === 'note').map(note => (
+                    `${note.date}: ${note.title}\n${note.description}\n${note.time || ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}${note.reminder ? (isNepali ? ' (रिमाइन्डर)' : ' (Reminder)') : ''}\n\n`
+                )).join('');
+            } else if (type === 'finance') {
+                content = (isNepali ? 'वित्त\n\n' : 'Finances\n\n') + notes.filter(note => note.type === 'income' || note.type === 'expense').map(note => (
+                    `${note.date}: ${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR\n${note.category || ''}\n${note.description || ''}\n${note.time || ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}\n\n`
+                )).join('');
+            } else if (type === 'calendar') {
+                let month = calendarData[currentYear][currentMonthIndex];
+                content = (isNepali ? `${monthsNepali[currentMonthIndex]} ${currentYear} BS\n\n` : `${month.name} ${currentYear} BS\n\n`);
+                for (let day = 1; day <= month.days; day++) {
+                    let dateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                    let gregDate = getGregorianDate(currentYear, currentMonthIndex, day);
+                    let dayNotes = notes.filter(note => getRecurringDates(note).includes(dateStr));
+                    let holiday = holidays[currentYear]?.find(h => h.month === currentMonthIndex && h.day === day);
+                    let customHoliday = customHolidays.find(ch => ch.date === dateStr);
+                    content += `${dateStr} (${gregDate.toISOString().split('T')[0]}):\n`;
+                    if (holiday) content += `  ${isNepali ? holiday.nepali : holiday.name}\n`;
+                    else if (customHoliday) content += `  ${isNepali ? customHoliday.nepali : customHoliday.name}\n`;
+                    dayNotes.forEach(note => {
+                        if (note.type === 'note') content += `  Note: ${note.title}\n`;
+                        else if (note.type === 'income') content += `  Income: ${note.title} NPR\n`;
+                        else if (note.type === 'expense') content += `  Expense: ${note.title} NPR\n`;
+                    });
+                    content += '\n';
+                }
+            }
+            if (!content) {
+                alert(isNepali ? 'निर्यात गर्न डाटा छैन' : 'No data to export');
+                return;
+            }
+            doc.text(content, 10, 10);
+            doc.save(`${type}.pdf`);
+        }
+
+        function toggleLanguage() {
+            isNepali = !isNepali;
+            document.querySelectorAll('[data-en][data-ne]').forEach(elem => {
+                elem.textContent = isNepali ? elem.dataset.ne : elem.dataset.en;
+                if (isNepali) {
+                    elem.classList.add('nepali');
+                } else {
+                    elem.classList.remove('nepali');
+                }
+            });
+            renderMonthTabs();
+            renderCalendar();
+            renderMonthlySummary();
+            renderHolidays();
+            if (notesModal._element.classList.contains('show')) {
+                renderNotesList();
+            }
+            if (reportModal._element.classList.contains('show')) {
+                if (weeklyReportTab.classList.contains('active')) renderReport('weekly');
+                else if (monthlyReportTab.classList.contains('active')) renderReport('monthly');
+                else if (yearlyReportTab.classList.contains('active')) renderReport('yearly');
+                else renderFinancialRecords();
+            }
+            if (shoppingListModal._element.classList.contains('show')) {
+                renderShoppingList();
+            }
+        }
+
+        function setToday() {
+            let today = new Date();
+            let bsDate = getBSDateFromGregorian(today);
+            if (bsDate) {
+                currentYear = bsDate.year;
+                currentMonthIndex = bsDate.month;
+                yearFilter.value = currentYear;
+                todayNepaliDate.textContent = `${bsDate.day} ${monthsNepali[bsDate.month]} ${bsDate.year} BS`;
+                todayEnglishDate.textContent = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
+                renderMonthTabs();
                 renderCalendar();
-            });
-            fragment.appendChild(tab);
-        });
-        monthTabs.appendChild(fragment);
-    }
-
-    function setToday() {
-        let today = new Date();
-        let bsDate = getBSDateFromGregorian(today);
-        if (bsDate) {
-            currentYear = bsDate.year;
-            currentMonthIndex = bsDate.month;
-            yearFilter.value = currentYear;
-            todayNepaliDate.textContent = `${bsDate.day} ${monthsNepali[bsDate.month]} ${bsDate.year} BS`;
-            todayEnglishDate.textContent = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-            renderMonthTabs();
-            renderCalendar();
-        } else {
-            console.error('Could not set today\'s date, falling back to default');
-            currentYear = 2082;
-            currentMonthIndex = 0;
-            yearFilter.value = currentYear;
-            todayNepaliDate.textContent = 'N/A';
-            todayEnglishDate.textContent = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-            renderMonthTabs();
-            renderCalendar();
-        }
-    }
-
-    function renderCalendar() {
-        let month = calendarData[currentYear]?.[currentMonthIndex];
-        if (!month) {
-            console.error('Invalid month data');
-            currentMonth.textContent = isNepali ? 'त्रुटि: अमान्य महिना' : 'Error: Invalid Month';
-            return;
-        }
-        currentMonth.textContent = isNepali 
-            ? `${monthsNepali[currentMonthIndex]} ${currentYear} BS` 
-            : `${month.name} ${currentYear} BS`;
-        const fragment = document.createDocumentFragment();
-
-        const weekdays = isNepali ? daysNepali : daysEnglish;
-        weekdays.forEach(day => {
-            let dayHeader = document.createElement('div');
-            dayHeader.className = 'calendar-day bg-primary text-white text-center py-2';
-            dayHeader.textContent = day;
-            fragment.appendChild(dayHeader);
-        });
-
-        let startDate = new Date(month.gregStart);
-        let firstDay = startDate.getDay();
-        let today = new Date();
-        let todayBS = getBSDateFromGregorian(today);
-
-        for (let i = 0; i < firstDay; i++) {
-            let emptyDay = document.createElement('div');
-            emptyDay.className = 'calendar-day bg-light';
-            fragment.appendChild(emptyDay);
-        }
-
-        console.log(`Rendering ${month.days} days for ${month.name} ${currentYear}`);
-        for (let day = 1; day <= month.days; day++) {
-            let gregDate = getGregorianDate(currentYear, currentMonthIndex, day);
-            let dayDiv = document.createElement('div');
-            dayDiv.className = `calendar-day bg-white border p-2 ${todayBS && todayBS.year === currentYear && todayBS.month === currentMonthIndex && todayBS.day === day ? 'today' : ''}`;
-            dayDiv.setAttribute('role', 'gridcell');
-            dayDiv.setAttribute('tabindex', '0');
-            if (gregDate.getDay() === 6) dayDiv.classList.add('saturday');
-
-            let dateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            let holiday = holidays[currentYear]?.find(h => h.month === currentMonthIndex && h.day === day);
-            let customHoliday = customHolidays.find(ch => ch.date === dateStr);
-
-            if (holiday) {
-                dayDiv.classList.add('holiday');
-                let festivalDiv = document.createElement('div');
-                festivalDiv.className = 'festival';
-                festivalDiv.textContent = isNepali ? holiday.nepali : holiday.name;
-                dayDiv.appendChild(festivalDiv);
-
-                let tooltip = document.createElement('div');
-                tooltip.className = 'festival-tooltip';
-                tooltip.textContent = isNepali ? holiday.nepali : holiday.name;
-                dayDiv.appendChild(tooltip);
-            } else if (customHoliday) {
-                dayDiv.classList.add('custom-holiday');
-                let festivalDiv = document.createElement('div');
-                festivalDiv.className = 'festival';
-                festivalDiv.textContent = isNepali ? customHoliday.nepali : customHoliday.name;
-                dayDiv.appendChild(festivalDiv);
-
-                let tooltip = document.createElement('div');
-                tooltip.className = 'festival-tooltip';
-                tooltip.textContent = isNepali ? customHoliday.nepali : customHoliday.name;
-                dayDiv.appendChild(tooltip);
             }
+        }
 
-            let bsDate = document.createElement('div');
-            bsDate.className = 'bs-date';
-            bsDate.textContent = isNepali ? (day).toString() : day;
-            dayDiv.appendChild(bsDate);
+        // Event listeners
+        yearFilter.addEventListener('change', () => {
+            currentYear = parseInt(yearFilter.value);
+            currentMonthIndex = 0;
+            renderMonthTabs();
+            renderCalendar();
+        });
 
-            let gregDateDiv = document.createElement('div');
-            gregDateDiv.className = 'greg-date';
-            gregDateDiv.textContent = gregDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-            dayDiv.appendChild(gregDateDiv);
+        todayButton.addEventListener('click', setToday);
 
-            let dayNotes = notes.filter(note => getRecurringDates(note).includes(dateStr));
-            dayNotes.forEach(note => {
-                let indicator = document.createElement('div');
-                let tooltip = document.createElement('div');
-                let preview = document.createElement('div');
-                preview.className = 'event-preview';
-                if (note.type === 'note') {
-                    indicator.className = 'note-indicator';
-                    tooltip.className = 'note-tooltip';
-                    tooltip.textContent = note.title;
-                    preview.textContent = note.title.substring(0, 15) + (note.title.length > 15 ? '...' : '');
-                } else if (note.type === 'income') {
-                    indicator.className = 'income-indicator';
-                    tooltip.className = 'finance-tooltip';
-                    tooltip.textContent = `Income: ${note.title} NPR`;
-                    preview.textContent = `+${note.title} NPR`;
-                } else if (note.type === 'expense') {
-                    indicator.className = 'expense-indicator';
-                    tooltip.className = 'finance-tooltip';
-                    tooltip.textContent = `Expense: ${note.title} NPR`;
-                    preview.textContent = `-${note.title} NPR`;
-                }
-                dayDiv.appendChild(indicator);
-                dayDiv.appendChild(tooltip);
-                dayDiv.appendChild(preview);
-            });
+        languageToggle.addEventListener('click', toggleLanguage);
 
-            dayDiv.addEventListener('click', () => {
-                selectedDate.textContent = dateStr;
+        addNote.addEventListener('click', () => {
+            let today = new Date();
+            let bsDate = getBSDateFromGregorian(today);
+            if (bsDate) {
+                selectedDate.textContent = `${bsDate.year}-${String(bsDate.month + 1).padStart(2, '0')}-${String(bsDate.day).padStart(2, '0')}`;
                 entryType.value = 'note';
                 noteTitle.value = '';
                 noteTime.value = '';
@@ -1113,571 +1228,454 @@
                 editEntry.style.display = 'none';
                 noteFormModal.show();
                 noteTitle.focus();
-            });
-
-            dayDiv.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                    dayDiv.click();
-                }
-            });
-
-            fragment.appendChild(dayDiv);
-        }
-
-        calendarGrid.innerHTML = '';
-        calendarGrid.appendChild(fragment);
-        renderMonthlySummary();
-        renderHolidays();
-    }
-
-    function renderMonthlySummary() {
-        let totalIncome = 0, totalExpense = 0, totalBudget = 0;
-        let monthNotes = notes.filter(note => {
-            let [year, month] = note.date.split('-').map(Number);
-            return year === currentYear && month - 1 === currentMonthIndex;
+            }
         });
 
-        monthNotes.forEach(note => {
-            if (note.type === 'income') totalIncome += parseFloat(note.title);
-            else if (note.type === 'expense') totalExpense += parseFloat(note.title);
-        });
-
-        let budget = monthNotes.find(note => note.type === 'budget');
-        if (budget) totalBudget = parseFloat(budget.title);
-
-        monthlySummary.innerHTML = `
-            <p>${isNepali ? 'आय' : 'Income'}: ${totalIncome} NPR</p>
-            <p>${isNepali ? 'खर्च' : 'Expense'}: ${totalExpense} NPR</p>
-            <p>${isNepali ? 'बजेट' : 'Budget'}: ${totalBudget} NPR</p>
-            <p>${isNepali ? 'बचत' : 'Savings'}: ${totalBudget - totalExpense} NPR</p>
-        `;
-    }
-
-    function renderHolidays() {
-        holidayList.innerHTML = '';
-        let monthHolidays = holidays[currentYear]?.filter(h => h.month === currentMonthIndex) || [];
-        let monthCustomHolidays = customHolidays.filter(ch => {
-            let [year, month] = ch.date.split('-').map(Number);
-            return year === currentYear && month - 1 === currentMonthIndex;
-        });
-
-        let allHolidays = [...monthHolidays, ...monthCustomHolidays.map(ch => ({
-            day: parseInt(ch.date.split('-')[2]),
-            name: ch.name,
-            nepali: ch.nepali
-        }))].sort((a, b) => a.day - b.day);
-
-        allHolidays.forEach(h => {
-            let li = document.createElement('li');
-            li.textContent = `${h.day} ${isNepali ? h.nepali : h.name}`;
-            holidayList.appendChild(li);
-        });
-
-        if (allHolidays.length === 0) {
-            let li = document.createElement('li');
-            li.textContent = isNepali ? 'यो महिना कुनै बिदा छैन' : 'No holidays this month';
-            holidayList.appendChild(li);
-        }
-    }
-
-    function renderNotesList() {
-        notesList.innerHTML = '';
-        let filteredNotes = notes.filter(note => getRecurringDates(note).includes(selectedDate.textContent));
-        filteredNotes.forEach((note, index) => {
-            let li = document.createElement('li');
-            li.className = 'list-group-item d-flex justify-content-between align-items-center';
-            let noteText = note.type === 'note' 
-                ? `${note.title}${note.time ? ` (${note.time})` : ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}${note.reminder ? (isNepali ? ' (रिमाइन्डर)' : ' (Reminder)') : ''}`
-                : `${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR${note.category ? ` (${note.category})` : ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}`;
-            li.textContent = noteText;
-
-            let btnGroup = document.createElement('div');
-            let editBtn = document.createElement('button');
-            editBtn.className = 'btn btn-sm btn-outline-primary me-2';
-            editBtn.textContent = isNepali ? 'सम्पादन' : 'Edit';
-            editBtn.addEventListener('click', () => {
-                selectedDate.textContent = note.date;
-                entryType.value = note.type;
-                noteTitle.value = note.title;
-                noteTime.value = note.time || '';
-                noteDescription.value = note.description || '';
-                recurring.checked = note.recurring || false;
-                reminder.checked = note.reminder || false;
-                entryCategory.style.display = note.type === 'note' ? 'none' : 'block';
-                categoryManager.style.display = note.type === 'note' ? 'none' : 'block';
+        addFinance.addEventListener('click', () => {
+            let today = new Date();
+            let bsDate = getBSDateFromGregorian(today);
+            if (bsDate) {
+                selectedDate.textContent = `${bsDate.year}-${String(bsDate.month + 1).padStart(2, '0')}-${String(bsDate.day).padStart(2, '0')}`;
+                entryType.value = 'income';
+                noteTitle.value = '';
+                noteTime.value = '';
+                noteDescription.value = '';
+                recurring.checked = false;
+                reminder.checked = false;
+                entryCategory.style.display = 'block';
+                categoryManager.style.display = 'block';
                 budgetSection.style.display = 'none';
-                saveNote.style.display = 'none';
-                editEntry.style.display = 'block';
-                editEntry.dataset.index = index;
+                saveNote.style.display = 'block';
+                editEntry.style.display = 'none';
                 noteFormModal.show();
                 noteTitle.focus();
+            }
+        });
+
+        entryType.addEventListener('change', () => {
+            if (entryType.value === 'note') {
+                entryCategory.style.display = 'none';
+                categoryManager.style.display = 'none';
+                budgetSection.style.display = 'none';
+            } else if (entryType.value === 'budget') {
+                entryCategory.style.display = 'none';
+                categoryManager.style.display = 'none';
+                budgetSection.style.display = 'block';
+            } else {
+                entryCategory.style.display = 'block';
+                categoryManager.style.display = 'block';
+                budgetSection.style.display = 'none';
+            }
+        });
+
+        addCategory.addEventListener('click', () => {
+            let category = newCategory.value.trim();
+            if (category && !customCategories.includes(category)) {
+                customCategories.push(category);
+                localStorage.setItem('customCategories', JSON.stringify(customCategories));
+                let option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                document.getElementById('category').appendChild(option);
+                newCategory.value = '';
+            }
+        });
+
+        saveNote.addEventListener('click', () => {
+            if (!noteTitle.value.trim()) {
+                alert(isNepali ? 'कृपया शीर्षक प्रविष्ट गर्नुहोस्' : 'Please enter a title/amount');
+                return;
+            }
+            let note = {
+                date: selectedDate.textContent,
+                type: entryType.value,
+                title: noteTitle.value.trim(),
+                time: noteTime.value,
+                description: noteDescription.value.trim(),
+                category: entryType.value === 'note' ? null : document.getElementById('category').value,
+                recurring: recurring.checked,
+                reminder: reminder.checked
+            };
+            if (entryType.value === 'budget') {
+                let dateStr = `${note.date.split('-')[0]}-${note.date.split('-')[1]}`;
+                budgets[dateStr] = parseFloat(noteTitle.value) || 0;
+                localStorage.setItem('budgets', JSON.stringify(budgets));
+            } else {
+                undoStack.push({ action: 'add', note });
+                notes.push(note);
+                localStorage.setItem('notes', JSON.stringify(notes));
+            }
+            renderCalendar();
+            noteFormModal.hide();
+        });
+
+        editEntry.addEventListener('click', () => {
+            if (!noteTitle.value.trim()) {
+                alert(isNepali ? 'कृपया शीर्षक प्रविष्ट गर्नुहोस्' : 'Please enter a title/amount');
+                return;
+            }
+            let oldNote = notes[editingNoteIndex];
+            let updatedNote = {
+                date: selectedDate.textContent,
+                type: entryType.value,
+                title: noteTitle.value.trim(),
+                time: noteTime.value,
+                description: noteDescription.value.trim(),
+                category: entryType.value === 'note' ? null : document.getElementById('category').value,
+                recurring: recurring.checked,
+                reminder: reminder.checked
+            };
+            undoStack.push({ action: 'edit', oldNote, index: editingNoteIndex });
+            notes[editingNoteIndex] = updatedNote;
+            localStorage.setItem('notes', JSON.stringify(notes));
+            renderNotesList();
+            renderCalendar();
+            noteFormModal.hide();
+            editingNoteIndex = null;
+        });
+
+        closeEntry.addEventListener('click', () => {
+            editingNoteIndex = null;
+        });
+
+        viewNotes.addEventListener('click', () => {
+            let today = new Date();
+            let bsDate = getBSDateFromGregorian(today);
+            if (bsDate) {
+                selectedDate.textContent = `${bsDate.year}-${String(bsDate.month + 1).padStart(2, '0')}-${String(bsDate.day).padStart(2, '0')}`;
+            }
+            renderNotesList();
+            notesModal.show();
+        });
+
+        noteSearch.addEventListener('input', debounce(() => {
+            let searchTerm = noteSearch.value.toLowerCase();
+            let filteredNotes = notes.filter(note => note.title.toLowerCase().includes(searchTerm));
+            notesList.innerHTML = '';
+            filteredNotes.forEach((note, index) => {
+                let li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                let noteText = note.type === 'note' 
+                    ? `${note.title}${note.time ? ` (${note.time})` : ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}${note.reminder ? (isNepali ? ' (रिमाइन्डर)' : ' (Reminder)') : ''}`
+                    : `${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR${note.category ? ` (${note.category})` : ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}`;
+                li.textContent = noteText;
+
+                let btnGroup = document.createElement('div');
+                let editBtn = document.createElement('button');
+                editBtn.className = 'btn btn-sm btn-outline-primary me-2';
+                editBtn.textContent = isNepali ? 'सम्पादन' : 'Edit';
+                editBtn.addEventListener('click', () => {
+                    editingNoteIndex = index;
+                    selectedDate.textContent = note.date;
+                    entryType.value = note.type;
+                    noteTitle.value = note.title;
+                    noteTime.value = note.time || '';
+                    noteDescription.value = note.description || '';
+                    recurring.checked = note.recurring || false;
+                    reminder.checked = note.reminder || false;
+                    entryCategory.style.display = note.type === 'note' ? 'none' : 'block';
+                    categoryManager.style.display = note.type === 'note' ? 'none' : 'block';
+                    budgetSection.style.display = 'none';
+                    saveNote.style.display = 'none';
+                    editEntry.style.display = 'block';
+                    noteFormModal.show();
+                    noteTitle.focus();
+                });
+
+                let deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn btn-sm btn-outline-danger';
+                deleteBtn.textContent = isNepali ? 'हटाउनुहोस्' : 'Delete';
+                deleteBtn.addEventListener('click', () => {
+                    undoStack.push({ action: 'delete', note: notes[index], index });
+                    notes.splice(index, 1);
+                    localStorage.setItem('notes', JSON.stringify(notes));
+                    renderNotesList();
+                    renderCalendar();
+                });
+
+                btnGroup.appendChild(editBtn);
+                btnGroup.appendChild(deleteBtn);
+                li.appendChild(btnGroup);
+                notesList.appendChild(li);
             });
 
-            let deleteBtn = document.createElement('button');
-            deleteBtn.className = 'btn btn-sm btn-outline-danger';
-            deleteBtn.textContent = isNepali ? 'हटाउनुहोस्' : 'Delete';
-            deleteBtn.addEventListener('click', () => {
-                notes.splice(index, 1);
+            if (filteredNotes.length === 0) {
+                let li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.textContent = isNepali ? 'कुनै नोटहरू छैनन्' : 'No notes available';
+                notesList.appendChild(li);
+            }
+        }, 300));
+
+        monthFilter.addEventListener('change', () => {
+            let filteredNotes = notes;
+            if (monthFilter.value) {
+                let month = parseInt(monthFilter.value) + 1;
+                filteredNotes = notes.filter(note => getRecurringDates(note).some(d => d.split('-')[1] === String(month).padStart(2, '0')));
+            }
+            notesList.innerHTML = '';
+            filteredNotes.forEach((note, index) => {
+                let li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                let noteText = note.type === 'note' 
+                    ? `${note.title}${note.time ? ` (${note.time})` : ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}${note.reminder ? (isNepali ? ' (रिमाइन्डर)' : ' (Reminder)') : ''}`
+                    : `${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR${note.category ? ` (${note.category})` : ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}`;
+                li.textContent = noteText;
+
+                let btnGroup = document.createElement('div');
+                let editBtn = document.createElement('button');
+                editBtn.className = 'btn btn-sm btn-outline-primary me-2';
+                editBtn.textContent = isNepali ? 'सम्पादन' : 'Edit';
+                editBtn.addEventListener('click', () => {
+                    editingNoteIndex = index;
+                    selectedDate.textContent = note.date;
+                    entryType.value = note.type;
+                    noteTitle.value = note.title;
+                    noteTime.value = note.time || '';
+                    noteDescription.value = note.description || '';
+                    recurring.checked = note.recurring || false;
+                    reminder.checked = note.reminder || false;
+                    entryCategory.style.display = note.type === 'note' ? 'none' : 'block';
+                    categoryManager.style.display = note.type === 'note' ? 'none' : 'block';
+                    budgetSection.style.display = 'none';
+                    saveNote.style.display = 'none';
+                    editEntry.style.display = 'block';
+                    noteFormModal.show();
+                    noteTitle.focus();
+                });
+
+                let deleteBtn = document.createElement('button');
+                deleteBtn.className = 'btn btn-sm btn-outline-danger';
+                deleteBtn.textContent = isNepali ? 'हटाउनुहोस्' : 'Delete';
+                deleteBtn.addEventListener('click', () => {
+                    undoStack.push({ action: 'delete', note: notes[index], index });
+                    notes.splice(index, 1);
+                    localStorage.setItem('notes', JSON.stringify(notes));
+                    renderNotesList();
+                    renderCalendar();
+                });
+
+                btnGroup.appendChild(editBtn);
+                btnGroup.appendChild(deleteBtn);
+                li.appendChild(btnGroup);
+                notesList.appendChild(li);
+            });
+
+            if (filteredNotes.length === 0) {
+                let li = document.createElement('li');
+                li.className = 'list-group-item';
+                li.textContent = isNepali ? 'कुनै नोटहरू छैनन्' : 'No notes available';
+                notesList.appendChild(li);
+            }
+        });
+
+        clearNotes.addEventListener('click', () => {
+            if (confirm(isNepali ? 'के तपाईं सबै नोटहरू खाली गर्न चाहनुहुन्छ?' : 'Are you sure you want to clear all notes?')) {
+                undoStack.push({ action: 'clear', notes: [...notes] });
+                notes = [];
+                localStorage.setItem('notes', JSON.stringify(notes));
                 renderNotesList();
                 renderCalendar();
-            });
-
-            btnGroup.appendChild(editBtn);
-            btnGroup.appendChild(deleteBtn);
-            li.appendChild(btnGroup);
-            notesList.appendChild(li);
+            }
         });
 
-        if (filteredNotes.length === 0) {
-            let li = document.createElement('li');
-            li.className = 'list-group-item';
-            li.textContent = isNepali ? 'कुनै नोटहरू छैनन्' : 'No notes available';
-            notesList.appendChild(li);
-        }
-    }
-
-    function renderReport(type) {
-        reportContent.innerHTML = '';
-        let reportData = [];
-        if (type === 'weekly') {
-            let weeks = {};
-            notes.forEach(note => {
-                let [year, month, day] = note.date.split('-').map(Number);
-                if (year === currentYear && month - 1 === currentMonthIndex) {
-                    let gregDate = getGregorianDate(year, month - 1, day);
-                    let weekNumber = Math.ceil((gregDate.getDate() + (new Date(gregDate.getFullYear(), gregDate.getMonth(), 1).getDay())) / 7);
-                    if (!weeks[weekNumber]) weeks[weekNumber] = { income: 0, expense: 0 };
-                    if (note.type === 'income') weeks[weekNumber].income += parseFloat(note.title);
-                    else if (note.type === 'expense') weeks[weekNumber].expense += parseFloat(note.title);
-                }
-            });
-            for (let week in weeks) {
-                reportData.push(`${isNepali ? `हप्ता ${week}` : `Week ${week}`}: ${isNepali ? 'आय' : 'Income'}: ${weeks[week].income} NPR, ${isNepali ? 'खर्च' : 'Expense'}: ${weeks[week].expense} NPR`);
-            }
-        } else if (type === 'monthly') {
-            let months = {};
-            notes.forEach(note => {
-                let [year, month] = note.date.split('-').map(Number);
-                if (year === currentYear) {
-                    if (!months[month]) months[month] = { income: 0, expense: 0 };
-                    if (note.type === 'income') months[month].income += parseFloat(note.title);
-                    else if (note.type === 'expense') months[month].expense += parseFloat(note.title);
-                }
-            });
-            for (let month in months) {
-                reportData.push(`${isNepali ? monthsNepali[month - 1] : calendarData[currentYear][month - 1].name}: ${isNepali ? 'आय' : 'Income'}: ${months[month].income} NPR, ${isNepali ? 'खर्च' : 'Expense'}: ${months[month].expense} NPR`);
-            }
-        } else if (type === 'yearly') {
-            let years = {};
-            notes.forEach(note => {
-                let [year] = note.date.split('-').map(Number);
-                if (!years[year]) years[year] = { income: 0, expense: 0 };
-                if (note.type === 'income') years[year].income += parseFloat(note.title);
-                else if (note.type === 'expense') years[year].expense += parseFloat(note.title);
-            });
-            for (let year in years) {
-                reportData.push(`${year} BS: ${isNepali ? 'आय' : 'Income'}: ${years[year].income} NPR, ${isNepali ? 'खर्च' : 'Expense'}: ${years[year].expense} NPR`);
-            }
-        }
-
-        if (reportData.length === 0) {
-            reportContent.textContent = isNepali ? 'कुनै डाटा छैन' : 'No data available';
-        } else {
-            reportData.forEach(line => {
-                let p = document.createElement('p');
-                p.textContent = line;
-                reportContent.appendChild(p);
-            });
-        }
-    }
-
-    function renderFinancialRecords() {
-        reportContent.innerHTML = '';
-        let finances = notes.filter(note => note.type === 'income' || note.type === 'expense');
-        if (finances.length === 0) {
-            reportContent.textContent = isNepali ? 'कुनै वित्तीय रेकर्ड छैन' : 'No financial records available';
-        } else {
-            finances.forEach(note => {
-                let p = document.createElement('p');
-                p.textContent = `${note.date}: ${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR${note.category ? ` (${note.category})` : ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}`;
-                reportContent.appendChild(p);
-            });
-        }
-    }
-
-    function renderShoppingList() {
-        shoppingListContent.innerHTML = '';
-        shoppingList.forEach((item, index) => {
-            let li = document.createElement('li');
-            li.className = 'list-group-item d-flex justify-content-between align-items-center';
-            let textSpan = document.createElement('span');
-            textSpan.textContent = item;
-            textSpan.style.textDecoration = item.completed ? 'line-through' : 'none';
-
-            let btnGroup = document.createElement('div');
-            let toggleBtn = document.createElement('button');
-            toggleBtn.className = 'btn btn-sm btn-outline-success me-2';
-            toggleBtn.textContent = item.completed ? (isNepali ? 'अनडु' : 'Undo') : (isNepali ? 'पूरा' : 'Done');
-            toggleBtn.addEventListener('click', () => {
-                shoppingList[index].completed = !shoppingList[index].completed;
-                renderShoppingList();
-            });
-
-            let deleteBtn = document.createElement('button');
-            deleteBtn.className = 'btn btn-sm btn-outline-danger';
-            deleteBtn.textContent = isNepali ? 'हटाउनुहोस्' : 'Delete';
-            deleteBtn.addEventListener('click', () => {
-                shoppingList.splice(index, 1);
-                renderShoppingList();
-            });
-
-            btnGroup.appendChild(toggleBtn);
-            btnGroup.appendChild(deleteBtn);
-            li.appendChild(textSpan);
-            li.appendChild(btnGroup);
-            shoppingListContent.appendChild(li);
+        closeModal.addEventListener('click', () => {
+            noteSearch.value = '';
+            monthFilter.value = '';
         });
 
-        if (shoppingList.length === 0) {
-            let li = document.createElement('li');
-            li.className = 'list-group-item';
-            li.textContent = isNepali ? 'कुनै सामानहरू छैनन्' : 'No items in the shopping list';
-            shoppingListContent.appendChild(li);
-        }
-    }
+        viewFinance.addEventListener('click', () => {
+            renderReport('weekly');
+            reportModal.show();
+        });
 
-    function exportToExcel(type) {
-        if (typeof XLSX === 'undefined') {
-            alert(isNepali ? 'Excel निर्यात असफल: XLSX पुस्तकालय लोड भएन' : 'Excel export failed: XLSX library not loaded');
-            return;
-        }
-        let data = [];
-        let filename = '';
-        if (type === 'note') {
-            filename = 'notes.xlsx';
-            data = notes.filter(note => note.type === 'note').map(note => ({
-                Date: note.date,
-                Title: note.title,
-                Description: note.description,
-                Time: note.time || '',
-                Recurring: note.recurring ? 'Yes' : 'No',
-                Reminder: note.reminder ? 'Yes' : 'No'
-            }));
-        } else if (type === 'finance') {
-            filename = 'finances.xlsx';
-            data = notes.filter(note => note.type === 'income' || note.type === 'expense').map(note => ({
-                Date: note.date,
-                Type: note.type,
-                Amount: note.title,
-                Category: note.category || '',
-                Description: note.description || '',
-                Time: note.time || '',
-                Recurring: note.recurring ? 'Yes' : 'No'
-            }));
-        } else if (type === 'calendar') {
-            filename = 'calendar.xlsx';
-            let days = [];
-            let month = calendarData[currentYear][currentMonthIndex];
-            for (let day = 1; day <= month.days; day++) {
-                let dateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                let gregDate = getGregorianDate(currentYear, currentMonthIndex, day);
-                let dayNotes = notes.filter(note => getRecurringDates(note).includes(dateStr));
-                let holiday = holidays[currentYear]?.find(h => h.month === currentMonthIndex && h.day === day);
-                let customHoliday = customHolidays.find(ch => ch.date === dateStr);
-                days.push({
-                    Date: dateStr,
-                    Gregorian: gregDate.toISOString().split('T')[0],
-                    Notes: dayNotes.filter(n => n.type === 'note').map(n => n.title).join('; ') || '',
-                    Income: dayNotes.filter(n => n.type === 'income').map(n => n.title).join('; ') || '',
-                    Expense: dayNotes.filter(n => n.type === 'expense').map(n => n.title).join('; ') || '',
-                    Holiday: holiday ? (isNepali ? holiday.nepali : holiday.name) : (customHoliday ? (isNepali ? customHoliday.nepali : customHoliday.name) : '')
-                });
-            }
-            data = days;
-        } else if (type === 'holiday') {
-            filename = 'holidays.xlsx';
-            let allHolidays = [];
-            Object.keys(holidays).forEach(year => {
-                holidays[year].forEach(h => {
-                    allHolidays.push({
-                        Year: year,
-                        Month: calendarData[year][h.month].name,
-                        Day: h.day,
-                        Name: h.name,
-                        NepaliName: h.nepali
-                    });
-                });
-            });
-            customHolidays.forEach(ch => {
-                let [year, month] = ch.date.split('-').map(Number);
-                allHolidays.push({
-                    Year: year,
-                    Month: calendarData[year][month - 1].name,
-                    Day: parseInt(ch.date.split('-')[2]),
-                    Name: ch.name,
-                    NepaliName: ch.nepali
-                });
-            });
-            data = allHolidays;
-        }
-        if (data.length === 0) {
-            alert(isNepali ? 'निर्यात गर्न डाटा छैन' : 'No data to export');
-            return;
-        }
-        let ws = XLSX.utils.json_to_sheet(data);
-        let wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-        XLSX.writeFile(wb, filename);
-    }
-
-    function exportToPDF(type) {
-        if (typeof window.jspdf === 'undefined') {
-            alert(isNepali ? 'PDF निर्यात असफल: jsPDF पुस्तकालय लोड भएन' : 'PDF export failed: jsPDF library not loaded');
-            return;
-        }
-        const { jsPDF } = window.jspdf;
-        const doc = new jsPDF();
-        let content = '';
-        if (type === 'note') {
-            content = (isNepali ? 'नोटहरू\n\n' : 'Notes\n\n') + notes.filter(note => note.type === 'note').map(note => (
-                `${note.date}: ${note.title}\n${note.description}\n${note.time || ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}${note.reminder ? (isNepali ? ' (रिमाइन्डर)' : ' (Reminder)') : ''}\n\n`
-            )).join('');
-        } else if (type === 'finance') {
-            content = (isNepali ? 'वित्त\n\n' : 'Finances\n\n') + notes.filter(note => note.type === 'income' || note.type === 'expense').map(note => (
-                `${note.date}: ${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR\n${note.category || ''}\n${note.description || ''}\n${note.time || ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}\n\n`
-            )).join('');
-        } else if (type === 'calendar') {
-            let month = calendarData[currentYear][currentMonthIndex];
-            content = (isNepali ? `${monthsNepali[currentMonthIndex]} ${currentYear} BS\n\n` : `${month.name} ${currentYear} BS\n\n`);
-            for (let day = 1; day <= month.days; day++) {
-                let dateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                let gregDate = getGregorianDate(currentYear, currentMonthIndex, day);
-                let dayNotes = notes.filter(note => getRecurringDates(note).includes(dateStr));
-                let holiday = holidays[currentYear]?.find(h => h.month === currentMonthIndex && h.day === day);
-                let customHoliday = customHolidays.find(ch => ch.date === dateStr);
-                content += `${dateStr} (${gregDate.toISOString().split('T')[0]}):\n`;
-                if (holiday) content += `  ${isNepali ? holiday.nepali : holiday.name}\n`;
-                else if (customHoliday) content += `  ${isNepali ? customHoliday.nepali : customHoliday.name}\n`;
-                dayNotes.forEach(note => {
-                    if (note.type === 'note') content += `  Note: ${note.title}\n`;
-                    else if (note.type === 'income') content += `  Income: ${note.title} NPR\n`;
-                    else if (note.type === 'expense') content += `  Expense: ${note.title} NPR\n`;
-                });
-                content += '\n';
-            }
-        }
-        if (!content) {
-            alert(isNepali ? 'निर्यात गर्न डाटा छैन' : 'No data to export');
-            return;
-        }
-        doc.text(content, 10, 10);
-        doc.save(`${type}.pdf`);
-    }
-
-    function toggleLanguage() {
-        isNepali = !isNepali;
-        document.querySelectorAll('[data-en][data-ne]').forEach(elem => {
-            elem.textContent = isNepali ? elem.dataset.ne : elem.dataset.en;
-            if (isNepali) {
-                elem.classList.add('nepali');
+        financeSearch.addEventListener('input', debounce(() => {
+            let searchTerm = financeSearch.value.toLowerCase();
+            let filteredFinances = notes.filter(note => (note.type === 'income' || note.type === 'expense') && (note.title.toLowerCase().includes(searchTerm) || (note.category && note.category.toLowerCase().includes(searchTerm))));
+            reportContent.innerHTML = '';
+            if (filteredFinances.length === 0) {
+                reportContent.textContent = isNepali ? 'कुनै वित्तीय रेकर्ड छैन' : 'No financial records available';
             } else {
-                elem.classList.remove('nepali');
+                filteredFinances.forEach(note => {
+                    let p = document.createElement('p');
+                    p.textContent = `${note.date}: ${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR${note.category ? ` (${note.category})` : ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}`;
+                    reportContent.appendChild(p);
+                });
+            }
+        }, 300));
+
+        weeklyReportTab.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+            weeklyReportTab.classList.add('active');
+            renderReport('weekly');
+        });
+
+        monthlyReportTab.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+            monthlyReportTab.classList.add('active');
+            renderReport('monthly');
+        });
+
+        yearlyReportTab.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+            yearlyReportTab.classList.add('active');
+            renderReport('yearly');
+        });
+
+        recordsReportTab.addEventListener('click', (e) => {
+            e.preventDefault();
+            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+            recordsReportTab.classList.add('active');
+            renderFinancialRecords();
+        });
+
+        closeReportModal.addEventListener('click', () => {
+            financeSearch.value = '';
+        });
+
+        document.querySelectorAll('.excel-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+                exportToExcel(option.dataset.type);
+            });
+        });
+
+        document.querySelectorAll('.pdf-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+                exportToPDF(option.dataset.type);
+            });
+        });
+
+        backupData.addEventListener('click', (e) => {
+            e.preventDefault();
+            let backup = {
+                notes,
+                customCategories,
+                budgets,
+                customHolidays,
+                shoppingList
+            };
+            let blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+            let url = URL.createObjectURL(blob);
+            let a = document.createElement('a');
+            a.href = url;
+            a.download = 'calendar_backup.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        });
+
+        restoreData.addEventListener('click', (e) => {
+            e.preventDefault();
+            restoreFileInput.click();
+        });
+
+        restoreFileInput.addEventListener('change', (e) => {
+            let file = e.target.files[0];
+            if (!file) return;
+            let reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    let backup = JSON.parse(event.target.result);
+                    notes = backup.notes || [];
+                    customCategories = backup.customCategories || [];
+                    budgets = backup.budgets || {};
+                    customHolidays = backup.customHolidays || [];
+                    shoppingList = backup.shoppingList || [];
+                    localStorage.setItem('notes', JSON.stringify(notes));
+                    localStorage.setItem('customCategories', JSON.stringify(customCategories));
+                    localStorage.setItem('budgets', JSON.stringify(budgets));
+                    localStorage.setItem('customHolidays', JSON.stringify(customHolidays));
+                    localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+                    renderCalendar();
+                    alert(isNepali ? 'डाटा सफलतापूर्वक पुनर्स्थापना गरियो' : 'Data successfully restored');
+                } catch (err) {
+                    alert(isNepali ? 'डाटा पुनर्स्थापना असफल' : 'Failed to restore data');
+                }
+            };
+            reader.readAsText(file);
+        });
+
+        undoAction.addEventListener('click', () => {
+            if (undoStack.length === 0) {
+                alert(isNepali ? 'कुनै कार्यहरू पूर्ववत् गर्न बाँकी छैन' : 'No actions to undo');
+                return;
+            }
+            let lastAction = undoStack.pop();
+            if (lastAction.action === 'add') {
+                notes = notes.filter(note => note !== lastAction.note);
+            } else if (lastAction.action === 'delete') {
+                notes.splice(lastAction.index, 0, lastAction.note);
+            } else if (lastAction.action === 'edit') {
+                notes[lastAction.index] = lastAction.oldNote;
+            } else if (lastAction.action === 'clear') {
+                notes = lastAction.notes;
+            }
+            localStorage.setItem('notes', JSON.stringify(notes));
+            renderCalendar();
+            if (notesModal._element.classList.contains('show')) {
+                renderNotesList();
             }
         });
-        renderMonthTabs();
-        renderCalendar();
-        renderMonthlySummary();
-        renderHolidays();
-        if (notesModal._element.classList.contains('show')) {
-            renderNotesList();
-        }
-        if (reportModal._element.classList.contains('show')) {
-            if (document.querySelector('#weeklyReportTab.nav-link.active')) renderReport('weekly');
-            else if (document.querySelector('#monthlyReportTab.nav-link.active')) renderReport('monthly');
-            else if (document.querySelector('#yearlyReportTab.nav-link.active')) renderReport('yearly');
-            else renderFinancialRecords();
-        }
-        if (shoppingListModal._element.classList.contains('show')) {
+
+        addCustomHoliday.addEventListener('click', () => {
+            holidayDate.value = '';
+            holidayName.value = '';
+            holidayNepaliName.value = '';
+            customHolidayModal.show();
+        });
+
+        saveCustomHoliday.addEventListener('click', () => {
+            if (!holidayDate.value || !holidayName.value || !holidayNepaliName.value) {
+                alert(isNepali ? 'कृपया सबै क्षेत्रहरू भर्नुहोस्' : 'Please fill in all fields');
+                return;
+            }
+            let gregDate = new Date(holidayDate.value);
+            let bsDate = getBSDateFromGregorian(gregDate);
+            if (!bsDate) {
+                alert(isNepali ? 'अमान्य मिति' : 'Invalid date');
+                return;
+            }
+            let dateStr = `${bsDate.year}-${String(bsDate.month + 1).padStart(2, '0')}-${String(bsDate.day).padStart(2, '0')}`;
+            customHolidays.push({
+                date: dateStr,
+                name: holidayName.value.trim(),
+                nepali: holidayNepaliName.value.trim()
+            });
+            localStorage.setItem('customHolidays', JSON.stringify(customHolidays));
+            renderCalendar();
+            customHolidayModal.hide();
+        });
+
+        manageShoppingList.addEventListener('click', () => {
             renderShoppingList();
-        }
-    }
+            shoppingListModal.show();
+        });
 
-    yearFilter.addEventListener('change', (e) => {
-        currentYear = parseInt(e.target.value);
-        renderMonthTabs();
-        renderCalendar();
-    });
+        addShoppingItem.addEventListener('click', () => {
+            let itemText = newShoppingItem.value.trim();
+            if (itemText) {
+                shoppingList.push({ text: itemText, completed: false });
+                localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+                newShoppingItem.value = '';
+                renderShoppingList();
+            }
+        });
 
-    document.getElementById('todayBtn').addEventListener('click', setToday);
+        clearShoppingList.addEventListener('click', () => {
+            if (confirm(isNepali ? 'के तपाईं किनमेल सूची खाली गर्न चाहनुहुन्छ?' : 'Are you sure you want to clear the shopping list?')) {
+                shoppingList = [];
+                localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+                renderShoppingList();
+            }
+        });
 
-    document.getElementById('addNoteBtn').addEventListener('click', () => {
-        let today = new Date();
-        let bsDate = getBSDateFromGregorian(today);
-        let dateStr = bsDate 
-            ? `${bsDate.year}-${String(bsDate.month + 1).padStart(2, '0')}-${String(bsDate.day).padStart(2, '0')}` 
-            : `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-01`;
-        selectedDate.textContent = dateStr;
-        entryType.value = 'note';
-        noteTitle.value = '';
-        noteTime.value = '';
-        noteDescription.value = '';
-        recurring.checked = false;
-        reminder.checked = false;
-        entryCategory.style.display = 'none';
-        categoryManager.style.display = 'none';
-        budgetSection.style.display = 'none';
-        saveNote.style.display = 'block';
-        editEntry.style.display = 'none';
-        noteFormModal.show();
-        noteTitle.focus();
-    });
-
-    entryType.addEventListener('change', (e) => {
-        const type = e.target.value;
-        entryCategory.style.display = type === 'note' ? 'none' : 'block';
-        categoryManager.style.display = type === 'note' ? 'none' : 'block';
-        budgetSection.style.display = type === 'budget' ? 'block' : 'none';
-    });
-
-    document.getElementById('addCategoryBtn').addEventListener('click', () => {
-        let newCategory = document.getElementById('newCategory').value.trim();
-        if (newCategory && !categories.includes(newCategory)) {
-            categories.push(newCategory);
-            let option = document.createElement('option');
-            option.value = newCategory;
-            option.textContent = newCategory;
-            document.getElementById('category').appendChild(option);
-            document.getElementById('newCategory').value = '';
-        }
-    });
-
-    saveNote.addEventListener('click', () => {
-        let note = {
-            date: selectedDate.textContent,
-            type: entryType.value,
-            title: noteTitle.value.trim(),
-            description: noteDescription.value.trim(),
-            time: noteTime.value,
-            recurring: recurring.checked,
-            reminder: reminder.checked
-        };
-        if (entryType.value !== 'note') {
-            note.category = document.getElementById('category').value;
-        }
-        if (note.title) {
-            notes.push(note);
-            noteFormModal.hide();
-            renderCalendar();
-        } else {
-            alert(isNepali ? 'कृपया शीर्षक प्रविष्ट गर्नुहोस्' : 'Please enter a title');
-        }
-    });
-
-    editEntry.addEventListener('click', () => {
-        let index = parseInt(editEntry.dataset.index);
-        let note = notes[index];
-        note.date = selectedDate.textContent;
-        note.type = entryType.value;
-        note.title = noteTitle.value.trim();
-        note.description = noteDescription.value.trim();
-        note.time = noteTime.value;
-        note.recurring = recurring.checked;
-        note.reminder = reminder.checked;
-        if (entryType.value !== 'note') {
-            note.category = document.getElementById('category').value;
-        }
-        if (note.title) {
-            notes[index] = note;
-            noteFormModal.hide();
-            renderNotesList();
-            renderCalendar();
-        } else {
-            alert(isNepali ? 'कृपया शीर्षक प्रविष्ट गर्नुहोस्' : 'Please enter a title');
-        }
-    });
-
-    document.getElementById('viewNotesBtn').addEventListener('click', () => {
-        let today = new Date();
-        let bsDate = getBSDateFromGregorian(today);
-        selectedDate.textContent = bsDate 
-            ? `${bsDate.year}-${String(bsDate.month + 1).padStart(2, '0')}-${String(bsDate.day).padStart(2, '0')}` 
-            : `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-01`;
-        renderNotesList();
-        notesModal.show();
-    });
-
-    document.getElementById('viewReportsBtn').addEventListener('click', () => {
-        renderFinancialRecords();
-        reportModal.show();
-    });
-
-    document.getElementById('weeklyReportTab').addEventListener('click', () => renderReport('weekly'));
-    document.getElementById('monthlyReportTab').addEventListener('click', () => renderReport('monthly'));
-    document.getElementById('yearlyReportTab').addEventListener('click', () => renderReport('yearly'));
-    document.getElementById('financeTab').addEventListener('click', renderFinancialRecords);
-
-    document.getElementById('exportNotesExcel').addEventListener('click', () => exportToExcel('note'));
-    document.getElementById('exportFinanceExcel').addEventListener('click', () => exportToExcel('finance'));
-    document.getElementById('exportCalendarExcel').addEventListener('click', () => exportToExcel('calendar'));
-    document.getElementById('exportHolidaysExcel').addEventListener('click', () => exportToExcel('holiday'));
-
-    document.getElementById('exportNotesPDF').addEventListener('click', () => exportToPDF('note'));
-    document.getElementById('exportFinancePDF').addEventListener('click', () => exportToPDF('finance'));
-    document.getElementById('exportCalendarPDF').addEventListener('click', () => exportToPDF('calendar'));
-
-    document.getElementById('addCustomHolidayBtn').addEventListener('click', () => {
-        let holidayDate = prompt(isNepali ? 'छुट्टीको मिति प्रविष्ट गर्नुहोस् (YYYY-MM-DD):' : 'Enter holiday date (YYYY-MM-DD):');
-        let holidayName = prompt(isNepali ? 'छुट्टीको नाम (अंग्रेजीमा):' : 'Enter holiday name (in English):');
-        let holidayNepali = prompt(isNepali ? 'छुट्टीको नाम (नेपालीमा):' : 'Enter holiday name (in Nepali):');
-        if (holidayDate && holidayName && holidayNepali) {
-            customHolidays.push({ date: holidayDate, name: holidayName, nepali: holidayNepali });
-            renderCalendar();
-        }
-    });
-
-    document.getElementById('setBudgetBtn').addEventListener('click', () => {
-        let today = new Date();
-        let bsDate = getBSDateFromGregorian(today);
-        let dateStr = bsDate 
-            ? `${bsDate.year}-${String(bsDate.month + 1).padStart(2, '0')}-${String(bsDate.day).padStart(2, '0')}` 
-            : `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-01`;
-        selectedDate.textContent = dateStr;
-        entryType.value = 'budget';
-        noteTitle.value = '';
-        noteTime.value = '';
-        noteDescription.value = '';
-        recurring.checked = false;
-        reminder.checked = false;
-        entryCategory.style.display = 'none';
-        categoryManager.style.display = 'none';
-        budgetSection.style.display = 'block';
-        saveNote.style.display = 'block';
-        editEntry.style.display = 'none';
-        noteFormModal.show();
-        noteTitle.focus();
-    });
-
-    document.getElementById('shoppingListBtn').addEventListener('click', () => {
-        renderShoppingList();
-        shoppingListModal.show();
-    });
-
-    addShoppingItemBtn.addEventListener('click', () => {
-        let item = shoppingListInput.value.trim();
-        if (item) {
-            shoppingList.push({ text: item, completed: false });
-            shoppingListInput.value = '';
-            renderShoppingList();
-        }
-    });
-
-    languageToggle.addEventListener('click', toggleLanguage);
-
-    function init() {
+        // Initialize
         setToday();
-    }
-
-    init();
-</script>
+        checkReminders();
+    </script>
 </body>
 </html>
