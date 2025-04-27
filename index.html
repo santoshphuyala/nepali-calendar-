@@ -8,7 +8,8 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
-    <style>
+    <!-- Favicon to resolve 404 error -->
+        <style>
         body {
             font-family: Arial, sans-serif;
             background-color: #f8f9fa;
@@ -40,9 +41,15 @@
         .calendar-day.today {
             background-color: #e7f3ff;
             border: 2px solid #007bff;
+            animation: blink 1.5s infinite; /* Add blinking animation */
+        }
+        @keyframes blink {
+            0% { background-color: #e7f3ff; }
+            50% { background-color: #b3d7ff; }
+            100% { background-color: #e7f3ff; }
         }
         .calendar-day.saturday {
-            background-color: #fff3e0;
+            background-color: #ffcccc; /* Red background for Saturdays */
         }
         .calendar-day.holiday, .calendar-day.custom-holiday {
             background-color: #ffe6e6;
@@ -143,20 +150,32 @@
                 <button id="addCustomHoliday" class="btn btn-danger me-2" data-en="Add Custom Holiday" data-ne="कस्टम बिदा थप्नुहोस्">Add Custom Holiday</button>
                 <button id="manageShoppingList" class="btn btn-info" data-en="Manage Shopping List" data-ne="किनमेल सूची व्यवस्थापन गर्नुहोस्">Manage Shopping List</button>
             </div>
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-en="Export Data" data-ne="डाटा निर्यात गर्नुहोस्">Export Data</button>
-                <ul class="dropdown-menu">
-                    <li><a class="dropdown-item excel-option" href="#" data-type="note" data-en="Export Notes (Excel)" data-ne="नोटहरू निर्यात गर्नुहोस् (Excel)">Export Notes (Excel)</a></li>
-                    <li><a class="dropdown-item excel-option" href="#" data-type="finance" data-en="Export Finances (Excel)" data-ne="वित्त निर्यात गर्नुहोस् (Excel)">Export Finances (Excel)</a></li>
-                    <li><a class="dropdown-item excel-option" href="#" data-type="calendar" data-en="Export Calendar (Excel)" data-ne="पात्रो निर्यात गर्नुहोस् (Excel)">Export Calendar (Excel)</a></li>
-                    <li><a class="dropdown-item excel-option" href="#" data-type="holiday" data-en="Export Holidays (Excel)" data-ne="बिदाहरू निर्यात गर्नुहोस् (Excel)">Export Holidays (Excel)</a></li>
-                    <li><a class="dropdown-item pdf-option" href="#" data-type="note" data-en="Export Notes (PDF)" data-ne="नोटहरू निर्यात गर्नुहोस् (PDF)">Export Notes (PDF)</a></li>
-                    <li><a class="dropdown-item pdf-option" href="#" data-type="finance" data-en="Export Finances (PDF)" data-ne="वित्त निर्यात गर्नुहोस् (PDF)">Export Finances (PDF)</a></li>
-                    <li><a class="dropdown-item pdf-option" href="#" data-type="calendar" data-en="Export Calendar (PDF)" data-ne="पात्रो निर्यात गर्नुहोस् (PDF)">Export Calendar (PDF)</a></li>
-                    <li><a class="dropdown-item" id="backupData" href="#" data-en="Backup Data" data-ne="डाटा ब्याकअप गर्नुहोस्">Backup Data</a></li>
-                    <li><a class="dropdown-item" id="restoreData" href="#" data-en="Restore Data" data-ne="डाटा पुनर्स्थापना गर्नुहोस्">Restore Data</a></li>
-                </ul>
-                <input type="file" id="restoreFileInput" style="display: none;" accept=".json">
+            <div class="d-flex">
+                <div class="dropdown me-2">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-en="Export Data" data-ne="डाटा निर्यात गर्नुहोस्">Export Data</button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item excel-option" href="#" data-type="note" data-en="Export Notes (Excel)" data-ne="नोटहरू निर्यात गर्नुहोस् (Excel)">Export Notes (Excel)</a></li>
+                        <li><a class="dropdown-item excel-option" href="#" data-type="finance" data-en="Export Finances (Excel)" data-ne="वित्त निर्यात गर्नुहोस् (Excel)">Export Finances (Excel)</a></li>
+                        <li><a class="dropdown-item excel-option" href="#" data-type="calendar" data-en="Export Calendar (Excel)" data-ne="पात्रो निर्यात गर्नुहोस् (Excel)">Export Calendar (Excel)</a></li>
+                        <li><a class="dropdown-item excel-option" href="#" data-type="holiday" data-en="Export Holidays (Excel)" data-ne="बिदाहरू निर्यात गर्नुहोस् (Excel)">Export Holidays (Excel)</a></li>
+                        <li><a class="dropdown-item pdf-option" href="#" data-type="note" data-en="Export Notes (PDF)" data-ne="नोटहरू निर्यात गर्नुहोस् (PDF)">Export Notes (PDF)</a></li>
+                        <li><a class="dropdown-item pdf-option" href="#" data-type="finance" data-en="Export Finances (PDF)" data-ne="वित्त निर्यात गर्नुहोस् (PDF)">Export Finances (PDF)</a></li>
+                        <li><a class="dropdown-item pdf-option" href="#" data-type="calendar" data-en="Export Calendar (PDF)" data-ne="पात्रो निर्यात गर्नुहोस् (PDF)">Export Calendar (PDF)</a></li>
+                        <li><a class="dropdown-item" id="backupData" href="#" data-en="Backup Data" data-ne="डाटा ब्याकअप गर्नुहोस्">Backup Data</a></li>
+                        <li><a class="dropdown-item" id="restoreData" href="#" data-en="Restore Data" data-ne="डाटा पुनर्स्थापना गर्नुहोस्">Restore Data</a></li>
+                    </ul>
+                    <input type="file" id="restoreFileInput" style="display: none;" accept=".json">
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" data-en="Import Data" data-ne="डाटा आयात गर्नुहोस्">Import Data</button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item import-option" href="#" data-type="note" data-en="Import Notes" data-ne="नोटहरू आयात गर्नुहोस्">Import Notes</a></li>
+                        <li><a class="dropdown-item import-option" href="#" data-type="finance" data-en="Import Finances" data-ne="वित्त आयात गर्नुहोस्">Import Finances</a></li>
+                        <li><a class="dropdown-item import-option" href="#" data-type="calendar" data-en="Import Calendar" data-ne="पात्रो आयात गर्नुहोस्">Import Calendar</a></li>
+                        <li><a class="dropdown-item import-option" href="#" data-type="holiday" data-en="Import Holidays" data-ne="बिदाहरू आयात गर्नुहोस्">Import Holidays</a></li>
+                    </ul>
+                    <input type="file" id="importFileInput" style="display: none;" accept=".json,.xlsx">
+                </div>
             </div>
         </div>
         <div class="month-tabs" id="monthTabs" role="tablist"></div>
@@ -190,7 +209,7 @@
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="selectedDate" class="form-label" data-en="Date" data-ne="मिति">Date</label>
-                        <input type="text" class="form-control" id="selectedDate" readonly>
+                        <input type="date" class="form-control" id="selectedDate">
                     </div>
                     <div class="mb-3">
                         <label for="entryType" class="form-label" data-en="Type" data-ne="प्रकार">Type</label>
@@ -509,6 +528,7 @@
         const backupData = document.getElementById('backupData');
         const restoreData = document.getElementById('restoreData');
         const restoreFileInput = document.getElementById('restoreFileInput');
+        const importFileInput = document.getElementById('importFileInput');
         const languageToggle = document.getElementById('languageToggle');
         const noteFormModal = new bootstrap.Modal(document.getElementById('noteFormModal'));
         const entryType = document.getElementById('entryType');
@@ -782,7 +802,8 @@
                 });
 
                 dayDiv.addEventListener('click', () => {
-                    selectedDate.textContent = dateStr;
+                    let gregDate = getGregorianDate(currentYear, currentMonthIndex, day);
+                    selectedDate.value = formatDate(gregDate);
                     entryType.value = 'note';
                     noteTitle.value = '';
                     noteTime.value = '';
@@ -860,7 +881,7 @@
 
         function renderNotesList() {
             notesList.innerHTML = '';
-            let filteredNotes = notes.filter(note => getRecurringDates(note).includes(selectedDate.textContent));
+            let filteredNotes = notes.filter(note => getRecurringDates(note).includes(formatBSDate(getBSDateFromGregorian(new Date(selectedDate.value)))));
             filteredNotes.forEach((note, index) => {
                 let li = document.createElement('li');
                 li.className = 'list-group-item d-flex justify-content-between align-items-center';
@@ -875,7 +896,8 @@
                 editBtn.textContent = isNepali ? 'सम्पादन' : 'Edit';
                 editBtn.addEventListener('click', () => {
                     editingNoteIndex = index;
-                    selectedDate.textContent = note.date;
+                    let gregDate = getGregorianDate(parseInt(note.date.split('-')[0]), parseInt(note.date.split('-')[1]) - 1, parseInt(note.date.split('-')[2]));
+                    selectedDate.value = formatDate(gregDate);
                     entryType.value = note.type;
                     noteTitle.value = note.title;
                     noteTime.value = note.time || '';
@@ -1028,15 +1050,24 @@
             }
         }
 
+        function getCurrentDateString() {
+            const today = new Date();
+            return today.toISOString().split('T')[0]; // Format: YYYY-MM-DD
+        }
+
+        function formatBSDate(bsDate) {
+            if (!bsDate) return '';
+            return `${bsDate.year}-${String(bsDate.month + 1).padStart(2, '0')}-${String(bsDate.day).padStart(2, '0')}`;
+        }
+
         function exportToExcel(type) {
             if (typeof XLSX === 'undefined') {
                 alert(isNepali ? 'Excel निर्यात असफल: XLSX पुस्तकालय लोड भएन' : 'Excel export failed: XLSX library not loaded');
                 return;
             }
             let data = [];
-            let filename = '';
+            let filename = `${type}_${getCurrentDateString()}.xlsx`; // Add date to filename
             if (type === 'note') {
-                filename = 'notes.xlsx';
                 data = notes.filter(note => note.type === 'note').map(note => ({
                     Date: note.date,
                     Title: note.title,
@@ -1046,7 +1077,6 @@
                     Reminder: note.reminder ? 'Yes' : 'No'
                 }));
             } else if (type === 'finance') {
-                filename = 'finances.xlsx';
                 data = notes.filter(note => note.type === 'income' || note.type === 'expense').map(note => ({
                     Date: note.date,
                     Type: note.type,
@@ -1057,7 +1087,6 @@
                     Recurring: note.recurring ? 'Yes' : 'No'
                 }));
             } else if (type === 'calendar') {
-                filename = 'calendar.xlsx';
                 let days = [];
                 let month = calendarData[currentYear][currentMonthIndex];
                 for (let day = 1; day <= month.days; day++) {
@@ -1072,133 +1101,290 @@
                         Notes: dayNotes.filter(n => n.type === 'note').map(n => n.title).join('; ') || '',
                         Income: dayNotes.filter(n => n.type === 'income').map(n => n.title).join('; ') || '',
                         Expense: dayNotes.filter(n => n.type === 'expense').map(n => n.title).join('; ') || '',
-                        Holiday: holiday ? (isNepali ? holiday.nepali : holiday.name) : (customHoliday ? (isNepali ? customHoliday.nepali : customHoliday.name) : '')
+                       Holiday: holiday ? (isNepali ? holiday.nepali : holiday.name) : (customHoliday ? (isNepali ? customHoliday.nepali : customHoliday.name) : '')
                     });
                 }
                 data = days;
             } else if (type === 'holiday') {
-                filename = 'holidays.xlsx';
                 let allHolidays = [];
-                Object.keys(holidays).forEach(year => {
+                for (let year in holidays) {
                     holidays[year].forEach(h => {
                         allHolidays.push({
                             Year: year,
-                            Month: calendarData[year][h.month].name,
-                            Day: h.day,
-                            Name: h.name,
-                            NepaliName: h.nepali
+                            Date: `${year}-${String(h.month + 1).padStart(2, '0')}-${String(h.day).padStart(2, '0')}`,
+                            Name: isNepali ? h.nepali : h.name
                         });
                     });
-                });
+                }
                 customHolidays.forEach(ch => {
-                    let [year, month] = ch.date.split('-').map(Number);
                     allHolidays.push({
-                        Year: year,
-                        Month: calendarData[year][month - 1].name,
-                        Day: parseInt(ch.date.split('-')[2]),
-                        Name: ch.name,
-                        NepaliName: ch.nepali
+                        Year: ch.date.split('-')[0],
+                        Date: ch.date,
+                        Name: isNepali ? ch.nepali : ch.name
                     });
                 });
                 data = allHolidays;
             }
+
             if (data.length === 0) {
                 alert(isNepali ? 'निर्यात गर्न डाटा छैन' : 'No data to export');
                 return;
             }
-            let ws = XLSX.utils.json_to_sheet(data);
-            let wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, type.charAt(0).toUpperCase() + type.slice(1));
             XLSX.writeFile(wb, filename);
         }
 
         function exportToPDF(type) {
-            if (typeof window.jspdf === 'undefined') {
+            if (typeof jspdf === 'undefined') {
                 alert(isNepali ? 'PDF निर्यात असफल: jsPDF पुस्तकालय लोड भएन' : 'PDF export failed: jsPDF library not loaded');
                 return;
             }
-            const { jsPDF } = window.jspdf;
+            const { jsPDF } = jspdf;
             const doc = new jsPDF();
-            let content = '';
+            let filename = `${type}_${getCurrentDateString()}.pdf`; // Add date to filename
+            let y = 10;
+
+            doc.setFontSize(16);
+            doc.text(isNepali ? `${type.charAt(0).toUpperCase() + type.slice(1)} डाटा` : `${type.charAt(0).toUpperCase() + type.slice(1)} Data`, 10, y);
+            y += 10;
+
             if (type === 'note') {
-                content = (isNepali ? 'नोटहरू\n\n' : 'Notes\n\n') + notes.filter(note => note.type === 'note').map(note => (
-                    `${note.date}: ${note.title}\n${note.description}\n${note.time || ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}${note.reminder ? (isNepali ? ' (रिमाइन्डर)' : ' (Reminder)') : ''}\n\n`
-                )).join('');
+                let noteData = notes.filter(note => note.type === 'note');
+                noteData.forEach(note => {
+                    doc.setFontSize(12);
+                    doc.text(`${note.date}: ${note.title}${note.time ? ` (${note.time})` : ''}${note.description ? ` - ${note.description}` : ''}`, 10, y);
+                    y += 10;
+                    if (y > 280) {
+                        doc.addPage();
+                        y = 10;
+                    }
+                });
             } else if (type === 'finance') {
-                content = (isNepali ? 'वित्त\n\n' : 'Finances\n\n') + notes.filter(note => note.type === 'income' || note.type === 'expense').map(note => (
-                    `${note.date}: ${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR\n${note.category || ''}\n${note.description || ''}\n${note.time || ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}\n\n`
-                )).join('');
+                let financeData = notes.filter(note => note.type === 'income' || note.type === 'expense');
+                financeData.forEach(note => {
+                    doc.setFontSize(12);
+                    doc.text(`${note.date}: ${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR${note.category ? ` (${note.category})` : ''}`, 10, y);
+                    y += 10;
+                    if (y > 280) {
+                        doc.addPage();
+                        y = 10;
+                    }
+                });
             } else if (type === 'calendar') {
                 let month = calendarData[currentYear][currentMonthIndex];
-                content = (isNepali ? `${monthsNepali[currentMonthIndex]} ${currentYear} BS\n\n` : `${month.name} ${currentYear} BS\n\n`);
                 for (let day = 1; day <= month.days; day++) {
                     let dateStr = `${currentYear}-${String(currentMonthIndex + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
                     let gregDate = getGregorianDate(currentYear, currentMonthIndex, day);
                     let dayNotes = notes.filter(note => getRecurringDates(note).includes(dateStr));
                     let holiday = holidays[currentYear]?.find(h => h.month === currentMonthIndex && h.day === day);
                     let customHoliday = customHolidays.find(ch => ch.date === dateStr);
-                    content += `${dateStr} (${gregDate.toISOString().split('T')[0]}):\n`;
-                    if (holiday) content += `  ${isNepali ? holiday.nepali : holiday.name}\n`;
-                    else if (customHoliday) content += `  ${isNepali ? customHoliday.nepali : customHoliday.name}\n`;
-                    dayNotes.forEach(note => {
-                        if (note.type === 'note') content += `  Note: ${note.title}\n`;
-                        else if (note.type === 'income') content += `  Income: ${note.title} NPR\n`;
-                        else if (note.type === 'expense') content += `  Expense: ${note.title} NPR\n`;
-                    });
-                    content += '\n';
+                    let text = `${dateStr} (${gregDate.toISOString().split('T')[0]}): `;
+                    if (dayNotes.length > 0) {
+                        text += dayNotes.map(n => n.type === 'note' ? n.title : `${n.type === 'income' ? '+' : '-'}${n.title} NPR`).join(', ');
+                    }
+                    if (holiday) text += `, ${isNepali ? holiday.nepali : holiday.name}`;
+                    if (customHoliday) text += `, ${isNepali ? customHoliday.nepali : customHoliday.name}`;
+                    doc.setFontSize(12);
+                    doc.text(text, 10, y);
+                    y += 10;
+                    if (y > 280) {
+                        doc.addPage();
+                        y = 10;
+                    }
                 }
             }
-            if (!content) {
-                alert(isNepali ? 'निर्यात गर्न डाटा छैन' : 'No data to export');
-                return;
-            }
-            doc.text(content, 10, 10);
-            doc.save(`${type}.pdf`);
+
+            doc.save(filename);
         }
 
-        function toggleLanguage() {
-            isNepali = !isNepali;
+        function importData(type, file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    let importedData;
+                    if (file.name.endsWith('.json')) {
+                        importedData = JSON.parse(e.target.result);
+                    } else if (file.name.endsWith('.xlsx')) {
+                        const workbook = XLSX.read(e.target.result, { type: 'binary' });
+                        const sheetName = workbook.SheetNames[0];
+                        importedData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
+                    } else {
+                        alert(isNepali ? 'असमर्थित फाइल ढाँचा। JSON वा Excel फाइल प्रयोग गर्नुहोस्।' : 'Unsupported file format. Please use JSON or Excel file.');
+                        return;
+                    }
+
+                    if (type === 'note') {
+                        let existingNotes = notes.filter(n => n.type === 'note');
+                        let newNotes = importedData
+                            .filter(item => item.Date && item.Title)
+                            .map(item => ({
+                                date: item.Date,
+                                type: 'note',
+                                title: item.Title,
+                                description: item.Description || '',
+                                time: item.Time || '',
+                                recurring: item.Recurring === 'Yes',
+                                reminder: item.Reminder === 'Yes'
+                            }));
+                        notes = [...notes.filter(n => n.type !== 'note'), ...existingNotes, ...newNotes];
+                    } else if (type === 'finance') {
+                        let existingFinances = notes.filter(n => n.type === 'income' || n.type === 'expense');
+                        let newFinances = importedData
+                            .filter(item => item.Date && item.Type && item.Amount)
+                            .map(item => ({
+                                date: item.Date,
+                                type: item.Type.toLowerCase(),
+                                title: item.Amount,
+                                category: item.Category || '',
+                                description: item.Description || '',
+                                time: item.Time || '',
+                                recurring: item.Recurring === 'Yes'
+                            }));
+                        notes = [...notes.filter(n => n.type !== 'income' && n.type !== 'expense'), ...existingFinances, ...newFinances];
+                    } else if (type === 'calendar') {
+                        let newNotes = importedData
+                            .filter(item => item.Date)
+                            .flatMap(item => {
+                                let entries = [];
+                                if (item.Notes) {
+                                    item.Notes.split('; ').forEach(note => {
+                                        if (note) entries.push({ date: item.Date, type: 'note', title: note });
+                                    });
+                                }
+                                if (item.Income) {
+                                    item.Income.split('; ').forEach(income => {
+                                        if (income) entries.push({ date: item.Date, type: 'income', title: income });
+                                    });
+                                }
+                                if (item.Expense) {
+                                    item.Expense.split('; ').forEach(expense => {
+                                        if (expense) entries.push({ date: item.Date, type: 'expense', title: expense });
+                                    });
+                                }
+                                return entries;
+                            });
+                        notes = [...notes, ...newNotes];
+                    } else if (type === 'holiday') {
+                        let newHolidays = importedData
+                            .filter(item => item.Date && item.Name)
+                            .map(item => ({
+                                date: item.Date,
+                                name: item.Name,
+                                nepali: item.Name
+                            }));
+                        customHolidays = [...customHolidays, ...newHolidays];
+                        localStorage.setItem('customHolidays', JSON.stringify(customHolidays));
+                    }
+
+                    localStorage.setItem('notes', JSON.stringify(notes));
+                    renderCalendar();
+                    alert(isNepali ? 'डाटा सफलतापूर्वक आयात गरियो' : 'Data imported successfully');
+                } catch (err) {
+                    console.error('Error importing data:', err);
+                    alert(isNepali ? 'डाटा आयातमा त्रुटि: ' + err.message : 'Error importing data: ' + err.message);
+                }
+            };
+            if (file.name.endsWith('.xlsx')) {
+                reader.readAsBinaryString(file);
+            } else {
+                reader.readAsText(file);
+            }
+        }
+
+        function backupDataFunc() {
+            const data = {
+                notes: notes,
+                customCategories: customCategories,
+                budgets: budgets,
+                customHolidays: customHolidays,
+                shoppingList: shoppingList
+            };
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `calendar_backup_${getCurrentDateString()}.json`; // Add date to filename
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function restoreDataFunc(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    // Merge data incrementally
+                    if (data.notes) {
+                        notes = [...notes, ...data.notes];
+                    }
+                    if (data.customCategories) {
+                        customCategories = [...customCategories, ...data.customCategories];
+                    }
+                    if (data.budgets) {
+                        budgets = { ...budgets, ...data.budgets };
+                    }
+                    if (data.customHolidays) {
+                        customHolidays = [...customHolidays, ...data.customHolidays];
+                    }
+                    if (data.shoppingList) {
+                        shoppingList = [...shoppingList, ...data.shoppingList];
+                    }
+
+                    localStorage.setItem('notes', JSON.stringify(notes));
+                    localStorage.setItem('customCategories', JSON.stringify(customCategories));
+                    localStorage.setItem('budgets', JSON.stringify(budgets));
+                    localStorage.setItem('customHolidays', JSON.stringify(customHolidays));
+                    localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+
+                    renderCalendar();
+                    renderShoppingList();
+                    alert(isNepali ? 'डाटा सफलतापूर्वक पुनर्स्थापना गरियो' : 'Data restored successfully');
+                } catch (err) {
+                    console.error('Error restoring data:', err);
+                    alert(isNepali ? 'डाटा पुनर्स्थापनामा त्रुटि: ' + err.message : 'Error restoring data: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function updateLanguage() {
             document.querySelectorAll('[data-en][data-ne]').forEach(elem => {
                 elem.textContent = isNepali ? elem.dataset.ne : elem.dataset.en;
-                if (isNepali) {
-                    elem.classList.add('nepali');
-                } else {
-                    elem.classList.remove('nepali');
-                }
+                if (isNepali) elem.classList.add('nepali');
+                else elem.classList.remove('nepali');
+            });
+            document.querySelectorAll('option[data-en][data-ne]').forEach(opt => {
+                opt.textContent = isNepali ? opt.dataset.ne : opt.dataset.en;
+            });
+            monthFilter.innerHTML = '<option value="">' + (isNepali ? 'सबै महिनाहरू' : 'All Months') + '</option>';
+            calendarData[currentYear].forEach((month, index) => {
+                let option = document.createElement('option');
+                option.value = index;
+                option.textContent = isNepali ? monthsNepali[index] : month.name;
+                monthFilter.appendChild(option);
             });
             renderMonthTabs();
             renderCalendar();
-            renderMonthlySummary();
-            renderHolidays();
-            if (notesModal._element.classList.contains('show')) {
-                renderNotesList();
-            }
-            if (reportModal._element.classList.contains('show')) {
-                if (weeklyReportTab.classList.contains('active')) renderReport('weekly');
-                else if (monthlyReportTab.classList.contains('active')) renderReport('monthly');
-                else if (yearlyReportTab.classList.contains('active')) renderReport('yearly');
-                else renderFinancialRecords();
-            }
-            if (shoppingListModal._element.classList.contains('show')) {
-                renderShoppingList();
+            renderNotesList();
+            renderReport('weekly');
+            renderFinancialRecords();
+            renderShoppingList();
+        }
+
+        function requestNotificationPermission() {
+            if ("Notification" in window && Notification.permission !== "granted" && Notification.permission !== "denied") {
+                Notification.requestPermission().then(permission => {
+                    if (permission === "granted") {
+                        checkReminders();
+                    }
+                });
             }
         }
 
-        function setToday() {
-            let today = new Date();
-            let bsDate = getBSDateFromGregorian(today);
-            if (bsDate) {
-                currentYear = bsDate.year;
-                currentMonthIndex = bsDate.month;
-                yearFilter.value = currentYear;
-                todayNepaliDate.textContent = `${bsDate.day} ${monthsNepali[bsDate.month]} ${bsDate.year} BS`;
-                todayEnglishDate.textContent = today.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' });
-                renderMonthTabs();
-                renderCalendar();
-            }
-        }
-
-        // Event listeners
+        // Event Listeners
         yearFilter.addEventListener('change', () => {
             currentYear = parseInt(yearFilter.value);
             currentMonthIndex = 0;
@@ -1206,50 +1392,60 @@
             renderCalendar();
         });
 
-        todayButton.addEventListener('click', setToday);
-
-        languageToggle.addEventListener('click', toggleLanguage);
-
-        addNote.addEventListener('click', () => {
+        todayButton.addEventListener('click', () => {
             let today = new Date();
             let bsDate = getBSDateFromGregorian(today);
             if (bsDate) {
-                selectedDate.textContent = `${bsDate.year}-${String(bsDate.month + 1).padStart(2, '0')}-${String(bsDate.day).padStart(2, '0')}`;
-                entryType.value = 'note';
-                noteTitle.value = '';
-                noteTime.value = '';
-                noteDescription.value = '';
-                recurring.checked = false;
-                reminder.checked = false;
-                entryCategory.style.display = 'none';
-                categoryManager.style.display = 'none';
-                budgetSection.style.display = 'none';
-                saveNote.style.display = 'block';
-                editEntry.style.display = 'none';
-                noteFormModal.show();
-                noteTitle.focus();
+                currentYear = bsDate.year;
+                currentMonthIndex = bsDate.month;
+                yearFilter.value = currentYear;
+                renderMonthTabs();
+                renderCalendar();
             }
+            todayNepaliDate.textContent = formatBSDate(bsDate);
+            todayEnglishDate.textContent = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        });
+
+        languageToggle.addEventListener('click', () => {
+            isNepali = !isNepali;
+            languageToggle.textContent = isNepali ? 'Switch to English' : 'Switch to Nepali';
+            updateLanguage();
+        });
+
+        addNote.addEventListener('click', () => {
+            let today = new Date();
+            selectedDate.value = formatDate(today);
+            entryType.value = 'note';
+            noteTitle.value = '';
+            noteTime.value = '';
+            noteDescription.value = '';
+            recurring.checked = false;
+            reminder.checked = false;
+            entryCategory.style.display = 'none';
+            categoryManager.style.display = 'none';
+            budgetSection.style.display = 'none';
+            saveNote.style.display = 'block';
+            editEntry.style.display = 'none';
+            noteFormModal.show();
+            noteTitle.focus();
         });
 
         addFinance.addEventListener('click', () => {
             let today = new Date();
-            let bsDate = getBSDateFromGregorian(today);
-            if (bsDate) {
-                selectedDate.textContent = `${bsDate.year}-${String(bsDate.month + 1).padStart(2, '0')}-${String(bsDate.day).padStart(2, '0')}`;
-                entryType.value = 'income';
-                noteTitle.value = '';
-                noteTime.value = '';
-                noteDescription.value = '';
-                recurring.checked = false;
-                reminder.checked = false;
-                entryCategory.style.display = 'block';
-                categoryManager.style.display = 'block';
-                budgetSection.style.display = 'none';
-                saveNote.style.display = 'block';
-                editEntry.style.display = 'none';
-                noteFormModal.show();
-                noteTitle.focus();
-            }
+            selectedDate.value = formatDate(today);
+            entryType.value = 'income';
+            noteTitle.value = '';
+            noteTime.value = '';
+            noteDescription.value = '';
+            recurring.checked = false;
+            reminder.checked = false;
+            entryCategory.style.display = 'block';
+            categoryManager.style.display = 'block';
+            budgetSection.style.display = 'none';
+            saveNote.style.display = 'block';
+            editEntry.style.display = 'none';
+            noteFormModal.show();
+            noteTitle.focus();
         });
 
         entryType.addEventListener('change', () => {
@@ -1282,206 +1478,86 @@
         });
 
         saveNote.addEventListener('click', () => {
-            if (!noteTitle.value.trim()) {
-                alert(isNepali ? 'कृपया शीर्षक प्रविष्ट गर्नुहोस्' : 'Please enter a title/amount');
+            let bsDate = getBSDateFromGregorian(new Date(selectedDate.value));
+            if (!bsDate) {
+                alert(isNepali ? 'अमान्य मिति' : 'Invalid date');
                 return;
             }
+            let dateStr = formatBSDate(bsDate);
             let note = {
-                date: selectedDate.textContent,
+                date: dateStr,
                 type: entryType.value,
                 title: noteTitle.value.trim(),
                 time: noteTime.value,
                 description: noteDescription.value.trim(),
-                category: entryType.value === 'note' ? null : document.getElementById('category').value,
                 recurring: recurring.checked,
                 reminder: reminder.checked
             };
+            if (entryType.value === 'income' || entryType.value === 'expense') {
+                note.category = document.getElementById('category').value;
+            }
             if (entryType.value === 'budget') {
-                let dateStr = `${note.date.split('-')[0]}-${note.date.split('-')[1]}`;
-                budgets[dateStr] = parseFloat(noteTitle.value) || 0;
+                let budgetKey = `${bsDate.year}-${String(bsDate.month + 1).padStart(2, '0')}`;
+                budgets[budgetKey] = parseFloat(monthlyBudget.value) || 0;
                 localStorage.setItem('budgets', JSON.stringify(budgets));
-            } else {
-                undoStack.push({ action: 'add', note });
+            } else if (note.title) {
                 notes.push(note);
+                undoStack.push({ action: 'add', note: note });
                 localStorage.setItem('notes', JSON.stringify(notes));
             }
-            renderCalendar();
             noteFormModal.hide();
+            renderCalendar();
         });
 
         editEntry.addEventListener('click', () => {
-            if (!noteTitle.value.trim()) {
-                alert(isNepali ? 'कृपया शीर्षक प्रविष्ट गर्नुहोस्' : 'Please enter a title/amount');
+            let bsDate = getBSDateFromGregorian(new Date(selectedDate.value));
+            if (!bsDate) {
+                alert(isNepali ? 'अमान्य मिति' : 'Invalid date');
                 return;
             }
-            let oldNote = notes[editingNoteIndex];
+            let dateStr = formatBSDate(bsDate);
             let updatedNote = {
-                date: selectedDate.textContent,
+                date: dateStr,
                 type: entryType.value,
                 title: noteTitle.value.trim(),
                 time: noteTime.value,
                 description: noteDescription.value.trim(),
-                category: entryType.value === 'note' ? null : document.getElementById('category').value,
                 recurring: recurring.checked,
                 reminder: reminder.checked
             };
-            undoStack.push({ action: 'edit', oldNote, index: editingNoteIndex });
+            if (entryType.value === 'income' || entryType.value === 'expense') {
+                updatedNote.category = document.getElementById('category').value;
+            }
+            undoStack.push({ action: 'edit', note: notes[editingNoteIndex], index: editingNoteIndex });
             notes[editingNoteIndex] = updatedNote;
             localStorage.setItem('notes', JSON.stringify(notes));
-            renderNotesList();
-            renderCalendar();
             noteFormModal.hide();
-            editingNoteIndex = null;
-        });
-
-        closeEntry.addEventListener('click', () => {
+            renderCalendar();
+            renderNotesList();
             editingNoteIndex = null;
         });
 
         viewNotes.addEventListener('click', () => {
             let today = new Date();
-            let bsDate = getBSDateFromGregorian(today);
-            if (bsDate) {
-                selectedDate.textContent = `${bsDate.year}-${String(bsDate.month + 1).padStart(2, '0')}-${String(bsDate.day).padStart(2, '0')}`;
-            }
+            selectedDate.value = formatDate(today);
             renderNotesList();
             notesModal.show();
         });
 
         noteSearch.addEventListener('input', debounce(() => {
-            let searchTerm = noteSearch.value.toLowerCase();
-            let filteredNotes = notes.filter(note => note.title.toLowerCase().includes(searchTerm));
-            notesList.innerHTML = '';
-            filteredNotes.forEach((note, index) => {
-                let li = document.createElement('li');
-                li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                let noteText = note.type === 'note' 
-                    ? `${note.title}${note.time ? ` (${note.time})` : ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}${note.reminder ? (isNepali ? ' (रिमाइन्डर)' : ' (Reminder)') : ''}`
-                    : `${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR${note.category ? ` (${note.category})` : ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}`;
-                li.textContent = noteText;
-
-                let btnGroup = document.createElement('div');
-                let editBtn = document.createElement('button');
-                editBtn.className = 'btn btn-sm btn-outline-primary me-2';
-                editBtn.textContent = isNepali ? 'सम्पादन' : 'Edit';
-                editBtn.addEventListener('click', () => {
-                    editingNoteIndex = index;
-                    selectedDate.textContent = note.date;
-                    entryType.value = note.type;
-                    noteTitle.value = note.title;
-                    noteTime.value = note.time || '';
-                    noteDescription.value = note.description || '';
-                    recurring.checked = note.recurring || false;
-                    reminder.checked = note.reminder || false;
-                    entryCategory.style.display = note.type === 'note' ? 'none' : 'block';
-                    categoryManager.style.display = note.type === 'note' ? 'none' : 'block';
-                    budgetSection.style.display = 'none';
-                    saveNote.style.display = 'none';
-                    editEntry.style.display = 'block';
-                    noteFormModal.show();
-                    noteTitle.focus();
-                });
-
-                let deleteBtn = document.createElement('button');
-                deleteBtn.className = 'btn btn-sm btn-outline-danger';
-                deleteBtn.textContent = isNepali ? 'हटाउनुहोस्' : 'Delete';
-                deleteBtn.addEventListener('click', () => {
-                    undoStack.push({ action: 'delete', note: notes[index], index });
-                    notes.splice(index, 1);
-                    localStorage.setItem('notes', JSON.stringify(notes));
-                    renderNotesList();
-                    renderCalendar();
-                });
-
-                btnGroup.appendChild(editBtn);
-                btnGroup.appendChild(deleteBtn);
-                li.appendChild(btnGroup);
-                notesList.appendChild(li);
-            });
-
-            if (filteredNotes.length === 0) {
-                let li = document.createElement('li');
-                li.className = 'list-group-item';
-                li.textContent = isNepali ? 'कुनै नोटहरू छैनन्' : 'No notes available';
-                notesList.appendChild(li);
-            }
+            renderNotesList();
         }, 300));
 
         monthFilter.addEventListener('change', () => {
-            let filteredNotes = notes;
-            if (monthFilter.value) {
-                let month = parseInt(monthFilter.value) + 1;
-                filteredNotes = notes.filter(note => getRecurringDates(note).some(d => d.split('-')[1] === String(month).padStart(2, '0')));
-            }
-            notesList.innerHTML = '';
-            filteredNotes.forEach((note, index) => {
-                let li = document.createElement('li');
-                li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                let noteText = note.type === 'note' 
-                    ? `${note.title}${note.time ? ` (${note.time})` : ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}${note.reminder ? (isNepali ? ' (रिमाइन्डर)' : ' (Reminder)') : ''}`
-                    : `${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR${note.category ? ` (${note.category})` : ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}`;
-                li.textContent = noteText;
-
-                let btnGroup = document.createElement('div');
-                let editBtn = document.createElement('button');
-                editBtn.className = 'btn btn-sm btn-outline-primary me-2';
-                editBtn.textContent = isNepali ? 'सम्पादन' : 'Edit';
-                editBtn.addEventListener('click', () => {
-                    editingNoteIndex = index;
-                    selectedDate.textContent = note.date;
-                    entryType.value = note.type;
-                    noteTitle.value = note.title;
-                    noteTime.value = note.time || '';
-                    noteDescription.value = note.description || '';
-                    recurring.checked = note.recurring || false;
-                    reminder.checked = note.reminder || false;
-                    entryCategory.style.display = note.type === 'note' ? 'none' : 'block';
-                    categoryManager.style.display = note.type === 'note' ? 'none' : 'block';
-                    budgetSection.style.display = 'none';
-                    saveNote.style.display = 'none';
-                    editEntry.style.display = 'block';
-                    noteFormModal.show();
-                    noteTitle.focus();
-                });
-
-                let deleteBtn = document.createElement('button');
-                deleteBtn.className = 'btn btn-sm btn-outline-danger';
-                deleteBtn.textContent = isNepali ? 'हटाउनुहोस्' : 'Delete';
-                deleteBtn.addEventListener('click', () => {
-                    undoStack.push({ action: 'delete', note: notes[index], index });
-                    notes.splice(index, 1);
-                    localStorage.setItem('notes', JSON.stringify(notes));
-                    renderNotesList();
-                    renderCalendar();
-                });
-
-                btnGroup.appendChild(editBtn);
-                btnGroup.appendChild(deleteBtn);
-                li.appendChild(btnGroup);
-                notesList.appendChild(li);
-            });
-
-            if (filteredNotes.length === 0) {
-                let li = document.createElement('li');
-                li.className = 'list-group-item';
-                li.textContent = isNepali ? 'कुनै नोटहरू छैनन्' : 'No notes available';
-                notesList.appendChild(li);
-            }
+            renderNotesList();
         });
 
         clearNotes.addEventListener('click', () => {
-            if (confirm(isNepali ? 'के तपाईं सबै नोटहरू खाली गर्न चाहनुहुन्छ?' : 'Are you sure you want to clear all notes?')) {
-                undoStack.push({ action: 'clear', notes: [...notes] });
-                notes = [];
-                localStorage.setItem('notes', JSON.stringify(notes));
-                renderNotesList();
-                renderCalendar();
-            }
-        });
-
-        closeModal.addEventListener('click', () => {
-            noteSearch.value = '';
-            monthFilter.value = '';
+            undoStack.push({ action: 'clear', notes: [...notes] });
+            notes = [];
+            localStorage.setItem('notes', JSON.stringify(notes));
+            renderNotesList();
+            renderCalendar();
         });
 
         viewFinance.addEventListener('click', () => {
@@ -1489,165 +1565,64 @@
             reportModal.show();
         });
 
-        financeSearch.addEventListener('input', debounce(() => {
-            let searchTerm = financeSearch.value.toLowerCase();
-            let filteredFinances = notes.filter(note => (note.type === 'income' || note.type === 'expense') && (note.title.toLowerCase().includes(searchTerm) || (note.category && note.category.toLowerCase().includes(searchTerm))));
-            reportContent.innerHTML = '';
-            if (filteredFinances.length === 0) {
-                reportContent.textContent = isNepali ? 'कुनै वित्तीय रेकर्ड छैन' : 'No financial records available';
-            } else {
-                filteredFinances.forEach(note => {
-                    let p = document.createElement('p');
-                    p.textContent = `${note.date}: ${note.type === 'income' ? (isNepali ? 'आय' : 'Income') : (isNepali ? 'खर्च' : 'Expense')}: ${note.title} NPR${note.category ? ` (${note.category})` : ''}${note.recurring ? (isNepali ? ' (मासिक)' : ' (Recurring)') : ''}`;
-                    reportContent.appendChild(p);
-                });
-            }
-        }, 300));
-
         weeklyReportTab.addEventListener('click', (e) => {
             e.preventDefault();
-            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+            reportModal.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
             weeklyReportTab.classList.add('active');
             renderReport('weekly');
         });
 
         monthlyReportTab.addEventListener('click', (e) => {
             e.preventDefault();
-            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+            reportModal.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
             monthlyReportTab.classList.add('active');
             renderReport('monthly');
         });
 
         yearlyReportTab.addEventListener('click', (e) => {
             e.preventDefault();
-            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+            reportModal.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
             yearlyReportTab.classList.add('active');
             renderReport('yearly');
         });
 
         recordsReportTab.addEventListener('click', (e) => {
             e.preventDefault();
-            document.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
+            reportModal.querySelectorAll('.nav-link').forEach(tab => tab.classList.remove('active'));
             recordsReportTab.classList.add('active');
             renderFinancialRecords();
         });
 
-        closeReportModal.addEventListener('click', () => {
-            financeSearch.value = '';
-        });
-
-        document.querySelectorAll('.excel-option').forEach(option => {
-            option.addEventListener('click', (e) => {
-                e.preventDefault();
-                exportToExcel(option.dataset.type);
-            });
-        });
-
-        document.querySelectorAll('.pdf-option').forEach(option => {
-            option.addEventListener('click', (e) => {
-                e.preventDefault();
-                exportToPDF(option.dataset.type);
-            });
-        });
-
-        backupData.addEventListener('click', (e) => {
-            e.preventDefault();
-            let backup = {
-                notes,
-                customCategories,
-                budgets,
-                customHolidays,
-                shoppingList
-            };
-            let blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-            let url = URL.createObjectURL(blob);
-            let a = document.createElement('a');
-            a.href = url;
-            a.download = 'calendar_backup.json';
-            a.click();
-            URL.revokeObjectURL(url);
-        });
-
-        restoreData.addEventListener('click', (e) => {
-            e.preventDefault();
-            restoreFileInput.click();
-        });
-
-        restoreFileInput.addEventListener('change', (e) => {
-            let file = e.target.files[0];
-            if (!file) return;
-            let reader = new FileReader();
-            reader.onload = (event) => {
-                try {
-                    let backup = JSON.parse(event.target.result);
-                    notes = backup.notes || [];
-                    customCategories = backup.customCategories || [];
-                    budgets = backup.budgets || {};
-                    customHolidays = backup.customHolidays || [];
-                    shoppingList = backup.shoppingList || [];
-                    localStorage.setItem('notes', JSON.stringify(notes));
-                    localStorage.setItem('customCategories', JSON.stringify(customCategories));
-                    localStorage.setItem('budgets', JSON.stringify(budgets));
-                    localStorage.setItem('customHolidays', JSON.stringify(customHolidays));
-                    localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
-                    renderCalendar();
-                    alert(isNepali ? 'डाटा सफलतापूर्वक पुनर्स्थापना गरियो' : 'Data successfully restored');
-                } catch (err) {
-                    alert(isNepali ? 'डाटा पुनर्स्थापना असफल' : 'Failed to restore data');
-                }
-            };
-            reader.readAsText(file);
-        });
-
-        undoAction.addEventListener('click', () => {
-            if (undoStack.length === 0) {
-                alert(isNepali ? 'कुनै कार्यहरू पूर्ववत् गर्न बाँकी छैन' : 'No actions to undo');
-                return;
-            }
-            let lastAction = undoStack.pop();
-            if (lastAction.action === 'add') {
-                notes = notes.filter(note => note !== lastAction.note);
-            } else if (lastAction.action === 'delete') {
-                notes.splice(lastAction.index, 0, lastAction.note);
-            } else if (lastAction.action === 'edit') {
-                notes[lastAction.index] = lastAction.oldNote;
-            } else if (lastAction.action === 'clear') {
-                notes = lastAction.notes;
-            }
-            localStorage.setItem('notes', JSON.stringify(notes));
-            renderCalendar();
-            if (notesModal._element.classList.contains('show')) {
-                renderNotesList();
-            }
-        });
+        financeSearch.addEventListener('input', debounce(() => {
+            renderFinancialRecords();
+        }, 300));
 
         addCustomHoliday.addEventListener('click', () => {
-            holidayDate.value = '';
+            let today = new Date();
+            holidayDate.value = formatDate(today);
             holidayName.value = '';
             holidayNepaliName.value = '';
             customHolidayModal.show();
         });
 
         saveCustomHoliday.addEventListener('click', () => {
-            if (!holidayDate.value || !holidayName.value || !holidayNepaliName.value) {
-                alert(isNepali ? 'कृपया सबै क्षेत्रहरू भर्नुहोस्' : 'Please fill in all fields');
-                return;
-            }
-            let gregDate = new Date(holidayDate.value);
-            let bsDate = getBSDateFromGregorian(gregDate);
+            let bsDate = getBSDateFromGregorian(new Date(holidayDate.value));
             if (!bsDate) {
                 alert(isNepali ? 'अमान्य मिति' : 'Invalid date');
                 return;
             }
-            let dateStr = `${bsDate.year}-${String(bsDate.month + 1).padStart(2, '0')}-${String(bsDate.day).padStart(2, '0')}`;
-            customHolidays.push({
+            let dateStr = formatBSDate(bsDate);
+            let holiday = {
                 date: dateStr,
                 name: holidayName.value.trim(),
                 nepali: holidayNepaliName.value.trim()
-            });
-            localStorage.setItem('customHolidays', JSON.stringify(customHolidays));
-            renderCalendar();
-            customHolidayModal.hide();
+            };
+            if (holiday.name && holiday.nepali) {
+                customHolidays.push(holiday);
+                localStorage.setItem('customHolidays', JSON.stringify(customHolidays));
+                customHolidayModal.hide();
+                renderCalendar();
+            }
         });
 
         manageShoppingList.addEventListener('click', () => {
@@ -1656,9 +1631,9 @@
         });
 
         addShoppingItem.addEventListener('click', () => {
-            let itemText = newShoppingItem.value.trim();
-            if (itemText) {
-                shoppingList.push({ text: itemText, completed: false });
+            let item = newShoppingItem.value.trim();
+            if (item) {
+                shoppingList.push({ text: item, completed: false });
                 localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
                 newShoppingItem.value = '';
                 renderShoppingList();
@@ -1666,16 +1641,88 @@
         });
 
         clearShoppingList.addEventListener('click', () => {
-            if (confirm(isNepali ? 'के तपाईं किनमेल सूची खाली गर्न चाहनुहुन्छ?' : 'Are you sure you want to clear the shopping list?')) {
-                shoppingList = [];
-                localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
-                renderShoppingList();
+            shoppingList = [];
+            localStorage.setItem('shoppingList', JSON.stringify(shoppingList));
+            renderShoppingList();
+        });
+
+        undoAction.addEventListener('click', () => {
+            let lastAction = undoStack.pop();
+            if (!lastAction) return;
+            if (lastAction.action === 'add') {
+                notes = notes.filter(note => note !== lastAction.note);
+            } else if (lastAction.action === 'delete') {
+                notes.splice(lastAction.index, 0, lastAction.note);
+            } else if (lastAction.action === 'edit') {
+                notes[lastAction.index] = lastAction.note;
+            } else if (lastAction.action === 'clear') {
+                notes = lastAction.notes;
+            }
+            localStorage.setItem('notes', JSON.stringify(notes));
+            renderCalendar();
+            renderNotesList();
+        });
+
+        document.querySelectorAll('.excel-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+                exportToExcel(e.target.dataset.type);
+            });
+        });
+
+        document.querySelectorAll('.pdf-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+                exportToPDF(e.target.dataset.type);
+            });
+        });
+
+        backupData.addEventListener('click', (e) => {
+            e.preventDefault();
+            backupDataFunc();
+        });
+
+        restoreData.addEventListener('click', (e) => {
+            e.preventDefault();
+            restoreFileInput.click();
+        });
+
+        restoreFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                restoreDataFunc(e.target.files[0]);
+            }
+        });
+
+        document.querySelectorAll('.import-option').forEach(option => {
+            option.addEventListener('click', (e) => {
+                e.preventDefault();
+                importFileInput.dataset.type = e.target.dataset.type;
+                importFileInput.click();
+            });
+        });
+
+        importFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                importData(importFileInput.dataset.type, e.target.files[0]);
             }
         });
 
         // Initialize
-        setToday();
-        checkReminders();
+        (function init() {
+            let today = new Date();
+            let bsDate = getBSDateFromGregorian(today);
+            if (bsDate) {
+                currentYear = bsDate.year;
+                currentMonthIndex = bsDate.month;
+                yearFilter.value = currentYear;
+                todayNepaliDate.textContent = formatBSDate(bsDate);
+                todayEnglishDate.textContent = today.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            }
+            renderMonthTabs();
+            renderCalendar();
+            requestNotificationPermission();
+            setInterval(checkReminders, 60000);
+        })();
     </script>
 </body>
 </html>
